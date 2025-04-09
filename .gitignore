@@ -1,0 +1,10 @@
+out/
+node_modules/
+.vscode-test/
+.vscode/
+vsix/
+*.vsix
+.DS_Store
+test_*/
+context.json
+package-lock.json

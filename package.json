@@ -1,0 +1,107 @@
+{
+    "name": "ton-graph",
+    "displayName": "TON Graph",
+    "description": "Visualize function calls for TON smart contracts",
+    "version": "0.2.1",
+    "icon": "pic/logo.png",
+    "engines": {
+        "vscode": "^1.60.0"
+    },
+    "categories": [
+        "Visualization",
+        "Programming Languages"
+    ],
+    "activationEvents": [
+        "onCommand:ton-graph.visualize",
+        "onLanguage:func",
+        "onLanguage:tact",
+        "onLanguage:tolk"
+    ],
+    "main": "./out/extension.js",
+    "contributes": {
+        "languages": [
+            {
+                "id": "tact",
+                "extensions": [
+                    ".tact"
+                ],
+                "aliases": [
+                    "Tact"
+                ]
+            },
+            {
+                "id": "tolk",
+                "extensions": [
+                    ".tolk"
+                ],
+                "aliases": [
+                    "Tolk"
+                ]
+            },
+            {
+                "id": "func",
+                "extensions": [
+                    ".fc"
+                ],
+                "aliases": [
+                    "Func"
+                ]
+            }
+        ],
+        "commands": [
+            {
+                "command": "ton-graph.visualize",
+                "title": "TON Graph: Visualize Contract"
+            },
+            {
+                "command": "ton-graph.saveMermaid",
+                "title": "TON Graph: Save Mermaid Diagram"
+            },
+            {
+                "command": "ton-graph.saveSvg",
+                "title": "TON Graph: Save SVG Diagram"
+            },
+            {
+                "command": "ton-graph.savePng",
+                "title": "TON Graph: Save PNG Diagram"
+            },
+            {
+                "command": "ton-graph.saveJpg",
+                "title": "TON Graph: Save JPG Diagram"
+            }
+        ],
+        "menus": {
+            "editor/context": [
+                {
+                    "command": "ton-graph.visualize",
+                    "when": "resourceLangId == func || resourceLangId == tact || resourceLangId == tolk",
+                    "group": "navigation"
+                }
+            ]
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "pretest": "npm run compile && npm run lint",
+        "lint": "eslint src --ext ts",
+        "test": "node ./out/test/runTest.js"
+    },
+    "devDependencies": {
+        "@types/node": "^14.x.x",
+        "@types/vscode": "^1.60.0",
+        "@typescript-eslint/eslint-plugin": "^4.x.x",
+        "@typescript-eslint/parser": "^4.x.x",
+        "eslint": "^7.x.x",
+        "typescript": "^4.x.x"
+    },
+    "dependencies": {
+        "mermaid": "^11.6.0",
+        "sharp": "^0.33.5"
+    },
+    "files": [
+        "out/**/*",
+        "cached/**/*"
+    ]
+}

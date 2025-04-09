@@ -4,6 +4,10 @@ A Visual Studio Code extension for visualizing function call graphs in TON smart
 
 Developed by [PosuitiveWeb3](https://positive.com)
 
+<a href="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr01.jpg" target="_blank">
+  <img src="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr01.jpg" width="400" alt="TON Graph visualization">
+</a>
+
 ## Features
 
 - Parse and visualize function call relationships in multiple contract types:
@@ -13,12 +17,17 @@ Developed by [PosuitiveWeb3](https://positive.com)
 - Interactive diagram with cluster-based organization
 - Zoom functionality for better navigation
 - Filter functions by type (regular, impure, inline, method_id)
-- Search functions by name
+- Filter functions by name
 - Export diagrams in multiple formats:
   - Mermaid (*.mmd)
   - SVG
   - PNG
   - JPG
+
+<a href="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr05.jpg" target="_blank">
+  <img src="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr05.jpg" width="400" alt="Export diagrams in multiple formats">
+</a>
+
 - Automatic color coding of different function clusters
 - Optimized performance with Mermaid library caching
 
@@ -43,7 +52,16 @@ The visualization provides several interactive features:
 - Zoom in/out for better detail view
 - Pan and navigate through the diagram
 - Filter functions by type
+
+<a href="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr03.jpg" target="_blank">
+  <img src="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr03.jpg" width="400" alt="Filter functions by type">
+</a>
+
 - Filter functions by name using the search bar
+ 
+<a href="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr02.jpg" target="_blank">
+  <img src="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr02.jpg" width="400" alt="Filter functions by name">
+</a>
 
 ### Exporting
 
@@ -61,8 +79,11 @@ The extension analyzes your contract code to:
 3. Create a directed graph of function relationships
 4. Generate a visual representation using [Mermaid](https://mermaid.js.org/) diagrams
 5. Group related functions into clusters for better readability
-6. Cache Mermaid library locally for improved performance
+6. Multiple contracts support (for Tact)
 
+<a href="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr04.jpg" target="_blank">
+  <img src="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr04.jpg" width="400" alt="Multiple contracts support">
+</a>
 
 ## Development
 

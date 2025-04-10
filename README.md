@@ -2,7 +2,7 @@
 
 A Visual Studio Code extension for visualizing function call graphs in TON smart contracts written in FunC, Tact, and Tolk.
 
-Developed by [PositiveWeb3](https://positive.com) security researchers.
+Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 
 <a href="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr01.jpg" target="_blank">
   <img src="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr01.jpg" width="400" alt="TON Graph visualization">

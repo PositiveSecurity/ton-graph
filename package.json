@@ -2,7 +2,7 @@
     "name": "ton-graph",
     "displayName": "TON Graph",
     "description": "Visualize function calls for TON smart contracts",
-    "version": "0.2.1",
+    "version": "0.2.2",
     "publisher": "positiveweb3",
     "icon": "pic/logo.png",
     "repository": {

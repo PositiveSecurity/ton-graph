@@ -17,15 +17,33 @@ export function activate(context: vscode.ExtensionContext) {
         console.log('Note: Cached directory may already exist');
     }
 
-    let disposable = vscode.commands.registerCommand('ton-graph.visualize', async () => {
-        const editor = vscode.window.activeTextEditor;
-        if (!editor) {
-            vscode.window.showErrorMessage('No active editor found');
-            return;
-        }
+    let disposable = vscode.commands.registerCommand('ton-graph.visualize', async (fileUri?: vscode.Uri) => {
+        let document: vscode.TextDocument;
+        let code: string;
 
-        const document = editor.document;
-        const code = document.getText();
+        // If invoked from explorer context menu, fileUri will be provided
+        if (fileUri) {
+            try {
+                // Read the file contents
+                const fileData = await vscode.workspace.fs.readFile(fileUri);
+                code = Buffer.from(fileData).toString('utf8');
+
+                // Open the document to get the language mode correctly set
+                document = await vscode.workspace.openTextDocument(fileUri);
+            } catch (error: any) {
+                vscode.window.showErrorMessage(`Could not read file: ${error.message || String(error)}`);
+                return;
+            }
+        } else {
+            // Invoked from editor context menu
+            const editor = vscode.window.activeTextEditor;
+            if (!editor) {
+                vscode.window.showErrorMessage('No active editor found');
+                return;
+            }
+            document = editor.document;
+            code = document.getText();
+        }
 
         let originalGraph: ContractGraph | null = null; // Store the original graph
 

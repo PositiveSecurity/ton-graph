@@ -1,8 +1,8 @@
 # TON Graph
 
-A Visual Studio Code extension for visualizing function call graphs in TON smart contracts written in FunC, TACT, and TOLK.
+A Visual Studio Code extension for visualizing function call graphs in TON smart contracts written in FunC, Tact, and Tolk.
 
-Developed by [PosuitiveWeb3](https://positive.com)
+Developed by [PositiveWeb3](https://positive.com) security researchers.
 
 <a href="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr01.jpg" target="_blank">
   <img src="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr01.jpg" width="400" alt="TON Graph visualization">
@@ -12,8 +12,8 @@ Developed by [PosuitiveWeb3](https://positive.com)
 
 - Parse and visualize function call relationships in multiple contract types:
   - FunC (*.fc)
-  - TACT (*.tact)
-  - TOLK (*.tolk)
+  - Tact (*.tact)
+  - Tolk (*.tolk)
 - Interactive diagram with cluster-based organization
 - Zoom functionality for better navigation
 - Filter functions by type (regular, impure, inline, method_id)
@@ -95,8 +95,8 @@ ton-graph/
 │   ├── extension.ts          # Extension entry point
 │   ├── parser/               # Contract code parsing
 │   │   ├── funcParser.ts     # FunC parser
-│   │   ├── tactParser.ts     # TACT parser
-│   │   ├── tolkParser.ts     # TOLK parser
+│   │   ├── tactParser.ts     # Tact parser
+│   │   ├── tolkParser.ts     # Tolk parser
 │   │   └── parserUtils.ts    # Shared parser utilities
 │   ├── types/                # Type definitions
 │   │   └── graph.ts          # Graph data structures
@@ -121,7 +121,7 @@ npm install
 npm run compile
 
 # Package the extension (creates a .vsix file)
-./rebuild.sh
+chmod +x rebuild.sh && ./rebuild.sh
 ```
 
 ## Requirements

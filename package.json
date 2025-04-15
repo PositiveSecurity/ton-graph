@@ -2,7 +2,7 @@
     "name": "ton-graph",
     "displayName": "TON Graph",
     "description": "Visualize function calls for TON smart contracts",
-    "version": "0.2.3",
+    "version": "0.2.4",
     "publisher": "positiveweb3",
     "icon": "pic/logo.png",
     "repository": {
@@ -23,6 +23,7 @@
     ],
     "activationEvents": [
         "onCommand:ton-graph.visualize",
+        "onCommand:ton-graph.visualizeProject",
         "onLanguage:func",
         "onLanguage:tact",
         "onLanguage:tolk"
@@ -64,6 +65,10 @@
                 "title": "TON Graph: Visualize Contract"
             },
             {
+                "command": "ton-graph.visualizeProject",
+                "title": "TON Graph: Visualize Contract with Imports"
+            },
+            {
                 "command": "ton-graph.saveMermaid",
                 "title": "TON Graph: Save Mermaid Diagram"
             },
@@ -86,11 +91,21 @@
                     "command": "ton-graph.visualize",
                     "when": "resourceLangId == func || resourceLangId == tact || resourceLangId == tolk",
                     "group": "navigation"
+                },
+                {
+                    "command": "ton-graph.visualizeProject",
+                    "when": "resourceLangId == func || resourceLangId == tact || resourceLangId == tolk",
+                    "group": "navigation"
                 }
             ],
             "explorer/context": [
                 {
                     "command": "ton-graph.visualize",
+                    "when": "resourceExtname == .fc || resourceExtname == .tact || resourceExtname == .tolk",
+                    "group": "navigation"
+                },
+                {
+                    "command": "ton-graph.visualizeProject",
                     "when": "resourceExtname == .fc || resourceExtname == .tact || resourceExtname == .tolk",
                     "group": "navigation"
                 }

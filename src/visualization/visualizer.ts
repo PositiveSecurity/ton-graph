@@ -1,6 +1,4 @@
 import * as vscode from 'vscode';
-import * as path from 'path';
-import * as fs from 'fs';
 import { ContractGraph } from '../types/graph';
 import { generateVisualizationHtml, filterMermaidDiagram } from './templates';
 
@@ -10,14 +8,19 @@ let originalGraph: ContractGraph;
 // Add a variable to track if Mermaid has been cached
 let cachedMermaidUri: vscode.Uri | undefined;
 
-export function createVisualizationPanel(context: vscode.ExtensionContext, graph: ContractGraph, functionTypeFilters: { value: string; label: string; }[]): vscode.WebviewPanel {
+export function createVisualizationPanel(
+    context: vscode.ExtensionContext,
+    graph: ContractGraph,
+    functionTypeFilters: { value: string; label: string; }[],
+    title: string = 'TON Graph'
+): vscode.WebviewPanel {
     // Store the original graph
     originalGraph = graph;
 
     // Create and show panel
     const panel = vscode.window.createWebviewPanel(
         'tonMessageFlow',
-        'TON Graph',
+        title,
         vscode.ViewColumn.Beside,
         {
             enableScripts: true,
@@ -258,7 +261,23 @@ export function generateMermaidDiagram(graph: ContractGraph): string {
 
         // Add parameters to the edge label if available
         if (targetNode?.parameters && targetNode.parameters.length > 0) {
-            label = `(${targetNode.parameters.join(', ')})`;
+            // Filter out any comments from parameters
+            const filteredParameters = targetNode.parameters
+                .filter(param => {
+                    // Filter out FunC comments (;;) and regular comments (//)
+                    const trimmedParam = param.trim();
+                    return !trimmedParam.startsWith(';;') &&
+                        !trimmedParam.startsWith('//');
+                })
+                .map(param => {
+                    // Remove inline comments from parameters
+                    return param.replace(/\s*;;.*$/, '')  // Remove FunC comments
+                        .replace(/\s*\/\/.*$/, ''); // Remove regular comments
+                });
+
+            // Show all parameters without limiting
+            label = filteredParameters.length > 0 ?
+                `(${filteredParameters.join(', ')})` : '()';
         }
 
         // Escape any markdown characters in labels

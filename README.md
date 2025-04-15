@@ -41,10 +41,22 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 ## Usage
 
 1. Open a contract file (*.fc, *.tact, or *.tolk)
-2. Press F1 or Ctrl+Shift+P to open the command palette
-3. Type "TON Graph: Visualize Contract" and press Enter
-or Use right click on contract code -> TON Graph: Visualize Contract
-4. The extension will analyze your contract and display a function call graph
+2. You can visualize a contract in multiple ways:
+   - Press F1 or Ctrl+Shift+P to open the command palette and type "TON Graph: Visualize Contract"
+   - Right-click on contract code in the editor → TON Graph: Visualize Contract
+   - Right-click on a contract file in the Explorer panel → TON Graph: Visualize Contract
+3. The extension will analyze your contract and display a function call graph
+
+### Visualizing Projects with Imports
+
+You can also visualize an entire contract including all imports:
+
+1. Open a main contract file (*.fc, *.tact, or *.tolk)
+2. Visualize the project in one of these ways:
+   - Press F1 or Ctrl+Shift+P and type "TON Graph: Visualize Contract with Imports"
+   - Right-click on contract code in the editor → TON Graph: Visualize Contract with Imports
+   - Right-click on a contract file in the Explorer panel → TON Graph: Visualize Contract with Imports
+3. The extension will analyze the main contract and all its imports, displaying a complete function call graph
 
 ### Interactive Features
 

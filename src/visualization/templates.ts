@@ -391,6 +391,7 @@ export function generateVisualizationHtml(mermaidDiagram: string, mermaidScriptU
                             securityLevel: 'loose',
                             theme: 'default',
                             fontSize: fontSize,
+                            maxTextSize: 9000000,
                             flowchart: {
                                 nodeSpacing: nodeSpacing,
                                 rankSpacing: rankSpacing,
@@ -736,7 +737,7 @@ export function generateVisualizationHtml(mermaidDiagram: string, mermaidScriptU
                                 svgWidth = viewBoxValues[2];
                                 svgHeight = viewBoxValues[3];
                                 logMessage('Using viewBox dimensions: ' + svgWidth + 'x' + svgHeight, 'info');
-                     } else {
+                            } else {
                                 // Fallback to getBoundingClientRect
                                 const svgRect = svgForPng.getBoundingClientRect();
                                 svgWidth = svgRect.width;
@@ -758,14 +759,37 @@ export function generateVisualizationHtml(mermaidDiagram: string, mermaidScriptU
                             
                             // Ensure reasonable canvas dimensions
                             const maxDimension = 16384; // Max canvas size most browsers support
-                            const canvasWidth = Math.min(svgWidth * scale, maxDimension);
-                            const canvasHeight = Math.min(svgHeight * scale, maxDimension);
+                            
+                            // Calculate desired dimensions
+                            const desiredWidth = svgWidth * scale;
+                            const desiredHeight = svgHeight * scale;
+                            
+                            // Calculate aspect ratio
+                            const aspectRatio = svgWidth / svgHeight;
+                            
+                            // Determine canvas dimensions based on aspect ratio
+                            let canvasWidth, canvasHeight;
+                            
+                            if (aspectRatio > 1) {
+                                // Landscape orientation (wider than tall)
+                                canvasWidth = Math.min(desiredWidth, maxDimension);
+                                canvasHeight = Math.min(canvasWidth / aspectRatio, maxDimension);
+                            } else {
+                                // Portrait orientation (taller than wide)
+                                canvasHeight = Math.min(desiredHeight, maxDimension);
+                                canvasWidth = Math.min(canvasHeight * aspectRatio, maxDimension);
+                            }
                             
                             // Set canvas size
                             canvas.width = canvasWidth;
                             canvas.height = canvasHeight;
                             
-                            logMessage('Canvas dimensions: ' + canvasWidth + 'x' + canvasHeight, 'info');
+                            // Calculate effective scale if dimensions were constrained
+                            const effectiveWidthScale = canvasWidth / svgWidth;
+                            const effectiveHeightScale = canvasHeight / svgHeight;
+                            const effectiveScale = Math.min(effectiveWidthScale, effectiveHeightScale);
+                            
+                            logMessage('Canvas dimensions: ' + canvasWidth + 'x' + canvasHeight + ', effective scale: ' + effectiveScale, 'info');
                             
                             // Create SVG data URL
                             const svgData = new XMLSerializer().serializeToString(svgForPng);
@@ -774,9 +798,9 @@ export function generateVisualizationHtml(mermaidDiagram: string, mermaidScriptU
                             if (!svgData || svgData.length < 10) {
                                 logMessage('Error: SVG serialization failed', 'error');
                                 throw new Error('SVG serialization failed');
-                }
-                
-                try {
+                            }
+                            
+                            try {
                                 const svgBase64 = btoa(unescape(encodeURIComponent(svgData)));
                                 const svgUrl = 'data:image/svg+xml;base64,' + svgBase64;
                                 
@@ -790,8 +814,8 @@ export function generateVisualizationHtml(mermaidDiagram: string, mermaidScriptU
                                         ctx.fillStyle = 'white';
                                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                                         
-                                        // Draw SVG with scale
-                                        ctx.scale(scale, scale);
+                                        // Draw SVG with effective scale
+                                        ctx.scale(effectiveScale, effectiveScale);
                                         ctx.drawImage(img, 0, 0, svgWidth, svgHeight);
                                         
                                         // Get PNG data
@@ -829,8 +853,8 @@ export function generateVisualizationHtml(mermaidDiagram: string, mermaidScriptU
                             }
                         } catch (error) {
                             logMessage('PNG conversion error: ' + error.message, 'error');
-                            }
-                            break;
+                        }
+                        break;
                         
                     case 'convertToJpg':
                         try {
@@ -883,14 +907,37 @@ export function generateVisualizationHtml(mermaidDiagram: string, mermaidScriptU
                             
                             // Ensure reasonable canvas dimensions
                             const maxDimension = 16384; // Max canvas size most browsers support
-                            const canvasWidth = Math.min(svgWidth * scale, maxDimension);
-                            const canvasHeight = Math.min(svgHeight * scale, maxDimension);
+                            
+                            // Calculate desired dimensions
+                            const desiredWidth = svgWidth * scale;
+                            const desiredHeight = svgHeight * scale;
+                            
+                            // Calculate aspect ratio
+                            const aspectRatio = svgWidth / svgHeight;
+                            
+                            // Determine canvas dimensions based on aspect ratio
+                            let canvasWidth, canvasHeight;
+                            
+                            if (aspectRatio > 1) {
+                                // Landscape orientation (wider than tall)
+                                canvasWidth = Math.min(desiredWidth, maxDimension);
+                                canvasHeight = Math.min(canvasWidth / aspectRatio, maxDimension);
+                            } else {
+                                // Portrait orientation (taller than wide)
+                                canvasHeight = Math.min(desiredHeight, maxDimension);
+                                canvasWidth = Math.min(canvasHeight * aspectRatio, maxDimension);
+                            }
                             
                             // Set canvas size
                             canvas.width = canvasWidth;
                             canvas.height = canvasHeight;
                             
-                            logMessage('Canvas dimensions: ' + canvasWidth + 'x' + canvasHeight, 'info');
+                            // Calculate effective scale if dimensions were constrained
+                            const effectiveWidthScale = canvasWidth / svgWidth;
+                            const effectiveHeightScale = canvasHeight / svgHeight;
+                            const effectiveScale = Math.min(effectiveWidthScale, effectiveHeightScale);
+                            
+                            logMessage('Canvas dimensions: ' + canvasWidth + 'x' + canvasHeight + ', effective scale: ' + effectiveScale, 'info');
                             
                             // Create SVG data URL
                             const svgData = new XMLSerializer().serializeToString(svgForJpg);
@@ -915,8 +962,8 @@ export function generateVisualizationHtml(mermaidDiagram: string, mermaidScriptU
                                         ctx.fillStyle = 'white';
                                         ctx.fillRect(0, 0, canvas.width, canvas.height);
                                         
-                                        // Draw SVG with scale
-                                        ctx.scale(scale, scale);
+                                        // Draw SVG with effective scale
+                                        ctx.scale(effectiveScale, effectiveScale);
                                         ctx.drawImage(img, 0, 0, svgWidth, svgHeight);
                                         
                                         // Get JPG data

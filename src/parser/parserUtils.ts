@@ -3,6 +3,8 @@ import { ContractGraph } from '../types/graph';
 import { parseContractCode } from './funcParser';
 import { parseTactContract } from './tactParser';
 import { parseTolkContract } from './tolkParser';
+import { processImports } from './importHandler';
+import * as vscode from 'vscode';
 
 export type ContractLanguage = 'func' | 'tact' | 'tolk';
 
@@ -35,6 +37,24 @@ export async function parseContractByLanguage(code: string, language: ContractLa
         default:
             return await parseContractCode(code);
     }
+}
+
+/**
+ * Parses a contract including its imports
+ */
+export async function parseContractWithImports(
+    code: string,
+    filePath: string,
+    language: ContractLanguage
+): Promise<ContractGraph> {
+    // Process imports first
+    const { importedCode } = await processImports(code, filePath, language);
+
+    // Combine the original code with imported code
+    const combinedCode = `${importedCode}\n\n${code}`;
+
+    // Parse the combined code
+    return parseContractByLanguage(combinedCode, language);
 }
 
 /**

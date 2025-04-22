@@ -2,7 +2,7 @@
     "name": "ton-graph",
     "displayName": "TON Graph",
     "description": "Visualize function calls for TON smart contracts",
-    "version": "0.2.4",
+    "version": "0.2.5",
     "publisher": "positiveweb3",
     "icon": "pic/logo.png",
     "repository": {
@@ -52,7 +52,8 @@
             {
                 "id": "func",
                 "extensions": [
-                    ".fc"
+                    ".fc",
+                    ".func"
                 ],
                 "aliases": [
                     "Func"
@@ -101,12 +102,12 @@
             "explorer/context": [
                 {
                     "command": "ton-graph.visualize",
-                    "when": "resourceExtname == .fc || resourceExtname == .tact || resourceExtname == .tolk",
+                    "when": "resourceExtname == .fc || resourceExtname == .func || resourceExtname == .tact || resourceExtname == .tolk",
                     "group": "navigation"
                 },
                 {
                     "command": "ton-graph.visualizeProject",
-                    "when": "resourceExtname == .fc || resourceExtname == .tact || resourceExtname == .tolk",
+                    "when": "resourceExtname == .fc || resourceExtname == .func || resourceExtname == .tact || resourceExtname == .tolk",
                     "group": "navigation"
                 }
             ]

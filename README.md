@@ -11,7 +11,7 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 ## Features
 
 - Parse and visualize function call relationships in multiple contract types:
-  - FunC (*.fc)
+  - FunC (*.fc, *.func)
   - Tact (*.tact)
   - Tolk (*.tolk)
 - Interactive diagram with cluster-based organization
@@ -40,7 +40,7 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 
 ## Usage
 
-1. Open a contract file (*.fc, *.tact, or *.tolk)
+1. Open a contract file (*.fc, *.func, *.tact, or *.tolk)
 2. You can visualize a contract in multiple ways:
    - Press F1 or Ctrl+Shift+P to open the command palette and type "TON Graph: Visualize Contract"
    - Right-click on contract code in the editor → TON Graph: Visualize Contract
@@ -51,7 +51,7 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 
 You can also visualize an entire contract including all imports:
 
-1. Open a main contract file (*.fc, *.tact, or *.tolk)
+1. Open a main contract file (*.fc, *.func, *.tact, or *.tolk)
 2. Visualize the project in one of these ways:
    - Press F1 or Ctrl+Shift+P and type "TON Graph: Visualize Contract with Imports"
    - Right-click on contract code in the editor → TON Graph: Visualize Contract with Imports

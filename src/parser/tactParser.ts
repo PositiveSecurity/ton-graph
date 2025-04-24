@@ -20,6 +20,21 @@ function removeCommentsFromCode(code: string): string {
     return result;
 }
 
+// Function to extract trait names from Tact code
+function extractTraitNames(code: string): string[] {
+    const traitNames: string[] = [];
+    const traitPattern = /trait\s+([a-zA-Z_][a-zA-Z0-9_]*)/g;
+    let match;
+
+    while ((match = traitPattern.exec(code)) !== null) {
+        if (match[1]) {
+            traitNames.push(match[1]);
+        }
+    }
+
+    return traitNames;
+}
+
 // Function to extract all contract names from Tact code
 function extractContractNames(code: string): string[] {
     const contractNames: string[] = [];
@@ -35,8 +50,42 @@ function extractContractNames(code: string): string[] {
     return contractNames;
 }
 
+// Map traits to contracts using them
+function mapTraitsToContracts(code: string, contractNames: string[], traitNames: string[]): Map<string, string[]> {
+    const traitToContractMap = new Map<string, string[]>();
+
+    // Initialize map for each trait
+    traitNames.forEach(trait => {
+        traitToContractMap.set(trait, []);
+    });
+
+    // For each contract, check which traits it uses
+    for (const contractName of contractNames) {
+        // Look for "contract ContractName with ... Trait1, Trait2"
+        const contractWithPattern = new RegExp(`contract\\s+${contractName}\\s+with\\s+([^{]+)`, 'i');
+        const match = contractWithPattern.exec(code);
+
+        if (match) {
+            const withClause = match[1];
+
+            // Check each trait if it's used by this contract
+            traitNames.forEach(trait => {
+                // Match the trait name as a word (surrounded by non-word chars or string boundaries)
+                const traitPattern = new RegExp(`\\b${trait}\\b`, 'i');
+                if (traitPattern.test(withClause)) {
+                    const contracts = traitToContractMap.get(trait) || [];
+                    contracts.push(contractName);
+                    traitToContractMap.set(trait, contracts);
+                }
+            });
+        }
+    }
+
+    return traitToContractMap;
+}
+
 // Find the contract name for a specific position in the code
-function findContractForPosition(code: string, position: number, contractNames: string[]): string {
+function findContractForPosition(code: string, position: number, contractNames: string[], traitNames: string[], traitToContractMap: Map<string, string[]>): string {
     const contractStartPositions: { name: string, startPos: number, endPos: number }[] = [];
 
     // Find all contract start positions
@@ -61,10 +110,46 @@ function findContractForPosition(code: string, position: number, contractNames: 
         }
     }
 
-    // Find which contract contains this position
+    // Find all trait start positions
+    const traitStartPositions: { name: string, startPos: number, endPos: number }[] = [];
+    for (const name of traitNames) {
+        const traitRegex = new RegExp(`trait\\s+${name}[\\s\\S]*?{`, 'g');
+        let traitMatch;
+
+        while ((traitMatch = traitRegex.exec(code)) !== null) {
+            const startPos = traitMatch.index;
+
+            // Find the end of this trait by counting braces
+            let braceCount = 1;
+            let endPos = startPos + traitMatch[0].length;
+
+            while (braceCount > 0 && endPos < code.length) {
+                if (code[endPos] === '{') braceCount++;
+                if (code[endPos] === '}') braceCount--;
+                endPos++;
+            }
+
+            traitStartPositions.push({ name, startPos, endPos });
+        }
+    }
+
+    // First check if the position is inside a contract
     for (const contract of contractStartPositions) {
         if (position > contract.startPos && position < contract.endPos) {
             return contract.name;
+        }
+    }
+
+    // Then check if the position is inside a trait
+    for (const trait of traitStartPositions) {
+        if (position > trait.startPos && position < trait.endPos) {
+            // If this trait is used by only one contract, associate it with that contract
+            const usingContracts = traitToContractMap.get(trait.name) || [];
+            if (usingContracts.length === 1) {
+                return usingContracts[0]; // Associate with the single contract using it
+            }
+            // Otherwise, we'll return the trait name and handle the multiple contracts later
+            return trait.name;
         }
     }
 
@@ -82,8 +167,11 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
     const normalizedCode = code.replace(/\r\n/g, '\n');
     const cleanedCode = removeCommentsFromCode(normalizedCode);
 
-    // Extract all contract names
+    // Extract all contract and trait names
     const contractNames = extractContractNames(cleanedCode);
+    const traitNames = extractTraitNames(cleanedCode);
+    const traitToContractMap = mapTraitsToContracts(cleanedCode, contractNames, traitNames);
+
     const multipleContracts = contractNames.length > 1;
 
     // Find all function declarations
@@ -92,7 +180,9 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
         params: string,
         body: string,
         type: string,
-        contractName: string
+        contractName: string,
+        isTrait: boolean,
+        traitName?: string
     }>();
 
     // Find function declarations for each type
@@ -103,7 +193,20 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
     while ((initMatch = initPattern.exec(cleanedCode)) !== null) {
         const params = initMatch[1] || '';
         const bodyStartPos = initMatch.index + initMatch[0].length;
-        const contractName = findContractForPosition(cleanedCode, initMatch.index, contractNames);
+        const contractName = findContractForPosition(cleanedCode, initMatch.index, contractNames, traitNames, traitToContractMap);
+
+        // Determine if this function is from a trait
+        const isTrait = traitNames.includes(contractName);
+        const traitName = isTrait ? contractName : undefined;
+
+        // If it's a trait function, use the contracts that implement it
+        let effectiveContractName = contractName;
+        if (isTrait) {
+            const implementingContracts = traitToContractMap.get(contractName) || [];
+            if (implementingContracts.length === 1) {
+                effectiveContractName = implementingContracts[0];
+            }
+        }
 
         // Find the matching closing brace
         let braceCount = 1;
@@ -120,7 +223,7 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
         const body = cleanedCode.slice(bodyStartPos, bodyEndPos - 1);
 
         // Create function ID with contract prefix if multiple contracts
-        const functionId = multipleContracts ? `${contractName}::init` : 'init';
+        const functionId = multipleContracts ? `${effectiveContractName}::init` : 'init';
 
         // Add init function with a special name
         functions.set(functionId, {
@@ -128,7 +231,9 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
             params,
             body,
             type: 'init',
-            contractName
+            contractName: effectiveContractName,
+            isTrait,
+            traitName
         });
     }
 
@@ -138,7 +243,21 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
     while ((receiveMatch = receivePattern.exec(cleanedCode)) !== null) {
         // Extract the message type from the parameter
         const params = receiveMatch[1] || '';
-        const contractName = findContractForPosition(cleanedCode, receiveMatch.index, contractNames);
+        const contractName = findContractForPosition(cleanedCode, receiveMatch.index, contractNames, traitNames, traitToContractMap);
+
+        // Determine if this function is from a trait
+        const isTrait = traitNames.includes(contractName);
+        const traitName = isTrait ? contractName : undefined;
+
+        // If it's a trait function, use the contracts that implement it
+        let effectiveContractName = contractName;
+        if (isTrait) {
+            const implementingContracts = traitToContractMap.get(contractName) || [];
+            if (implementingContracts.length === 1) {
+                effectiveContractName = implementingContracts[0];
+            }
+        }
+
         let funcBaseName = 'receive';
 
         // Check for string literal patterns: receive("StringLiteral")
@@ -162,7 +281,7 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
         }
 
         // Create function ID with contract prefix if multiple contracts
-        const functionId = multipleContracts ? `${contractName}::${funcBaseName}` : funcBaseName;
+        const functionId = multipleContracts ? `${effectiveContractName}::${funcBaseName}` : funcBaseName;
 
         const bodyStartPos = receiveMatch.index + receiveMatch[0].length;
 
@@ -186,7 +305,9 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
             params,
             body,
             type: 'receive',
-            contractName
+            contractName: effectiveContractName,
+            isTrait,
+            traitName
         });
     }
 
@@ -196,7 +317,20 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
     while ((getMatch = getPattern.exec(cleanedCode)) !== null) {
         const funcName = getMatch[1];
         const params = getMatch[2] || '';
-        const contractName = findContractForPosition(cleanedCode, getMatch.index, contractNames);
+        const contractName = findContractForPosition(cleanedCode, getMatch.index, contractNames, traitNames, traitToContractMap);
+
+        // Determine if this function is from a trait
+        const isTrait = traitNames.includes(contractName);
+        const traitName = isTrait ? contractName : undefined;
+
+        // If it's a trait function, use the contracts that implement it
+        let effectiveContractName = contractName;
+        if (isTrait) {
+            const implementingContracts = traitToContractMap.get(contractName) || [];
+            if (implementingContracts.length === 1) {
+                effectiveContractName = implementingContracts[0];
+            }
+        }
 
         // Skip built-in functions
         if (BUILT_IN_FUNCTIONS.has(funcName)) {
@@ -221,14 +355,16 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
 
         // Add get function - ensure ID doesn't have spaces
         const getBaseId = `get_fun_${funcName}`;
-        const functionId = multipleContracts ? `${contractName}::${getBaseId}` : getBaseId;
+        const functionId = multipleContracts ? `${effectiveContractName}::${getBaseId}` : getBaseId;
 
         functions.set(functionId, {
             id: functionId,
             params,
             body,
             type: 'get_fun',
-            contractName
+            contractName: effectiveContractName,
+            isTrait,
+            traitName
         });
     }
 
@@ -238,7 +374,20 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
     while ((funMatch = funPattern.exec(cleanedCode)) !== null) {
         const funcName = funMatch[1];
         const params = funMatch[2] || '';
-        const contractName = findContractForPosition(cleanedCode, funMatch.index, contractNames);
+        const contractName = findContractForPosition(cleanedCode, funMatch.index, contractNames, traitNames, traitToContractMap);
+
+        // Determine if this function is from a trait
+        const isTrait = traitNames.includes(contractName);
+        const traitName = isTrait ? contractName : undefined;
+
+        // If it's a trait function, use the contracts that implement it
+        let effectiveContractName = contractName;
+        if (isTrait) {
+            const implementingContracts = traitToContractMap.get(contractName) || [];
+            if (implementingContracts.length === 1) {
+                effectiveContractName = implementingContracts[0];
+            }
+        }
 
         // Skip built-in functions
         if (BUILT_IN_FUNCTIONS.has(funcName)) {
@@ -262,14 +411,16 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
         const body = cleanedCode.slice(bodyStartPos, bodyEndPos - 1);
 
         // Add regular function
-        const functionId = multipleContracts ? `${contractName}::${funcName}` : funcName;
+        const functionId = multipleContracts ? `${effectiveContractName}::${funcName}` : funcName;
 
         functions.set(functionId, {
             id: functionId,
             params,
             body,
             type: 'fun',
-            contractName
+            contractName: effectiveContractName,
+            isTrait,
+            traitName
         });
     }
 
@@ -302,7 +453,10 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
             type: 'function',
             contractName: func.contractName,
             parameters: func.params.split(',').map(p => p.trim()).filter(p => p),
-            functionType: func.type.replace(/\s+/g, '_') as any
+            functionType: func.type.replace(/\s+/g, '_') as any,
+            // Add trait info to the node if needed
+            isTrait: func.isTrait,
+            traitName: func.traitName
         };
         graph.nodes.push(node);
     });
@@ -336,14 +490,16 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
                 }
 
                 // Check for direct function calls (functionName())
-                const pattern = new RegExp(`\\b${baseCalledFuncName}\\s*\\(`, 'g');
+                const pattern = new RegExp(`\\b${baseCalledFuncName.replace(/_/g, '_')}\\s*\\(`, 'g');
                 let match;
 
                 // Only add edge if the called function is in the same contract or explicitly qualified
+                // Trait functions are considered part of the contract that implements them
                 const isSameContract = currentContractName === calledContractName;
                 const isExplicitCall = funcBody.includes(`${calledContractName}.${baseCalledFuncName}`);
+                const isTraitFunction = calledFunc.isTrait;
 
-                if (isSameContract || isExplicitCall) {
+                if (isSameContract || isExplicitCall || isTraitFunction) {
                     while ((match = pattern.exec(funcBody)) !== null) {
                         // Skip if it's an explicitly qualified call to another contract's function
                         const matchPos = match.index;

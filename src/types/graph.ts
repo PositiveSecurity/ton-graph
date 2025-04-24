@@ -5,6 +5,8 @@ export interface GraphNode {
     contractName: string;
     parameters?: string[];
     functionType?: string;
+    isTrait?: boolean;
+    traitName?: string;
 }
 
 export interface GraphEdge {

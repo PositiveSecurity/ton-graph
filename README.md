@@ -37,6 +37,7 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 2. Go to Extensions view (Ctrl+Shift+X)
 3. Search for "TON Graph"
 4. Click Install
+5. Run "TON Graph: Set API Key" from the command palette and enter your Toncenter API key
 
 ## Usage
 

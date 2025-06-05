@@ -5,6 +5,7 @@ import { handleExport } from './export/exportHandler';
 import { ContractGraph } from './types/graph';
 import { detectLanguage, parseContractByLanguage, getFunctionTypeFilters, parseContractWithImports } from './parser/parserUtils';
 import { logError } from './logger';
+import { setApiKey } from './secrets/tokenManager';
 
 let panel: vscode.WebviewPanel | undefined;
 
@@ -343,6 +344,19 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
     context.subscriptions.push(projectDisposable);
+
+    const apiKeyDisposable = vscode.commands.registerCommand('ton-graph.setApiKey', async () => {
+        const value = await vscode.window.showInputBox({
+            prompt: 'Enter TON API key',
+            ignoreFocusOut: true,
+        });
+        if (value !== undefined) {
+            await setApiKey(context, value.trim());
+            vscode.window.showInformationMessage('TON Graph API key saved');
+        }
+    });
+
+    context.subscriptions.push(apiKeyDisposable);
 }
 
 export function deactivate() { }

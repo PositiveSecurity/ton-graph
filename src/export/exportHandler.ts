@@ -147,12 +147,10 @@ async function getMermaidScriptUri(context: vscode.ExtensionContext, webview: vs
         try {
             // Check if file exists locally
             await vscode.workspace.fs.stat(localMermaidPath);
-            console.log('Using cached Mermaid library in exportHandler');
             cachedMermaidUri = localMermaidPath;
             return webview.asWebviewUri(localMermaidPath).toString();
         } catch {
             // File doesn't exist, use CDN
-            console.log('No cached Mermaid found, using CDN in exportHandler');
             return cdnUrl;
         }
     } catch (error) {
@@ -264,7 +262,6 @@ async function handlePngExport(
         try {
             // Get SVG content
             const svgContent = message.content;
-            console.log('PNG export: Got SVG content, length:', svgContent.length);
 
             // Convert SVG to PNG using the webview
             panel.webview.postMessage({
@@ -286,7 +283,6 @@ async function handlePngExport(
                 )
             ]);
 
-            console.log('PNG export: Received response');
 
             if (!pngResponse || !pngResponse.content) {
                 throw new Error('No PNG data received from webview');
@@ -338,7 +334,6 @@ async function handleJpgExport(
         try {
             // Get SVG content
             const svgContent = message.content;
-            console.log('JPG export: Got SVG content, length:', svgContent.length);
 
             // Convert SVG to JPG using the webview
             panel.webview.postMessage({
@@ -360,7 +355,6 @@ async function handleJpgExport(
                 )
             ]);
 
-            console.log('JPG export: Received response');
 
             if (!jpgResponse || !jpgResponse.content) {
                 throw new Error('No JPG data received from webview');

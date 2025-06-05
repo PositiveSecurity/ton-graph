@@ -110,5 +110,19 @@ describe('Visualizer', () => {
             await new Promise(resolve => setTimeout(resolve, 0));
             expect(panel.webview.html).to.include('graph TB;');
         });
+
+        it('injects a CSP meta tag', async () => {
+            const context = { extensionPath: process.cwd(), subscriptions: [] } as any;
+            const graph: ContractGraph = {
+                nodes: [
+                    { id: 'n', label: 'n()', type: 'entry', contractName: '' }
+                ],
+                edges: []
+            };
+
+            const panel = createVisualizationPanel(context, graph, []);
+            await new Promise(resolve => setTimeout(resolve, 0));
+            expect(panel.webview.html).to.include('Content-Security-Policy');
+        });
     });
 });

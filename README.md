@@ -149,6 +149,11 @@ To work with it:
 3. Wait for the container to build and dependencies to install.
 4. You can now run `npm test` or other tasks inside the container.
 
+### Logs
+
+Runtime logs are written to `logs/extension.log` in the project root. The file
+rotates when it reaches 1 MB and up to five log files are kept.
+
 ## Requirements
 
 - Visual Studio Code 1.60.0 or newer

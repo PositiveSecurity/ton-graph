@@ -133,7 +133,8 @@ async function handleApplyFilters(
  */
 async function getMermaidScriptUri(context: vscode.ExtensionContext, webview: vscode.Webview): Promise<string> {
     if (!bundledMermaidUri) {
-        bundledMermaidUri = vscode.Uri.joinPath(context.extensionUri, 'cached', 'mermaid.min.js');
+        const filePath = path.join(context.extensionPath, 'cached', 'mermaid.min.js');
+        bundledMermaidUri = vscode.Uri.file(filePath);
     }
     return webview.asWebviewUri(bundledMermaidUri).toString();
 }

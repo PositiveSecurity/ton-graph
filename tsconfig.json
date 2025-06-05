@@ -5,8 +5,10 @@
         "outDir": "out",
         "rootDir": "src",
         "sourceMap": true,
-        "strict": false,
-        "noImplicitAny": false,
+        "strict": true,
+        "noImplicitAny": true,
+        "types": ["node", "vscode", "mocha"],
+        "skipLibCheck": true,
         "lib": [
             "es2018",
             "dom"

@@ -482,14 +482,15 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
         let match: RegExpExecArray | null;
 
         while ((match = callRegex.exec(funcBody)) !== null) {
-            const baseCalledName = match[1];
+            const m = match as RegExpExecArray;
+            const baseCalledName = m[1];
             const targets = baseNameMap.get(baseCalledName) || [];
             targets.forEach(targetId => {
                 if (targetId !== funcName) {
-                    const lineStart = funcBody.lastIndexOf('\n', match.index) + 1;
-                    const lineEnd = funcBody.indexOf('\n', match.index);
+                    const lineStart = funcBody.lastIndexOf('\n', m.index) + 1;
+                    const lineEnd = funcBody.indexOf('\n', m.index);
                     const line = funcBody.substring(lineStart, lineEnd === -1 ? funcBody.length : lineEnd);
-                    const beforeMatch = line.substring(0, match.index - lineStart);
+                    const beforeMatch = line.substring(0, m.index - lineStart);
                     if (beforeMatch.includes('//') || beforeMatch.includes(';')) {
                         return;
                     }

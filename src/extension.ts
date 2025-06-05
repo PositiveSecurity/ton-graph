@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 import { createVisualizationPanel, generateMermaidDiagram } from './visualization/visualizer';
 import { handleExport } from './export/exportHandler';
 import { ContractGraph } from './types/graph';
@@ -8,7 +9,7 @@ import { logError } from './logger';
 export function activate(context: vscode.ExtensionContext) {
 
     // Create the cached directory for storing the Mermaid library
-    const cachedDir = vscode.Uri.joinPath(context.extensionUri, 'cached');
+    const cachedDir = vscode.Uri.file(path.join(context.extensionPath, 'cached'));
     try {
         vscode.workspace.fs.createDirectory(cachedDir);
     } catch (err) {

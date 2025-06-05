@@ -126,8 +126,8 @@ ton-graph/
 ```bash
 # Clone the repository
 git clone https://github.com/PositiveSecurity/ton-graph
-# Install dependencies
-npm install
+# Install dependencies using the lockfile
+npm ci
 
 # Compile the extension
 npm run compile

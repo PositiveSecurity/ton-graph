@@ -6,8 +6,8 @@ rm -rf ./vsix
 rm -rf ./out
 rm -rf ./cached
 
-# Install dependencies
-npm install
+# Install dependencies using the lockfile
+npm ci
 
 # Install vsce locally
 npm install -D @vscode/vsce

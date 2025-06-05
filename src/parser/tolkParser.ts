@@ -131,6 +131,12 @@ export function extractBody(lines: string[], fromLine: number): { body: string; 
     let isAsm = false;
     for (let j = fromLine; j < lines.length; j++) {
         if (lines[j].includes('{')) {
+            const startLine = lines[j];
+            if (startLine.includes('}') && startLine.indexOf('{') < startLine.indexOf('}')) {
+                const match = /{([^}]*)}/.exec(startLine);
+                bodyText = match ? match[1] : '';
+                break;
+            }
             let braceCount = 1;
             const bodyLines: string[] = [];
             for (let k = j + 1; k < lines.length && braceCount > 0; k++) {
@@ -234,9 +240,6 @@ export async function parseTolkContract(code: string): Promise<ContractGraph> {
     for (const decl of declarations) {
         const { params, endLine } = parseParameters(lines, decl.lineIndex);
         const { body } = extractBody(lines, endLine);
-        if (!body.trim()) {
-            continue;
-        }
         const type = determineFunctionType(decl.isGet, decl.decorators);
         functions.set(decl.name, {
             id: decl.name,

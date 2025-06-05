@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import logger from '../logging/logger';
 
 function isPathInsideWorkspace(filePath: string): boolean {
-    const folders = vscode.workspace.workspaceFolders;
+    const folders = vscode.workspace && vscode.workspace.workspaceFolders;
     if (!folders) {
         return true;
     }

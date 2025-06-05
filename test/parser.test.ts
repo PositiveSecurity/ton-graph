@@ -126,8 +126,12 @@ describe('Parser', () => {
         const main = path.join(tmp, 'main.fc');
         fs.writeFileSync(main, '#include "lib.fc"\nint main() { lib(); }');
         const code = fs.readFileSync(main, 'utf8');
-        const graph = await parseContractWithImports(code, main, 'func');
-        const ids = graph.nodes.map(n => n.id);
+        mock('vscode', { window: { createOutputChannel: () => ({ appendLine: () => {} }) }, workspace: { workspaceFolders: [{ uri: { fsPath: tmp } }] } });
+        delete require.cache[require.resolve('../src/parser/importHandler')];
+        delete require.cache[require.resolve('../src/parser/parserUtils')];
+        const { parseContractWithImports: parseWithImports } = require('../src/parser/parserUtils');
+        const graph = await parseWithImports(code, main, 'func');
+        const ids = graph.nodes.map((n: any) => n.id);
         expect(ids).to.include.members(['lib', 'main']);
     });
 });

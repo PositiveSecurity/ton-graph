@@ -3,6 +3,29 @@ import * as path from 'path';
 import { filterMermaidDiagram, generateVisualizationHtml } from '../visualization/templates';
 import logger from '../logging/logger';
 
+function isValidBase64(str: string): boolean {
+    try {
+        return Buffer.from(str, 'base64').toString('base64') === str.replace(/\r?\n/g, '');
+    } catch {
+        return false;
+    }
+}
+
+function isValidDataUrl(url: string, mime: string): boolean {
+    const prefix = `data:${mime};base64,`;
+    if (!url.startsWith(prefix)) {
+        return false;
+    }
+    return isValidBase64(url.slice(prefix.length));
+}
+
+function isValidSvg(content: string): boolean {
+    if (isValidDataUrl(content, 'image/svg+xml')) {
+        return true;
+    }
+    return /^<svg[\s\S]*<\/svg>$/.test(content.trim());
+}
+
 // URI to the bundled Mermaid script
 let bundledMermaidUri: vscode.Uri | undefined;
 
@@ -214,6 +237,11 @@ async function handleSvgExport(
     });
 
     const svgContent = response.content;
+
+    if (typeof svgContent !== 'string' || !isValidSvg(svgContent)) {
+        logger.error('Invalid SVG content format', typeof svgContent === 'string' ? svgContent.substring(0, 50) + '...' : 'not a string');
+        throw new Error('Invalid SVG content');
+    }
     const svgUri = await vscode.window.showSaveDialog({
         defaultUri: vscode.Uri.file(path.join(basePath, `${baseFileName}.svg`)),
         filters: {
@@ -256,6 +284,11 @@ async function handlePngExport(
             // Get SVG content
             const svgContent = message.content;
 
+            if (typeof svgContent !== 'string' || !isValidSvg(svgContent)) {
+                logger.error('Invalid SVG content format', typeof svgContent === 'string' ? svgContent.substring(0, 50) + '...' : 'not a string');
+                throw new Error('Invalid SVG content');
+            }
+
             // Convert SVG to PNG using the webview
             panel.webview.postMessage({
                 command: 'convertToPng'
@@ -283,9 +316,8 @@ async function handlePngExport(
 
             const pngDataUrl = pngResponse.content;
 
-            // Validate the data URL format
-            if (!pngDataUrl.startsWith('data:image/png;base64,')) {
-                logger.error('Invalid PNG data URL format', pngDataUrl.substring(0, 50) + '...');
+            if (!isValidDataUrl(pngDataUrl, 'image/png')) {
+                logger.error('Invalid PNG data URL format', typeof pngDataUrl === 'string' ? pngDataUrl.substring(0, 50) + '...' : 'not a string');
                 throw new Error('Invalid PNG data URL format');
             }
 
@@ -328,6 +360,11 @@ async function handleJpgExport(
             // Get SVG content
             const svgContent = message.content;
 
+            if (typeof svgContent !== 'string' || !isValidSvg(svgContent)) {
+                logger.error('Invalid SVG content format', typeof svgContent === 'string' ? svgContent.substring(0, 50) + '...' : 'not a string');
+                throw new Error('Invalid SVG content');
+            }
+
             // Convert SVG to JPG using the webview
             panel.webview.postMessage({
                 command: 'convertToJpg'
@@ -355,9 +392,8 @@ async function handleJpgExport(
 
             const jpgDataUrl = jpgResponse.content;
 
-            // Validate the data URL format
-            if (!jpgDataUrl.startsWith('data:image/jpeg;base64,')) {
-                logger.error('Invalid JPG data URL format', jpgDataUrl.substring(0, 50) + '...');
+            if (!isValidDataUrl(jpgDataUrl, 'image/jpeg')) {
+                logger.error('Invalid JPG data URL format', typeof jpgDataUrl === 'string' ? jpgDataUrl.substring(0, 50) + '...' : 'not a string');
                 throw new Error('Invalid JPG data URL format');
             }
 

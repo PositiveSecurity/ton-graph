@@ -144,5 +144,11 @@
         "pic/**/*",
         "README.md",
         "LICENSE"
-    ]
+    ],
+    "nyc": {
+        "check-coverage": true,
+        "lines": 85,
+        "branches": 80,
+        "functions": 85
+    }
 }

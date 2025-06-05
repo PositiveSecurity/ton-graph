@@ -34,6 +34,7 @@ describe('ImportHandler', () => {
         fs.writeFileSync(externalFile, 'external content');
 
         const linkDir = path.join(testRoot, 'link');
+        fs.rmSync(linkDir, { recursive: true, force: true });
         fs.mkdirSync(linkDir, { recursive: true });
         const linkPath = path.join(linkDir, 'link.fc');
         fs.symlinkSync(externalFile, linkPath);
@@ -61,6 +62,7 @@ describe('ImportHandler', () => {
 
     it('rejects symlink import loops', async () => {
         const loopDir = path.join(testRoot, 'symlinkLoop');
+        fs.rmSync(loopDir, { recursive: true, force: true });
         fs.mkdirSync(loopDir, { recursive: true });
         const aPath = path.join(loopDir, 'a.fc');
         fs.writeFileSync(aPath, '#include "b.fc"');
@@ -157,5 +159,39 @@ describe('ImportHandler', () => {
         const res = await processImports('code', 'dummy', 'unknown');
         expect(res.importedFilePaths).to.deep.equal([]);
         expect(res.importedCode).to.equal('');
+    });
+
+    it('rejects imports when no workspace is open', async () => {
+        mock('vscode', {
+            window: { createOutputChannel: () => ({ appendLine: () => {} }) },
+            workspace: { }
+        });
+        const { processFuncImports: proc } = require('../src/parser/importHandler');
+        const code = '#include "./file.fc"';
+        const res = await proc(code, path.join(testRoot, 'dummy.fc'));
+        expect(res.importedFilePaths.length).to.equal(0);
+    });
+
+    it('detects symlink loops in Tact imports', async () => {
+        const tactLoop = path.join(testRoot, 'tactLoop');
+        fs.rmSync(tactLoop, { recursive: true, force: true });
+        fs.mkdirSync(tactLoop, { recursive: true });
+        const main = path.join(tactLoop, 'main.tact');
+        fs.writeFileSync(main, 'import "lib";');
+        const lib = path.join(tactLoop, 'lib.tact');
+        fs.symlinkSync(main, lib);
+
+        mock('vscode', {
+            window: { createOutputChannel: () => ({ appendLine: () => {} }) },
+            workspace: { workspaceFolders: [{ uri: { fsPath: tactLoop } }] }
+        });
+        const { processTactImports: procT } = require('../src/parser/importHandler');
+
+        try {
+            await procT(fs.readFileSync(main, 'utf8'), main);
+            expect.fail('should throw due to symlink loop');
+        } catch (err: any) {
+            expect(err.message).to.match(/symlink loop/i);
+        }
     });
 });

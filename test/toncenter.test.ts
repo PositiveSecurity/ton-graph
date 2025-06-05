@@ -42,7 +42,7 @@ afterEach(() => server.resetHandlers());
 after(() => server.close());
 
 describe('callToncenter', () => {
-    it('times out after retrying once', async () => {
+    it('times out after retrying once with backoff', async () => {
         server.use(
             rest.get('https://toncenter.com/api/v2/', (_req, res, ctx) => {
                 return res(ctx.delay(200), ctx.json({ ok: true }));
@@ -55,7 +55,27 @@ describe('callToncenter', () => {
             expect.fail('should throw');
         } catch {
             const elapsed = Date.now() - start;
-            expect(elapsed).to.be.greaterThan(90);
+            expect(elapsed).to.be.greaterThan(190);
+        }
+    });
+
+    it('stops after max retries with exponential delays', async () => {
+        let calls = 0;
+        server.use(
+            rest.get('https://toncenter.com/api/v2/', (_req, res) => {
+                calls++;
+                return res.networkError('failed');
+            })
+        );
+        const context = { workspaceState: new TestMemento(), secrets: new TestSecrets() } as any;
+        const start = Date.now();
+        try {
+            await callToncenter(context, 'test', {}, 50, 2);
+            expect.fail('should throw');
+        } catch {
+            const elapsed = Date.now() - start;
+            expect(calls).to.equal(3);
+            expect(elapsed).to.be.greaterThan(290);
         }
     });
 });

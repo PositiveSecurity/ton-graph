@@ -1,5 +1,6 @@
 const vscode = require('vscode');
 const path = require('path');
+const fs = require('fs');
 
 module.exports = async function () {
   const ext = vscode.extensions.getExtension('positiveweb3.ton-graph');
@@ -25,6 +26,11 @@ module.exports = async function () {
 
   if (!panelStub.webview.html.includes('.mermaid')) {
     throw new Error('Mermaid script not found in webview');
+  }
+
+  const outputPath = process.env.OUTPUT_HTML;
+  if (outputPath) {
+    fs.writeFileSync(outputPath, panelStub.webview.html, 'utf8');
   }
 
   vscode.window.createWebviewPanel = originalCreate;

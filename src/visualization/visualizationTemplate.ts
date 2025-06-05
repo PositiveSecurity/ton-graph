@@ -204,10 +204,28 @@ export const VISUALIZATION_TEMPLATE = `<!DOCTYPE html>
                 width: 100%;
                 height: 100%;
             }
+            .loading-overlay {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(255, 255, 255, 0.8);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 16px;
+                color: #333;
+                z-index: 2;
+            }
+            .loading-overlay.hidden {
+                display: none;
+            }
         </style>
     </head>
     <body>
         <div class="container">
+            <div id="loadingOverlay" class="loading-overlay">Loading...</div>
             <div class="controls-top">
                 <div class="filter-section">
                     <div id="typeFilters" class="filter-options"></div>

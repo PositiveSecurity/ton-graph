@@ -110,6 +110,12 @@ async function getMermaidScriptUri(context: vscode.ExtensionContext, webview: vs
     if (!bundledMermaidUri) {
         const filePath = path.join(context.extensionPath, 'cached', 'mermaid.min.js');
         bundledMermaidUri = vscode.Uri.file(filePath);
+        try {
+            const fileUrl = bundledMermaidUri.with({ scheme: 'file' }).toString();
+            await import(fileUrl);
+        } catch {
+            // Ignore import errors as the file may not be a valid module
+        }
     }
     return webview.asWebviewUri(bundledMermaidUri).toString();
 }

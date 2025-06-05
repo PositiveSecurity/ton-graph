@@ -40,7 +40,9 @@ export async function processFuncImports(
     code: string,
     filePath: string,
     visited: Set<string> = new Set(),
-    stack: string[] = []
+    stack: string[] = [],
+    visitedInodes: Set<string> = new Set(),
+    inodeStack: string[] = []
 ): Promise<{ importedCode: string, importedFilePaths: string[], cycles: string[] }> {
     const importedFilePaths: string[] = [];
     const importedCode: string[] = [];
@@ -75,15 +77,34 @@ export async function processFuncImports(
             continue;
         }
 
-        visited.add(fullPath);
-        stack.push(fullPath);
-
         try {
             await fs.promises.access(fullPath);
         } catch {
             logger.error(`Included file not found: ${fullPath}`);
             continue;
         }
+
+        let inode: string;
+        try {
+            const stat = await fs.promises.stat(fullPath);
+            inode = stat.ino.toString();
+        } catch {
+            logger.error(`Cannot stat file: ${fullPath}`);
+            continue;
+        }
+
+        if (inodeStack.includes(inode)) {
+            throw new Error(`Symlink loop detected at ${fullPath}`);
+        }
+
+        if (visitedInodes.has(inode)) {
+            continue;
+        }
+
+        visited.add(fullPath);
+        visitedInodes.add(inode);
+        stack.push(fullPath);
+        inodeStack.push(inode);
 
         try {
             const fileContent = await fs.promises.readFile(fullPath, 'utf8');
@@ -93,7 +114,7 @@ export async function processFuncImports(
             importedFilePaths.push(fullPath);
 
             // Process nested imports recursively
-            const nestedImports = await processFuncImports(fileContent, fullPath, visited, stack);
+            const nestedImports = await processFuncImports(fileContent, fullPath, visited, stack, visitedInodes, inodeStack);
             importedCode.push(nestedImports.importedCode);
             importedFilePaths.push(...nestedImports.importedFilePaths);
             cycles.push(...nestedImports.cycles);
@@ -101,6 +122,7 @@ export async function processFuncImports(
             logger.error(`Error processing import ${fullPath}`, error);
         }
         stack.pop();
+        inodeStack.pop();
     }
 
     return {
@@ -120,7 +142,9 @@ export async function processTactImports(
     code: string,
     filePath: string,
     visited: Set<string> = new Set(),
-    stack: string[] = []
+    stack: string[] = [],
+    visitedInodes: Set<string> = new Set(),
+    inodeStack: string[] = []
 ): Promise<{ importedCode: string, importedFilePaths: string[], cycles: string[] }> {
     const importedFilePaths: string[] = [];
     const importedCode: string[] = [];
@@ -173,15 +197,34 @@ export async function processTactImports(
             continue;
         }
 
-        visited.add(fullPath);
-        stack.push(fullPath);
-
         try {
             await fs.promises.access(fullPath);
         } catch {
             logger.error(`Imported file not found: ${fullPath}`);
             continue;
         }
+
+        let inode: string;
+        try {
+            const stat = await fs.promises.stat(fullPath);
+            inode = stat.ino.toString();
+        } catch {
+            logger.error(`Cannot stat file: ${fullPath}`);
+            continue;
+        }
+
+        if (inodeStack.includes(inode)) {
+            throw new Error(`Symlink loop detected at ${fullPath}`);
+        }
+
+        if (visitedInodes.has(inode)) {
+            continue;
+        }
+
+        visited.add(fullPath);
+        visitedInodes.add(inode);
+        stack.push(fullPath);
+        inodeStack.push(inode);
 
         try {
             const fileContent = await fs.promises.readFile(fullPath, 'utf8');
@@ -191,7 +234,7 @@ export async function processTactImports(
             importedFilePaths.push(fullPath);
 
             // Process nested imports recursively
-            const nestedImports = await processTactImports(fileContent, fullPath, visited, stack);
+            const nestedImports = await processTactImports(fileContent, fullPath, visited, stack, visitedInodes, inodeStack);
             importedCode.push(nestedImports.importedCode);
             importedFilePaths.push(...nestedImports.importedFilePaths);
             cycles.push(...nestedImports.cycles);
@@ -199,6 +242,7 @@ export async function processTactImports(
             logger.error(`Error processing import ${fullPath}`, error);
         }
         stack.pop();
+        inodeStack.pop();
     }
 
     return {
@@ -218,7 +262,9 @@ export async function processTolkImports(
     code: string,
     filePath: string,
     visited: Set<string> = new Set(),
-    stack: string[] = []
+    stack: string[] = [],
+    visitedInodes: Set<string> = new Set(),
+    inodeStack: string[] = []
 ): Promise<{ importedCode: string, importedFilePaths: string[], cycles: string[] }> {
     const importedFilePaths: string[] = [];
     const importedCode: string[] = [];
@@ -271,15 +317,34 @@ export async function processTolkImports(
             continue;
         }
 
-        visited.add(fullPath);
-        stack.push(fullPath);
-
         try {
             await fs.promises.access(fullPath);
         } catch {
             logger.error(`Imported file not found: ${fullPath}`);
             continue;
         }
+
+        let inode: string;
+        try {
+            const stat = await fs.promises.stat(fullPath);
+            inode = stat.ino.toString();
+        } catch {
+            logger.error(`Cannot stat file: ${fullPath}`);
+            continue;
+        }
+
+        if (inodeStack.includes(inode)) {
+            throw new Error(`Symlink loop detected at ${fullPath}`);
+        }
+
+        if (visitedInodes.has(inode)) {
+            continue;
+        }
+
+        visited.add(fullPath);
+        visitedInodes.add(inode);
+        stack.push(fullPath);
+        inodeStack.push(inode);
 
         try {
             const fileContent = await fs.promises.readFile(fullPath, 'utf8');
@@ -289,7 +354,7 @@ export async function processTolkImports(
             importedFilePaths.push(fullPath);
 
             // Process nested imports recursively
-            const nestedImports = await processTolkImports(fileContent, fullPath, visited, stack);
+            const nestedImports = await processTolkImports(fileContent, fullPath, visited, stack, visitedInodes, inodeStack);
             importedCode.push(nestedImports.importedCode);
             importedFilePaths.push(...nestedImports.importedFilePaths);
             cycles.push(...nestedImports.cycles);
@@ -297,6 +362,7 @@ export async function processTolkImports(
             logger.error(`Error processing import ${fullPath}`, error);
         }
         stack.pop();
+        inodeStack.pop();
     }
 
     return {
@@ -315,13 +381,15 @@ export async function processImports(
     language: string
 ): Promise<{ importedCode: string, importedFilePaths: string[], cycles: string[] }> {
     const visited = new Set<string>();
+    const visitedInodes = new Set<string>();
+    const inodeStack: string[] = [];
     switch (language) {
         case 'func':
-            return processFuncImports(code, filePath, visited);
+            return processFuncImports(code, filePath, visited, [], visitedInodes, inodeStack);
         case 'tact':
-            return processTactImports(code, filePath, visited);
+            return processTactImports(code, filePath, visited, [], visitedInodes, inodeStack);
         case 'tolk':
-            return processTolkImports(code, filePath, visited);
+            return processTolkImports(code, filePath, visited, [], visitedInodes, inodeStack);
         default:
             return { importedCode: '', importedFilePaths: [], cycles: [] };
     }

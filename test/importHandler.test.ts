@@ -50,6 +50,23 @@ describe('ImportHandler', () => {
         expect(result.cycles.length).to.be.greaterThan(0);
     });
 
+    it('rejects symlink import loops', async () => {
+        const loopDir = path.join(testRoot, 'symlinkLoop');
+        fs.mkdirSync(loopDir, { recursive: true });
+        const aPath = path.join(loopDir, 'a.fc');
+        fs.writeFileSync(aPath, '#include "b.fc"');
+        const bPath = path.join(loopDir, 'b.fc');
+        fs.symlinkSync(aPath, bPath);
+
+        const code = fs.readFileSync(aPath, 'utf8');
+        try {
+            await processFuncImports(code, aPath);
+            expect.fail('should throw due to symlink loop');
+        } catch (err: any) {
+            expect(err.message).to.match(/symlink loop/i);
+        }
+    });
+
     it('merges nested imports in order', async () => {
         const nestedDir = path.join(testRoot, 'nested');
         fs.mkdirSync(nestedDir, { recursive: true });

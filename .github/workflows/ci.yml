@@ -31,7 +31,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           directory: ./coverage
       - name: Check coverage thresholds
-        run: npx nyc check-coverage
+        run: npx nyc check-coverage --lines=85 --branches=80 --functions=85
       - name: Package extension
         run: npx vsce package
       - name: Upload coverage baseline

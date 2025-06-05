@@ -32,11 +32,9 @@ export function createVisualizationPanel(
 
     // Get path to the visualization lib directory
     const extensionPath = context.extensionPath;
-    console.log(`Extension path: ${extensionPath}`);
 
     // Get the Mermaid script URI (either cached or from CDN)
     getMermaidScriptUri(context, panel.webview).then(mermaidScriptUri => {
-        console.log(`Using Mermaid from: ${mermaidScriptUri}`);
 
         // Generate Mermaid diagram from graph
         const mermaidDiagram = generateMermaidDiagram(graph);
@@ -115,12 +113,10 @@ async function getMermaidScriptUri(context: vscode.ExtensionContext, webview: vs
         try {
             // Check if file already exists locally
             await vscode.workspace.fs.stat(localMermaidPath);
-            console.log('Using cached Mermaid library');
             cachedMermaidUri = localMermaidPath;
             return webview.asWebviewUri(localMermaidPath).toString();
         } catch {
             // File doesn't exist yet, fetch it
-            console.log('Downloading Mermaid library from CDN');
 
             // Fetch the library from CDN
             const response = await fetch(cdnUrl);

@@ -5,16 +5,13 @@ import { ContractGraph } from './types/graph';
 import { detectLanguage, parseContractByLanguage, getFunctionTypeFilters, parseContractWithImports } from './parser/parserUtils';
 
 export function activate(context: vscode.ExtensionContext) {
-    console.log('TON Graph extension is now active');
 
     // Create the cached directory for storing the Mermaid library
     const cachedDir = vscode.Uri.joinPath(context.extensionUri, 'cached');
     try {
         vscode.workspace.fs.createDirectory(cachedDir);
-        console.log('Cached directory created/verified');
     } catch (err) {
         // Directory might already exist, that's fine
-        console.log('Note: Cached directory may already exist');
     }
 
     let disposable = vscode.commands.registerCommand('ton-graph.visualize', async (fileUri?: vscode.Uri) => {

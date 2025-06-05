@@ -10,7 +10,12 @@ mock('vscode', {
     workspace: { workspaceFolders: [{ uri: { fsPath: testRoot } }] }
 });
 
-import { processFuncImports } from '../src/parser/importHandler';
+import {
+    processFuncImports,
+    processTactImports,
+    processTolkImports,
+    processImports
+} from '../src/parser/importHandler';
 
 describe('ImportHandler', () => {
     it('rejects imports outside workspace', async () => {
@@ -104,5 +109,49 @@ describe('ImportHandler', () => {
         (fs.promises as any).readFile = originalReadFile;
 
         expect(called).to.be.true;
+    });
+
+    it('processes Tact relative imports', async () => {
+        const tactDir = path.join(testRoot, 'tactrel');
+        fs.mkdirSync(tactDir, { recursive: true });
+        const lib = path.join(tactDir, 'lib.tact');
+        fs.writeFileSync(lib, 'fun lib() {}');
+        const main = path.join(tactDir, 'main.tact');
+        fs.writeFileSync(main, 'import "lib"; fun main() { lib(); }');
+        const result = await processTactImports(fs.readFileSync(main, 'utf8'), main);
+        expect(result.importedFilePaths).to.deep.equal([lib]);
+    });
+
+    it('processes Tolk relative imports', async () => {
+        const tolkDir = path.join(testRoot, 'tolkrel');
+        fs.mkdirSync(tolkDir, { recursive: true });
+        const lib = path.join(tolkDir, 'lib.tolk');
+        fs.writeFileSync(lib, 'fun lib() {}');
+        const main = path.join(tolkDir, 'main.tolk');
+        fs.writeFileSync(main, 'import "lib"; fun main() { lib(); }');
+        const result = await processTolkImports(fs.readFileSync(main, 'utf8'), main);
+        expect(result.importedFilePaths).to.deep.equal([lib]);
+    });
+
+    it('skips missing Tact package imports', async () => {
+        const tactPkg = fs.mkdtempSync(path.join(os.tmpdir(), 'tactpkg-'));
+        const main = path.join(tactPkg, 'main.tact');
+        fs.writeFileSync(main, 'import "@nope";');
+        const res = await processTactImports(fs.readFileSync(main, 'utf8'), main);
+        expect(res.importedFilePaths.length).to.equal(0);
+    });
+
+    it('skips missing Tolk package imports', async () => {
+        const tolkPkg = fs.mkdtempSync(path.join(os.tmpdir(), 'tolkpkg-'));
+        const main = path.join(tolkPkg, 'main.tolk');
+        fs.writeFileSync(main, 'import "@nope";');
+        const res = await processTolkImports(fs.readFileSync(main, 'utf8'), main);
+        expect(res.importedFilePaths.length).to.equal(0);
+    });
+
+    it('returns empty for unknown language', async () => {
+        const res = await processImports('code', 'dummy', 'unknown');
+        expect(res.importedFilePaths).to.deep.equal([]);
+        expect(res.importedCode).to.equal('');
     });
 });

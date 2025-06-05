@@ -7,7 +7,8 @@ export function generateVisualizationHtml(
     webviewScriptUri: string
 ): string {
     const filtersJson = JSON.stringify(functionTypeFilters);
-    return VISUALIZATION_TEMPLATE
+    const cspMetaTag = '<meta http-equiv="Content-Security-Policy" content="default-src \'self\' vscode-resource:; script-src \'self\' vscode-resource:; style-src \'self\' vscode-resource:; img-src \'self\' vscode-resource:;">';
+    return VISUALIZATION_TEMPLATE.replace('<head>', `<head>${cspMetaTag}`)
         .replace('{{MERMAID_DIAGRAM}}', mermaidDiagram)
         .replace('{{MERMAID_SCRIPT_URI}}', mermaidScriptUri)
         .replace('{{FILTERS_JSON}}', filtersJson)

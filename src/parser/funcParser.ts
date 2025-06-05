@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import * as WebTreeSitter from 'web-tree-sitter';
 import { loadFunC } from '@scaleton/tree-sitter-func';
 import { ContractGraph, ContractNode } from '../types/graph';
+import { GraphNodeKind } from '../types/graphNodeKind';
 
 const BUILT_IN_FUNCTIONS = new Set([
     'if', 'elseif', 'while', 'for', 'switch', 'return', 'throw', 'throw_unless',
@@ -67,7 +68,7 @@ export async function parseContractCode(code: string): Promise<ContractGraph> {
         const node: ContractNode = {
             id: funcName,
             label: `${funcName}(${params})`,
-            type: 'function',
+            type: GraphNodeKind.Function,
             contractName,
             parameters: params.split(',').map((p: string) => p.trim()).filter(Boolean),
             functionType: 'regular'

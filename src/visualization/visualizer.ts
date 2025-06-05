@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { ContractGraph } from '../types/graph';
+import { GraphNodeKind } from '../types/graphNodeKind';
 import { generateVisualizationHtml, filterMermaidDiagram } from './templates';
 import { logError } from '../logger';
 
@@ -211,9 +212,9 @@ export function generateMermaidDiagram(graph: ContractGraph): string {
             label = escapeMermaidLabel(label);
 
             // Use different node shapes based on function type
-            if (node.type === 'entry') {
+            if (node.type === GraphNodeKind.Entry) {
                 diagram += `        ${nodeId}(["${label}"])\n`;
-            } else if (node.type === 'external') {
+            } else if (node.type === GraphNodeKind.External) {
                 diagram += `        ${nodeId}[["${label}"]]\n`;
             } else {
                 diagram += `        ${nodeId}["${label}"]\n`;

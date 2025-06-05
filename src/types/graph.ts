@@ -1,7 +1,9 @@
+import { GraphNodeKind } from './graphNodeKind';
+
 export interface GraphNode {
     id: string;
     label: string;
-    type: string;
+    type: GraphNodeKind;
     contractName: string;
     parameters?: string[];
     functionType?: string;

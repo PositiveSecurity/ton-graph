@@ -147,7 +147,9 @@ To work with it:
 1. Install the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension for VS Code.
 2. Run **Remote-Containers: Open Folder in Container...** from the command palette and select this repository.
 3. Wait for the container to build and dependencies to install.
-4. You can now run `npm test` or other tasks inside the container.
+4. Node dependencies are cached across rebuilds using a Docker volume mounted at `~/.npm`.
+5. Docker build caching is enabled via the `cacheFrom` property to speed up subsequent builds.
+6. You can now run `npm test` or other tasks inside the container.
 
 ### Logs
 

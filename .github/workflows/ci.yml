@@ -23,7 +23,7 @@ jobs:
       - name: Run tests
         run: |
           npm run test -- --coverage
-          npx nyc report --reporter=json
+          npx nyc report --reporter=json --reporter=json-summary
           cp coverage/coverage-final.json artifacts/coverage-baseline.json
       - name: Check coverage thresholds
         run: npx nyc check-coverage

@@ -190,38 +190,39 @@ export async function parseTolkContract(code: string): Promise<ContractGraph> {
         graph.nodes.push(node);
     });
 
-    // Second pass: analyze function calls
+    // Second pass: analyze function calls without nested iterations
+    const functionNames = Array.from(functions.keys()).sort((a, b) => b.length - a.length);
+    const callRegex = new RegExp(`\\b(${functionNames.join('|')})\\s*\\(`, 'g');
+
     functions.forEach((func, funcName) => {
         const funcBody = func.body;
-
-        // Create a set to track already added edges to avoid duplicates
         const addedEdges = new Set<string>();
+        let match: RegExpExecArray | null;
 
-        // Check for calls to other functions
-        functions.forEach((calledFunc, calledFuncName) => {
-            if (funcName !== calledFuncName) {
-                // Simple pattern to detect function calls
-                const pattern = new RegExp(`\\b${calledFuncName}\\s*\\(`, 'g');
-                let match;
+        while ((match = callRegex.exec(funcBody)) !== null) {
+            const calledFuncName = match[1];
+            if (calledFuncName && calledFuncName !== funcName) {
+                const lineStart = funcBody.lastIndexOf('\n', match.index) + 1;
+                const lineEnd = funcBody.indexOf('\n', match.index);
+                const line = funcBody.substring(lineStart, lineEnd === -1 ? funcBody.length : lineEnd);
+                const beforeMatch = line.substring(0, match.index - lineStart);
+                if (beforeMatch.includes('//') || beforeMatch.includes(';')) {
+                    continue;
+                }
 
-                while ((match = pattern.exec(funcBody)) !== null) {
-                    // Create a unique key for this edge to avoid duplicates
-                    const edgeKey = `${func.id}->${calledFunc.id}`;
-
-                    // Add edge if not already added
-                    if (!addedEdges.has(edgeKey)) {
-                        graph.edges.push({
-                            from: func.id,
-                            to: calledFunc.id,
-                            label: ''
-                        });
-
-                        addedEdges.add(edgeKey);
-                        break;
-                    }
+                const edgeKey = `${funcName}->${calledFuncName}`;
+                if (!addedEdges.has(edgeKey)) {
+                    graph.edges.push({
+                        from: funcName,
+                        to: calledFuncName,
+                        label: ''
+                    });
+                    addedEdges.add(edgeKey);
                 }
             }
-        });
+        }
+
+        callRegex.lastIndex = 0;
     });
 
     return graph;

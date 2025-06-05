@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { filterMermaidDiagram, generateVisualizationHtml } from '../visualization/templates';
+import { logError } from '../logger';
 
 // URI to the bundled Mermaid script
 let bundledMermaidUri: vscode.Uri | undefined;
@@ -48,7 +49,7 @@ export async function handleExport(
                 break;
         }
     } catch (error: any) {
-        console.error('Error handling export:', error);
+        logError('Error handling export', error);
         vscode.window.showErrorMessage(`Error handling export: ${error.message || String(error)}`);
         panel.webview.postMessage({
             command: 'saveResult',
@@ -82,7 +83,7 @@ async function handleApplyFilters(
         const originalGraph = response.content;
 
         if (!originalGraph) {
-            console.error('No original graph data received');
+            logError('No original graph data received');
             throw new Error('No original graph data received');
         }
 
@@ -113,11 +114,11 @@ async function handleApplyFilters(
                 nameFilter
             });
         } catch (updateError) {
-            console.error('Error updating webview content:', updateError);
+            logError('Error updating webview content', updateError);
             throw updateError;
         }
     } catch (error: any) {
-        console.error('Error applying filters:', error);
+        logError('Error applying filters', error);
         panel.webview.postMessage({
             command: 'filtersApplied',
             success: false,
@@ -270,7 +271,7 @@ async function handlePngExport(
 
             // Validate the data URL format
             if (!pngDataUrl.startsWith('data:image/png;base64,')) {
-                console.error('Invalid PNG data URL format:', pngDataUrl.substring(0, 50) + '...');
+                logError('Invalid PNG data URL format', pngDataUrl.substring(0, 50) + '...');
                 throw new Error('Invalid PNG data URL format');
             }
 
@@ -286,7 +287,7 @@ async function handlePngExport(
                 path: pngUri.fsPath
             });
         } catch (error: any) {
-            console.error('Error in PNG export:', error);
+            logError('Error in PNG export', error);
             vscode.window.showErrorMessage(`Failed to export PNG: ${error.message}`);
             throw error;
         }
@@ -342,7 +343,7 @@ async function handleJpgExport(
 
             // Validate the data URL format
             if (!jpgDataUrl.startsWith('data:image/jpeg;base64,')) {
-                console.error('Invalid JPG data URL format:', jpgDataUrl.substring(0, 50) + '...');
+                logError('Invalid JPG data URL format', jpgDataUrl.substring(0, 50) + '...');
                 throw new Error('Invalid JPG data URL format');
             }
 
@@ -358,9 +359,9 @@ async function handleJpgExport(
                 path: jpgUri.fsPath
             });
         } catch (error: any) {
-            console.error('Error in JPG export:', error);
+            logError('Error in JPG export', error);
             vscode.window.showErrorMessage(`Failed to export JPG: ${error.message}`);
             throw error;
         }
     }
-} 
+}

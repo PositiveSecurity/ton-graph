@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { ContractGraph } from '../types/graph';
 import { generateVisualizationHtml, filterMermaidDiagram } from './templates';
+import { logError } from '../logger';
 
 // Map panels to their original graphs
 const panelGraphs = new WeakMap<vscode.WebviewPanel, ContractGraph>();
@@ -57,7 +58,7 @@ export function createVisualizationPanel(
         // Set the HTML content for the panel
         panel.webview.html = html;
     }).catch(error => {
-        console.error('Error loading Mermaid library:', error);
+        logError('Error loading Mermaid library', error);
         vscode.window.showErrorMessage(`Error loading Mermaid library: ${error.message}`);
     });
 
@@ -73,7 +74,7 @@ export function createVisualizationPanel(
                     // Handle other messages (export commands, etc.)
                 }
             } catch (error) {
-                console.error('Error handling message from webview:', error);
+                logError('Error handling message from webview', error);
                 panel.webview.postMessage({
                     command: 'filterError',
                     error: error instanceof Error ? error.message : String(error)
@@ -141,7 +142,7 @@ function handleFilterRequest(panel: vscode.WebviewPanel, selectedTypes: string[]
         });
 
     } catch (error) {
-        console.error('Error handling filter request:', error);
+        logError('Error handling filter request', error);
         panel.webview.postMessage({
             command: 'filterError',
             error: error instanceof Error ? error.message : String(error)

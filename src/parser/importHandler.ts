@@ -8,8 +8,24 @@ function isPathInsideWorkspace(filePath: string): boolean {
     if (!folders) {
         return true;
     }
+
+    // Resolve symlinks for the file path
+    let resolvedPath: string;
+    try {
+        resolvedPath = fs.realpathSync(path.resolve(filePath));
+    } catch {
+        // If resolving fails, treat path as is
+        resolvedPath = path.resolve(filePath);
+    }
+
     return folders.some(folder => {
-        const relative = path.relative(folder.uri.fsPath, filePath);
+        let workspacePath: string;
+        try {
+            workspacePath = fs.realpathSync(folder.uri.fsPath);
+        } catch {
+            workspacePath = folder.uri.fsPath;
+        }
+        const relative = path.relative(workspacePath, resolvedPath);
         return !relative.startsWith('..') && !path.isAbsolute(relative);
     });
 }

@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import mock = require('mock-require');
 import * as path from 'path';
 import * as fs from 'fs';
+import * as os from 'os';
 
 const testRoot = __dirname;
 mock('vscode', {
@@ -15,6 +16,21 @@ describe('ImportHandler', () => {
     it('rejects imports outside workspace', async () => {
         const code = '#include "../../etc/passwd"';
         const result = await processFuncImports(code, path.join(testRoot, 'dummy.fc'));
+        expect(result.importedFilePaths.length).to.equal(0);
+    });
+
+    it('rejects symlinked imports pointing outside workspace', async () => {
+        const externalDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ext-'));
+        const externalFile = path.join(externalDir, 'outside.fc');
+        fs.writeFileSync(externalFile, 'external content');
+
+        const linkDir = path.join(testRoot, 'link');
+        fs.mkdirSync(linkDir, { recursive: true });
+        const linkPath = path.join(linkDir, 'link.fc');
+        fs.symlinkSync(externalFile, linkPath);
+
+        const code = '#include "link.fc"';
+        const result = await processFuncImports(code, path.join(linkDir, 'dummy.fc'));
         expect(result.importedFilePaths.length).to.equal(0);
     });
 

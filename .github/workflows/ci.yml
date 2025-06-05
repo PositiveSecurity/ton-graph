@@ -21,6 +21,14 @@ jobs:
       - name: Install dependencies
         run: npm ci
       - name: Run tests
-        run: npm test
+        run: |
+          npm run test -- --coverage
+          npx nyc report --reporter=json
+          cp coverage/coverage-final.json artifacts/coverage-baseline.json
       - name: Package extension
         run: npx vsce package
+      - name: Upload coverage baseline
+        uses: actions/upload-artifact@v3
+        with:
+          name: coverage-baseline
+          path: artifacts/coverage-baseline.json

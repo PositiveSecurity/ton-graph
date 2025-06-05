@@ -9,6 +9,8 @@ export interface GraphNode {
     traitName?: string;
 }
 
+export type ContractNode = GraphNode;
+
 export interface GraphEdge {
     from: string;
     to: string;

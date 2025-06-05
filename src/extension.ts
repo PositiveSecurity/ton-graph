@@ -6,6 +6,8 @@ import { ContractGraph } from './types/graph';
 import { detectLanguage, parseContractByLanguage, getFunctionTypeFilters, parseContractWithImports } from './parser/parserUtils';
 import { logError } from './logger';
 
+let panel: vscode.WebviewPanel | undefined;
+
 export function activate(context: vscode.ExtensionContext) {
 
     // Create the cached directory for storing the Mermaid library
@@ -51,11 +53,20 @@ export function activate(context: vscode.ExtensionContext) {
             const language = detectLanguage(document.fileName);
             originalGraph = await parseContractByLanguage(code, language);
 
+            // Dispose existing panel to avoid multiple instances
+            if (panel) {
+                panel.dispose();
+            }
+
             // Create and show the webview with language-specific function type filters
-            const panel = createVisualizationPanel(context, originalGraph, getFunctionTypeFilters(language));
+            panel = createVisualizationPanel(context, originalGraph, getFunctionTypeFilters(language));
+
+            panel.onDidDispose(() => {
+                panel = undefined;
+            }, null, context.subscriptions);
 
             // Handle messages from the webview
-            panel.webview.onDidReceiveMessage(
+            panel!.webview.onDidReceiveMessage(
                 async (message) => {
                     if (message.command === 'applyFilters') {
                         if (!originalGraph) {
@@ -131,7 +142,7 @@ export function activate(context: vscode.ExtensionContext) {
                             const newMermaidDiagram = generateMermaidDiagram(filteredGraph);
 
                             // 6. Send the new diagram to WebView
-                            panel.webview.postMessage({
+                            panel!.webview.postMessage({
                                 command: 'updateDiagram',
                                 diagram: newMermaidDiagram
                             });
@@ -140,7 +151,7 @@ export function activate(context: vscode.ExtensionContext) {
                             logError('Error applying filters', filterError);
                             vscode.window.showErrorMessage(`Error applying filters: ${filterError.message || String(filterError)}`);
                             // Send error message back to WebView
-                            panel.webview.postMessage({
+                            panel!.webview.postMessage({
                                 command: 'filterError',
                                 error: filterError.message || String(filterError)
                             });
@@ -148,14 +159,14 @@ export function activate(context: vscode.ExtensionContext) {
 
                     } else {
                         // Handle other commands, e.g. export
-                        await handleExport(panel, message, context);
+                        await handleExport(panel!, message, context);
                     }
                 },
                 undefined,
                 context.subscriptions
             );
 
-            panel.reveal(vscode.ViewColumn.Beside);
+            panel!.reveal(vscode.ViewColumn.Beside);
         } catch (error: any) {
             logError('Error visualizing contract', error);
             vscode.window.showErrorMessage(`Error visualizing contract: ${error.message || String(error)}`);
@@ -216,11 +227,20 @@ export function activate(context: vscode.ExtensionContext) {
 
                 progress.report({ increment: 30, message: "Generating visualization..." });
 
+                // Dispose existing panel to avoid multiple instances
+                if (panel) {
+                    panel.dispose();
+                }
+
                 // Create and show the webview
-                const panel = createVisualizationPanel(context, originalGraph, getFunctionTypeFilters(language), "Contract Project Visualization");
+                panel = createVisualizationPanel(context, originalGraph, getFunctionTypeFilters(language), "Contract Project Visualization");
+
+                panel.onDidDispose(() => {
+                    panel = undefined;
+                }, null, context.subscriptions);
 
                 // Handle messages from the webview (same as in visualize command)
-                panel.webview.onDidReceiveMessage(
+                panel!.webview.onDidReceiveMessage(
                     async (message) => {
                         if (message.command === 'applyFilters') {
                             try {
@@ -291,7 +311,7 @@ export function activate(context: vscode.ExtensionContext) {
                                 const newMermaidDiagram = generateMermaidDiagram(filteredGraph);
 
                                 // 6. Send the new diagram to WebView
-                                panel.webview.postMessage({
+                                panel!.webview.postMessage({
                                     command: 'updateDiagram',
                                     diagram: newMermaidDiagram
                                 });
@@ -299,14 +319,14 @@ export function activate(context: vscode.ExtensionContext) {
                             } catch (filterError: any) {
                                 logError('Error applying filters', filterError);
                                 vscode.window.showErrorMessage(`Error applying filters: ${filterError.message || String(filterError)}`);
-                                panel.webview.postMessage({
+                                panel!.webview.postMessage({
                                     command: 'filterError',
                                     error: filterError.message || String(filterError)
                                 });
                             }
                         } else {
                             // Handle other commands, e.g. export
-                            await handleExport(panel, message, context);
+                            await handleExport(panel!, message, context);
                         }
                     },
                     undefined,
@@ -314,7 +334,7 @@ export function activate(context: vscode.ExtensionContext) {
                 );
 
                 progress.report({ increment: 20, message: "Opening visualization..." });
-                panel.reveal(vscode.ViewColumn.Beside);
+                panel!.reveal(vscode.ViewColumn.Beside);
             });
         } catch (error: any) {
             logError('Error visualizing contract project', error);

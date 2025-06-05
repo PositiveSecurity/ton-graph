@@ -1,166 +1,175 @@
 {
-    "name": "ton-graph",
-    "displayName": "TON Graph",
-    "description": "Visualize function calls for TON smart contracts",
-    "version": "0.2.6",
-    "publisher": "positiveweb3",
-    "icon": "pic/logo.png",
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/PositiveSecurity/ton-graph"
-    },
-    "license": "MIT",
-    "author": {
-        "name": "PositiveWeb3"
-    },
-    "homepage": "https://github.com/PositiveSecurity/ton-graph",
-    "engines": {
-        "vscode": "^1.60.0"
-    },
-    "categories": [
-        "Visualization",
-        "Programming Languages"
-    ],
-    "activationEvents": [
-        "onCommand:ton-graph.visualize",
-        "onCommand:ton-graph.visualizeProject",
-        "onCommand:ton-graph.setApiKey",
-        "onLanguage:func",
-        "onLanguage:tact",
-        "onLanguage:tolk"
-    ],
-    "main": "./out/extension.js",
-    "contributes": {
-        "languages": [
-            {
-                "id": "tact",
-                "extensions": [
-                    ".tact"
-                ],
-                "aliases": [
-                    "Tact"
-                ]
-            },
-            {
-                "id": "tolk",
-                "extensions": [
-                    ".tolk"
-                ],
-                "aliases": [
-                    "Tolk"
-                ]
-            },
-            {
-                "id": "func",
-                "extensions": [
-                    ".fc",
-                    ".func"
-                ],
-                "aliases": [
-                    "Func"
-                ]
-            }
+  "name": "ton-graph",
+  "displayName": "TON Graph",
+  "description": "Visualize function calls for TON smart contracts",
+  "version": "0.2.6",
+  "publisher": "positiveweb3",
+  "icon": "pic/logo.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PositiveSecurity/ton-graph"
+  },
+  "license": "MIT",
+  "author": {
+    "name": "PositiveWeb3"
+  },
+  "homepage": "https://github.com/PositiveSecurity/ton-graph",
+  "engines": {
+    "vscode": "^1.60.0"
+  },
+  "categories": [
+    "Visualization",
+    "Programming Languages"
+  ],
+  "activationEvents": [
+    "onCommand:ton-graph.visualize",
+    "onCommand:ton-graph.visualizeProject",
+    "onCommand:ton-graph.setApiKey",
+    "onLanguage:func",
+    "onLanguage:tact",
+    "onLanguage:tolk"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "tact",
+        "extensions": [
+          ".tact"
         ],
-        "commands": [
-            {
-                "command": "ton-graph.visualize",
-                "title": "TON Graph: Visualize Contract"
-            },
-            {
-                "command": "ton-graph.visualizeProject",
-                "title": "TON Graph: Visualize Contract with Imports"
-            },
-            {
-                "command": "ton-graph.saveMermaid",
-                "title": "TON Graph: Save Mermaid Diagram"
-            },
-            {
-                "command": "ton-graph.saveSvg",
-                "title": "TON Graph: Save SVG Diagram"
-            },
-            {
-                "command": "ton-graph.savePng",
-                "title": "TON Graph: Save PNG Diagram"
-            },
-            {
-                "command": "ton-graph.saveJpg",
-                "title": "TON Graph: Save JPG Diagram"
-            },
-            {
-                "command": "ton-graph.setApiKey",
-                "title": "TON Graph: Set API Key"
-            }
+        "aliases": [
+          "Tact"
+        ]
+      },
+      {
+        "id": "tolk",
+        "extensions": [
+          ".tolk"
         ],
-        "menus": {
-            "editor/context": [
-                {
-                    "command": "ton-graph.visualize",
-                    "when": "resourceLangId == func || resourceLangId == tact || resourceLangId == tolk",
-                    "group": "navigation"
-                },
-                {
-                    "command": "ton-graph.visualizeProject",
-                    "when": "resourceLangId == func || resourceLangId == tact || resourceLangId == tolk",
-                    "group": "navigation"
-                }
-            ],
-            "explorer/context": [
-                {
-                    "command": "ton-graph.visualize",
-                    "when": "resourceExtname == .fc || resourceExtname == .func || resourceExtname == .tact || resourceExtname == .tolk",
-                    "group": "navigation"
-                },
-                {
-                    "command": "ton-graph.visualizeProject",
-                    "when": "resourceExtname == .fc || resourceExtname == .func || resourceExtname == .tact || resourceExtname == .tolk",
-                    "group": "navigation"
-                }
-            ]
+        "aliases": [
+          "Tolk"
+        ]
+      },
+      {
+        "id": "func",
+        "extensions": [
+          ".fc",
+          ".func"
+        ],
+        "aliases": [
+          "Func"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "ton-graph.visualize",
+        "title": "TON Graph: Visualize Contract"
+      },
+      {
+        "command": "ton-graph.visualizeProject",
+        "title": "TON Graph: Visualize Contract with Imports"
+      },
+      {
+        "command": "ton-graph.saveMermaid",
+        "title": "TON Graph: Save Mermaid Diagram"
+      },
+      {
+        "command": "ton-graph.saveSvg",
+        "title": "TON Graph: Save SVG Diagram"
+      },
+      {
+        "command": "ton-graph.savePng",
+        "title": "TON Graph: Save PNG Diagram"
+      },
+      {
+        "command": "ton-graph.saveJpg",
+        "title": "TON Graph: Save JPG Diagram"
+      },
+      {
+        "command": "ton-graph.setApiKey",
+        "title": "TON Graph: Set API Key"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "ton-graph.visualize",
+          "when": "resourceLangId == func || resourceLangId == tact || resourceLangId == tolk",
+          "group": "navigation"
+        },
+        {
+          "command": "ton-graph.visualizeProject",
+          "when": "resourceLangId == func || resourceLangId == tact || resourceLangId == tolk",
+          "group": "navigation"
         }
-    },
-    "scripts": {
-        "vscode:prepublish": "npm run compile",
-        "compile": "tsc -p ./",
-        "watch": "tsc -watch -p ./",
-        "lint": "eslint src --ext ts",
-        "test": "mocha -r ts-node/register test/**/*.test.ts",
-        "build:webview": "ts-node scripts/build-webview.ts"
-    },
-    "devDependencies": {
-        "@types/chai": "^5.2.2",
-        "@types/mocha": "^10.0.10",
-        "@types/mock-require": "^3.0.0",
-        "@types/moo": "^0.5.10",
-        "@types/node": "^14.x.x",
-        "@types/node-fetch": "^2.6.12",
-        "@types/vscode": "^1.60.0",
-        "@typescript-eslint/eslint-plugin": "^4.x.x",
-        "@typescript-eslint/parser": "^4.x.x",
-        "@vscode/vsce": "^3.3.2",
-        "chai": "^4.3.0",
-        "esbuild": "^0.19.12",
-        "eslint": "^7.x.x",
-        "mocha": "^10.0.0",
-        "mock-require": "^3.0.3",
-        "terser": "^5.41.0",
-        "ts-node": "^10.9.1",
-        "typescript": "^4.x.x"
-    },
-    "dependencies": {
-        "@scaleton/tree-sitter-func": "^1.0.1",
-        "mermaid": "^11.6.0",
-        "moo": "^0.5.2",
-        "node-fetch": "^2.6.7",
-        "vscode": "^1.1.37",
-        "web-tree-sitter": "^0.25.6",
-        "winston": "^3.17.0"
-    },
-    "files": [
-        "out/**/*",
-        "cached/**/*",
-        "src/**/*",
-        "pic/**/*",
-        "README.md",
-        "LICENSE"
-    ]
+      ],
+      "explorer/context": [
+        {
+          "command": "ton-graph.visualize",
+          "when": "resourceExtname == .fc || resourceExtname == .func || resourceExtname == .tact || resourceExtname == .tolk",
+          "group": "navigation"
+        },
+        {
+          "command": "ton-graph.visualizeProject",
+          "when": "resourceExtname == .fc || resourceExtname == .func || resourceExtname == .tact || resourceExtname == .tolk",
+          "group": "navigation"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "lint": "eslint src --ext ts",
+    "test": "mocha -r ts-node/register test/**/*.test.ts",
+    "build:webview": "ts-node scripts/build-webview.ts"
+  },
+  "lint-staged": {
+    "*.{ts,js}": [
+      "eslint",
+      "prettier --check"
+    ],
+    "*.{json,md}": "prettier --check"
+  },
+  "devDependencies": {
+    "@types/chai": "^5.2.2",
+    "@types/mocha": "^10.0.10",
+    "@types/mock-require": "^3.0.0",
+    "@types/moo": "^0.5.10",
+    "@types/node": "^14.x.x",
+    "@types/node-fetch": "^2.6.12",
+    "@types/vscode": "^1.60.0",
+    "@typescript-eslint/eslint-plugin": "^4.x.x",
+    "@typescript-eslint/parser": "^4.x.x",
+    "@vscode/vsce": "^3.3.2",
+    "chai": "^4.3.0",
+    "esbuild": "^0.19.12",
+    "eslint": "^7.x.x",
+    "husky": "^8.0.3",
+    "lint-staged": "^14.0.1",
+    "mocha": "^10.0.0",
+    "mock-require": "^3.0.3",
+    "terser": "^5.41.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.x.x"
+  },
+  "dependencies": {
+    "@scaleton/tree-sitter-func": "^1.0.1",
+    "mermaid": "^11.6.0",
+    "moo": "^0.5.2",
+    "node-fetch": "^2.6.7",
+    "vscode": "^1.1.37",
+    "web-tree-sitter": "^0.25.6",
+    "winston": "^3.17.0"
+  },
+  "files": [
+    "out/**/*",
+    "cached/**/*",
+    "src/**/*",
+    "pic/**/*",
+    "README.md",
+    "LICENSE"
+  ]
 }

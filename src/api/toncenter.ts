@@ -7,7 +7,8 @@ const BASE_URL = 'https://toncenter.com/api/v2/';
 export async function callToncenter<T>(
     context: vscode.ExtensionContext,
     method: string,
-    params: Record<string, unknown>
+    params: Record<string, unknown>,
+    timeoutMs = 10000
 ): Promise<T> {
     const apiKey = await getApiKey(context);
     const paramsWithKey = apiKey ? { ...params, api_key: apiKey } : { ...params };
@@ -17,11 +18,28 @@ export async function callToncenter<T>(
     }
 
     const search = new URLSearchParams({ ...paramsWithKey, method });
-    const res = await globalThis.fetch(`${BASE_URL}?${search.toString()}`);
-    if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+        const controller = new AbortController();
+        const timer = setTimeout(() => controller.abort(), timeoutMs);
+        try {
+            const res = await globalThis.fetch(`${BASE_URL}?${search.toString()}`,
+                { signal: controller.signal });
+            clearTimeout(timer);
+            if (!res.ok) {
+                throw new Error(`HTTP ${res.status}`);
+            }
+            const data = (await res.json()) as T;
+            await setCachedResponse(context, method, paramsWithKey, data);
+            return data;
+        } catch (err: any) {
+            clearTimeout(timer);
+            if (attempt === 0 && !(err instanceof Error && err.message.startsWith('HTTP'))) {
+                continue; // retry once on network error or timeout
+            }
+            throw err;
+        }
     }
-    const data = (await res.json()) as T;
-    await setCachedResponse(context, method, paramsWithKey, data);
-    return data;
+
+    throw new Error('Failed to fetch from toncenter');
 }

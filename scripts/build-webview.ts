@@ -1,6 +1,7 @@
 import { build } from 'esbuild';
 import { minify } from 'terser';
 import { writeFile, mkdir } from 'fs/promises';
+import logger from '../src/logging/logger';
 
 async function bundle() {
   const result = await build({
@@ -21,6 +22,6 @@ async function bundle() {
 }
 
 bundle().catch(err => {
-  console.error(err);
+  logger.error(err);
   process.exit(1);
 });

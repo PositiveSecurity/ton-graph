@@ -8,7 +8,8 @@ export async function callToncenter<T>(
     context: vscode.ExtensionContext,
     method: string,
     params: Record<string, unknown>,
-    timeoutMs = 10000
+    timeoutMs = 10000,
+    maxRetries = 1
 ): Promise<T> {
     const apiKey = await getApiKey(context);
     const paramsWithKey = apiKey ? { ...params, api_key: apiKey } : { ...params };
@@ -19,7 +20,7 @@ export async function callToncenter<T>(
 
     const search = new URLSearchParams({ ...paramsWithKey, method });
 
-    for (let attempt = 0; attempt < 2; attempt++) {
+    for (let attempt = 0; ; attempt++) {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), timeoutMs);
         try {
@@ -34,12 +35,13 @@ export async function callToncenter<T>(
             return data;
         } catch (err: any) {
             clearTimeout(timer);
-            if (attempt === 0 && !(err instanceof Error && err.message.startsWith('HTTP'))) {
-                continue; // retry once on network error or timeout
+            const isHttpError = err instanceof Error && err.message.startsWith('HTTP');
+            if (attempt >= maxRetries || isHttpError) {
+                throw err;
             }
-            throw err;
+            const delay = Math.pow(2, attempt) * 100;
+            await new Promise(resolve => setTimeout(resolve, delay));
+            continue;
         }
     }
-
-    throw new Error('Failed to fetch from toncenter');
 }

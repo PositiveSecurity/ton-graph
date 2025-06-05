@@ -26,7 +26,7 @@ export function createVisualizationPanel(
     context: vscode.ExtensionContext,
     graph: ContractGraph,
     functionTypeFilters: { value: string; label: string; }[],
-    title: string = 'TON Graph'
+    title = 'TON Graph'
 ): vscode.WebviewPanel {
     // Store the original graph associated with this panel
     const panel = vscode.window.createWebviewPanel(
@@ -48,13 +48,16 @@ export function createVisualizationPanel(
     const extensionPath = context.extensionPath;
 
     // Get the Mermaid script URI (either cached or from CDN)
-    getMermaidScriptUri(context, panel.webview).then(mermaidScriptUri => {
+    Promise.all([
+        getMermaidScriptUri(context, panel.webview),
+        getWebviewScriptUri(context, panel.webview)
+    ]).then(([mermaidScriptUri, webviewScriptUri]) => {
 
         // Generate Mermaid diagram from graph
         const mermaidDiagram = generateMermaidDiagram(graph);
 
         // Generate the final HTML with function type filters
-        const html = generateVisualizationHtml(mermaidDiagram, mermaidScriptUri, functionTypeFilters);
+        const html = generateVisualizationHtml(mermaidDiagram, mermaidScriptUri, functionTypeFilters, webviewScriptUri);
 
         // Set the HTML content for the panel
         panel.webview.html = html;
@@ -108,6 +111,12 @@ async function getMermaidScriptUri(context: vscode.ExtensionContext, webview: vs
         bundledMermaidUri = vscode.Uri.file(filePath);
     }
     return webview.asWebviewUri(bundledMermaidUri).toString();
+}
+
+async function getWebviewScriptUri(context: vscode.ExtensionContext, webview: vscode.Webview): Promise<string> {
+    const filePath = path.join(context.extensionPath, 'dist', 'webview.js');
+    const uri = vscode.Uri.file(filePath);
+    return webview.asWebviewUri(uri).toString();
 }
 
 /**

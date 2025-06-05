@@ -92,6 +92,7 @@ async function handleApplyFilters(
 
         // Get Mermaid script URI (either cached or from CDN)
         const mermaidScriptUri = await getMermaidScriptUri(context, panel.webview);
+        const webviewScriptUri = await getWebviewScriptUri(context, panel.webview);
 
         // Define function type filters based on selected types
         const functionTypeFilters = [
@@ -103,7 +104,7 @@ async function handleApplyFilters(
 
         // Update the webview content
         try {
-            const html = generateVisualizationHtml(filteredDiagram, mermaidScriptUri, functionTypeFilters);
+            const html = generateVisualizationHtml(filteredDiagram, mermaidScriptUri, functionTypeFilters, webviewScriptUri);
             panel.webview.html = html;
 
             // Notify the webview that filters have been applied
@@ -137,6 +138,12 @@ async function getMermaidScriptUri(context: vscode.ExtensionContext, webview: vs
         bundledMermaidUri = vscode.Uri.file(filePath);
     }
     return webview.asWebviewUri(bundledMermaidUri).toString();
+}
+
+async function getWebviewScriptUri(context: vscode.ExtensionContext, webview: vscode.Webview): Promise<string> {
+    const filePath = path.join(context.extensionPath, 'dist', 'webview.js');
+    const uri = vscode.Uri.file(filePath);
+    return webview.asWebviewUri(uri).toString();
 }
 
 async function handleMermaidExport(

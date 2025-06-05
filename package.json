@@ -152,7 +152,8 @@
         "moo": "^0.5.2",
         "node-fetch": "^2.6.7",
         "vscode": "^1.1.37",
-        "web-tree-sitter": "^0.25.6"
+        "web-tree-sitter": "^0.25.6",
+        "winston": "^3.17.0"
     },
     "files": [
         "out/**/*",

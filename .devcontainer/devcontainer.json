@@ -1,5 +1,9 @@
 {
     "name": "TON Graph Dev Container",
-    "image": "mcr.microsoft.com/devcontainers/node:18-bullseye",
-    "postCreateCommand": "npm ci && npx playwright install --with-deps chromium"
+    "build": {
+        "dockerfile": "Dockerfile",
+        "cacheFrom": "mcr.microsoft.com/devcontainers/node:18-bullseye"
+    },
+    "postCreateCommand": "npm ci && npx playwright install --with-deps chromium",
+    "mounts": ["source=ton-graph-npm-cache,target=/home/node/.npm,type=volume"]
 }

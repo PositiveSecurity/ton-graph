@@ -62,10 +62,12 @@ document.getElementById('mermaid-diagram').setAttribute('data-original-code', or
 document.getElementById('mermaid-diagram').innerHTML = result.svg;
 setupPanZoom();
 logMessage('Diagram rendered successfully', 'success');
+document.getElementById('loadingOverlay').classList.add('hidden');
 }).catch(function(error) {
 document.getElementById('errorContainer').textContent = 'Error rendering diagram: ' + error;
 document.getElementById('errorContainer').style.display = 'block';
 logMessage('Error rendering diagram: ' + error, 'error');
+document.getElementById('loadingOverlay').classList.add('hidden');
 });
 var vscode = acquireVsCodeApi();
 window.addEventListener('message', function(event) {

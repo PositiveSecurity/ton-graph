@@ -24,6 +24,7 @@
     "activationEvents": [
         "onCommand:ton-graph.visualize",
         "onCommand:ton-graph.visualizeProject",
+        "onCommand:ton-graph.setApiKey",
         "onLanguage:func",
         "onLanguage:tact",
         "onLanguage:tolk"
@@ -84,6 +85,10 @@
             {
                 "command": "ton-graph.saveJpg",
                 "title": "TON Graph: Save JPG Diagram"
+            },
+            {
+                "command": "ton-graph.setApiKey",
+                "title": "TON Graph: Set API Key"
             }
         ],
         "menus": {

@@ -25,6 +25,8 @@ jobs:
           npm run test -- --coverage
           npx nyc report --reporter=json
           cp coverage/coverage-final.json artifacts/coverage-baseline.json
+      - name: Check coverage thresholds
+        run: npx nyc check-coverage
       - name: Package extension
         run: npx vsce package
       - name: Upload coverage baseline
@@ -32,3 +34,8 @@ jobs:
         with:
           name: coverage-baseline
           path: artifacts/coverage-baseline.json
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage

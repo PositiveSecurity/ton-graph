@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { visualize, visualizeProject } from './commands';
-import { setApiKey } from './secrets/tokenManager';
+import { setApiKey, deleteApiKey } from './secrets/tokenManager';
 
 export function activate(context: vscode.ExtensionContext) {
     const cachedDir = vscode.Uri.file(path.join(context.extensionPath, 'cached'));
@@ -34,7 +34,12 @@ export function activate(context: vscode.ExtensionContext) {
         }
     });
 
-    context.subscriptions.push(apiKeyDisposable);
+    const deleteApiKeyDisposable = vscode.commands.registerCommand('ton-graph.deleteApiKey', async () => {
+        await deleteApiKey(context);
+        vscode.window.showInformationMessage('TON Graph API key deleted');
+    });
+
+    context.subscriptions.push(apiKeyDisposable, deleteApiKeyDisposable);
 }
 
 export function deactivate() {}

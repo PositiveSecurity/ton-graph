@@ -18,3 +18,8 @@ jobs:
         with:
           name: coverage-baseline
           path: artifacts/coverage-baseline.json
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/coverage-final.json

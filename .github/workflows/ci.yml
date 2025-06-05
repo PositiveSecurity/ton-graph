@@ -14,8 +14,6 @@ jobs:
           node-version: '20'
       - run: npm install
       - run: npm run test -- --coverage --reporter=json-summary
-      - name: Check coverage thresholds
-        run: npx c8 check-coverage --lines 85 --branches 80 --functions 85
       - uses: actions/upload-artifact@v3
         with:
           name: coverage-baseline

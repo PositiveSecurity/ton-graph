@@ -63,6 +63,7 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
                 }
             }
             while (i < tokens.length && tokens[i].type !== 'lparen') i++;
+            if (i >= tokens.length) break;
             i++; // skip '('
             const paramsStart = i;
             let depth = 0;
@@ -75,8 +76,10 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
                 i++;
             }
             const paramsEnd = i;
+            if (i >= tokens.length || tokens[i].type !== 'rparen') continue;
             i++; // skip ')'
             while (i < tokens.length && tokens[i].type !== 'lbrace') i++;
+            if (i >= tokens.length) break;
             i++; // skip '{'
             const bodyStart = i;
             depth = 1;
@@ -85,6 +88,7 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
                 else if (tokens[i].type === 'rbrace') depth--;
                 i++;
             }
+            if (depth !== 0) continue;
             const bodyEnd = i - 1;
             const params = tokens.slice(paramsStart, paramsEnd).map(t => t.value).join('');
             const bodyText = tokens.slice(bodyStart, bodyEnd).map(t => t.value).join('');

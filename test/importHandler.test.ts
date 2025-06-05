@@ -18,6 +18,10 @@ import {
 } from '../src/parser/importHandler';
 
 describe('ImportHandler', () => {
+    afterEach(() => {
+        mock.stopAll();
+        delete require.cache[require.resolve('../src/parser/importHandler')];
+    });
     it('rejects imports outside workspace', async () => {
         const code = '#include "../../etc/passwd"';
         const result = await processFuncImports(code, path.join(testRoot, 'dummy.fc'));

@@ -8,6 +8,9 @@ rm -rf ./out
 # Install dependencies using the lockfile
 npm ci
 
+# Remove dev dependencies
+npm prune --production
+
 # Install vsce locally
 npm install -D @vscode/vsce
 

@@ -1,6 +1,6 @@
 # TON Graph
 
-[![codecov](https://codecov.io/gh/PositiveSecurity/ton-graph/branch/main/graph/badge.svg)](https://codecov.io/gh/PositiveSecurity/ton-graph)
+[![codecov](https://codecov.io/gh/PositiveSecurity/ton-graph/branch/work/graph/badge.svg)](https://codecov.io/gh/PositiveSecurity/ton-graph)
 
 A Visual Studio Code extension for visualizing function call graphs in TON smart contracts written in FunC, Tact, and Tolk.
 

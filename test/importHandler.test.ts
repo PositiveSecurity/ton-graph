@@ -47,5 +47,45 @@ describe('ImportHandler', () => {
         expect(result.importedFilePaths).to.include(bPath);
         // Should not throw or loop endlessly
         expect(result.importedFilePaths.length).to.be.greaterThan(0);
+        expect(result.cycles.length).to.be.greaterThan(0);
+    });
+
+    it('merges nested imports in order', async () => {
+        const nestedDir = path.join(testRoot, 'nested');
+        fs.mkdirSync(nestedDir, { recursive: true });
+        const level2 = path.join(nestedDir, 'level2.fc');
+        const level1 = path.join(nestedDir, 'level1.fc');
+        const main = path.join(nestedDir, 'main.fc');
+
+        fs.writeFileSync(level2, 'int level2() { return 2; }');
+        fs.writeFileSync(level1, `#include "level2.fc"\nint level1() { level2(); }`);
+        fs.writeFileSync(main, `#include "level1.fc"\nint main() { level1(); }`);
+
+        const code = fs.readFileSync(main, 'utf8');
+        const result = await processFuncImports(code, main);
+
+        const expected = [fs.readFileSync(level1, 'utf8'), fs.readFileSync(level2, 'utf8')].join('\n\n');
+        expect(result.importedFilePaths).to.deep.equal([level1, level2]);
+        expect(result.importedCode.trim()).to.equal(expected.trim());
+    });
+
+    it('uses async file reading', async () => {
+        const asyncDir = path.join(testRoot, 'async');
+        fs.mkdirSync(asyncDir, { recursive: true });
+        const asyncFile = path.join(asyncDir, 'a.fc');
+        fs.writeFileSync(asyncFile, 'int a() { return 1; }');
+
+        const originalReadFile: any = fs.promises.readFile;
+        let called = false;
+        (fs.promises as any).readFile = async (...args: any[]): Promise<any> => {
+            called = true;
+            return originalReadFile(...args);
+        };
+
+        const code = fs.readFileSync(asyncFile, 'utf8');
+        await processFuncImports(code, asyncFile);
+        (fs.promises as any).readFile = originalReadFile;
+
+        expect(called).to.be.true;
     });
 });

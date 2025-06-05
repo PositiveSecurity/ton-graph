@@ -108,7 +108,23 @@ function decodeHtmlEntities(text: string): string {
 }
 
 // Function to filter the Mermaid diagram based on selected types
-interface ParsedDiagram { lines: string[]; originalLines: string[]; graphDefinition: string; graphDefLineIndex: number; }
+interface ParsedDiagram {
+    lines: string[];
+    originalLines: string[];
+    graphDefinition: string;
+    graphDefLineIndex: number;
+}
+
+interface ParsedInfo {
+    hiddenNodes: Set<string>;
+    nodeLabels: Map<string, string>;
+    edgeConnections: Map<string, Set<string>>;
+    allNodeIds: Map<string, string>;
+    clusterNodes: Map<string, Set<string>>;
+    nodeToCluster: Map<string, string>;
+    clusterDefinitions: Map<string, string>;
+    originalNodeLines: Map<string, string>;
+}
 
 function parseMermaidDiagram(diagram: string): ParsedDiagram {
     const lines = diagram.split("\n").map(line => decodeHtmlEntities(line));
@@ -144,15 +160,18 @@ function filterNodesByType(parsed: ParsedDiagram, selectedTypes: string[]): stri
     return result;
 }
 
-function filterByName(parsed: ParsedDiagram, selectedTypes: string[], nameFilter: string): string[] {
-    const { lines, graphDefLineIndex, graphDefinition, originalLines } = parsed;
-    const hiddenNodes = new Set<string>();
-    const visibleNodes = new Set<string>();
-    const nodeLabels = new Map<string, string>();
-    const edgeConnections = new Map<string, Set<string>>();
-    const allNodeIds = new Map<string, string>();
-    const clusterNodes = new Map<string, Set<string>>();
-    const nodeToCluster = new Map<string, string>();
+function parseDiagram(parsed: ParsedDiagram, selectedTypes: string[]): ParsedInfo {
+    const { lines, graphDefLineIndex, originalLines } = parsed;
+    const info: ParsedInfo = {
+        hiddenNodes: new Set(),
+        nodeLabels: new Map(),
+        edgeConnections: new Map(),
+        allNodeIds: new Map(),
+        clusterNodes: new Map(),
+        nodeToCluster: new Map(),
+        clusterDefinitions: new Map(),
+        originalNodeLines: new Map()
+    };
 
     const getBaseNodeId = (fullNodeId: string): string => {
         const parts = fullNodeId.split('_');
@@ -167,11 +186,11 @@ function filterByName(parsed: ParsedDiagram, selectedTypes: string[], nameFilter
         const line = lines[i];
         if (i === graphDefLineIndex) continue;
         const trimmedLine = line.trim();
-        if (trimmedLine.startsWith("graph ") || trimmedLine.startsWith("flowchart ")) continue;
-        if (trimmedLine.startsWith("subgraph ")) {
+        if (trimmedLine.startsWith('graph ') || trimmedLine.startsWith('flowchart ')) continue;
+        if (trimmedLine.startsWith('subgraph ')) {
             currentCluster = trimmedLine.split('subgraph ')[1].split('[')[0].trim();
-            if (!clusterNodes.has(currentCluster)) {
-                clusterNodes.set(currentCluster, new Set<string>());
+            if (!info.clusterNodes.has(currentCluster)) {
+                info.clusterNodes.set(currentCluster, new Set());
             }
             continue;
         }
@@ -189,17 +208,17 @@ function filterByName(parsed: ParsedDiagram, selectedTypes: string[], nameFilter
             }
             if (!nodeId) continue;
             const baseNodeId = getBaseNodeId(nodeId);
-            allNodeIds.set(baseNodeId, nodeId);
+            info.allNodeIds.set(baseNodeId, nodeId);
             if (currentCluster) {
-                clusterNodes.get(currentCluster)?.add(nodeId);
-                nodeToCluster.set(nodeId, currentCluster);
+                info.clusterNodes.get(currentCluster)?.add(nodeId);
+                info.nodeToCluster.set(nodeId, currentCluster);
             }
             const labelMatch = line.match(/\[(.*?)\]/);
             const nodeLabel = labelMatch ? labelMatch[1] : nodeId;
-            nodeLabels.set(nodeId, nodeLabel);
+            info.nodeLabels.set(nodeId, nodeLabel);
             const nodeType = getNodeType(nodeId);
             if (nodeType && !selectedTypes.includes(nodeType)) {
-                hiddenNodes.add(nodeId);
+                info.hiddenNodes.add(nodeId);
             }
         }
         if (line.includes('-->')) {
@@ -221,49 +240,20 @@ function filterByName(parsed: ParsedDiagram, selectedTypes: string[], nameFilter
                 }
             }
             if (from && to) {
-                if (!edgeConnections.has(from)) edgeConnections.set(from, new Set<string>());
-                edgeConnections.get(from)?.add(to);
-                if (!edgeConnections.has(to)) edgeConnections.set(to, new Set<string>());
-                edgeConnections.get(to)?.add(from);
+                if (!info.edgeConnections.has(from)) info.edgeConnections.set(from, new Set());
+                info.edgeConnections.get(from)!.add(to);
+                if (!info.edgeConnections.has(to)) info.edgeConnections.set(to, new Set());
+                info.edgeConnections.get(to)!.add(from);
             }
         }
     }
-    const lowerFilter = nameFilter.toLowerCase();
-    const directMatches = new Set<string>();
-    for (const [nodeId, nodeLabel] of nodeLabels.entries()) {
-        if (hiddenNodes.has(nodeId)) continue;
-        if (nodeLabel.toLowerCase().includes(lowerFilter)) {
-            directMatches.add(nodeId);
-            visibleNodes.add(nodeId);
-        }
-    }
-    if (directMatches.size === 0) {
-        for (const [baseNodeId, fullNodeId] of allNodeIds.entries()) {
-            if (hiddenNodes.has(fullNodeId)) continue;
-            if (baseNodeId.toLowerCase().includes(lowerFilter)) {
-                directMatches.add(fullNodeId);
-                visibleNodes.add(fullNodeId);
-            }
-        }
-    }
-    for (const matchingNodeId of directMatches) {
-        const connectedIds = edgeConnections.get(matchingNodeId) || new Set<string>();
-        for (const connectedId of connectedIds) {
-            if (!hiddenNodes.has(connectedId)) {
-                visibleNodes.add(connectedId);
-            }
-        }
-    }
-    const newDiagram: string[] = [graphDefinition];
-    const clusterDefinitions = new Map<string, string>();
-    const originalNodeLines = new Map<string, string>();
-    for (let i = 0; i < originalLines.length; i++) {
-        const line = originalLines[i];
+
+    for (const line of originalLines) {
         const trimmedLine = line.trim();
         if (trimmedLine.startsWith('graph ') || trimmedLine.startsWith('flowchart ')) continue;
         if (trimmedLine.startsWith('subgraph ')) {
             const clusterId = trimmedLine.split('subgraph ')[1].split('[')[0].trim();
-            clusterDefinitions.set(clusterId, line);
+            info.clusterDefinitions.set(clusterId, line);
         }
         if (line.includes('[') && line.includes(']')) {
             let nodeId = '';
@@ -274,31 +264,75 @@ function filterByName(parsed: ParsedDiagram, selectedTypes: string[], nameFilter
                 nodeId = line.split('[')[0].trim();
             }
             if (nodeId) {
-                originalNodeLines.set(nodeId, line);
+                info.originalNodeLines.set(nodeId, line);
             }
         }
     }
+
+    return info;
+}
+
+function determineVisibleNodes(info: ParsedInfo, nameFilter: string): Set<string> {
+    const visibleNodes = new Set<string>();
+    const lowerFilter = nameFilter.toLowerCase();
+    const directMatches = new Set<string>();
+
+    for (const [nodeId, nodeLabel] of info.nodeLabels.entries()) {
+        if (info.hiddenNodes.has(nodeId)) continue;
+        if (nodeLabel.toLowerCase().includes(lowerFilter)) {
+            directMatches.add(nodeId);
+            visibleNodes.add(nodeId);
+        }
+    }
+
+    if (directMatches.size === 0) {
+        for (const [baseNodeId, fullNodeId] of info.allNodeIds.entries()) {
+            if (info.hiddenNodes.has(fullNodeId)) continue;
+            if (baseNodeId.toLowerCase().includes(lowerFilter)) {
+                directMatches.add(fullNodeId);
+                visibleNodes.add(fullNodeId);
+            }
+        }
+    }
+
+    for (const matchingNodeId of directMatches) {
+        const connectedIds = info.edgeConnections.get(matchingNodeId) || new Set<string>();
+        for (const connectedId of connectedIds) {
+            if (!info.hiddenNodes.has(connectedId)) {
+                visibleNodes.add(connectedId);
+            }
+        }
+    }
+    return visibleNodes;
+}
+
+function buildDiagramLines(parsed: ParsedDiagram, info: ParsedInfo, visibleNodes: Set<string>): string[] {
+    const { graphDefinition, originalLines } = parsed;
+    const newDiagram: string[] = [graphDefinition];
     const processedClusters = new Set<string>();
-    for (const [clusterId, nodeSet] of clusterNodes.entries()) {
+
+    for (const [clusterId, nodeSet] of info.clusterNodes.entries()) {
         const visibleNodesInCluster = Array.from(nodeSet).filter(nodeId => visibleNodes.has(nodeId));
         if (visibleNodesInCluster.length > 0) {
-            const clusterDefLine = clusterDefinitions.get(clusterId);
+            const clusterDefLine = info.clusterDefinitions.get(clusterId);
             if (clusterDefLine) {
                 newDiagram.push(clusterDefLine);
                 processedClusters.add(clusterId);
                 for (const nodeId of visibleNodesInCluster) {
-                    const nodeLine = originalNodeLines.get(nodeId);
+                    const nodeLine = info.originalNodeLines.get(nodeId);
                     if (nodeLine) newDiagram.push(nodeLine);
                 }
                 newDiagram.push('end');
             }
         }
     }
-    const remainingNodes = Array.from(visibleNodes).filter(nodeId => !nodeToCluster.has(nodeId) || !processedClusters.has(nodeToCluster.get(nodeId) || ''));
+
+    const remainingNodes = Array.from(visibleNodes).filter(nodeId => !info.nodeToCluster.has(nodeId) || !processedClusters.has(info.nodeToCluster.get(nodeId) || ''));
     for (const nodeId of remainingNodes) {
-        const nodeLine = originalNodeLines.get(nodeId);
+        const nodeLine = info.originalNodeLines.get(nodeId);
         if (nodeLine) newDiagram.push(nodeLine);
     }
+
     const addedEdges = new Set<string>();
     for (const line of originalLines) {
         if (line.includes('-->')) {
@@ -328,6 +362,7 @@ function filterByName(parsed: ParsedDiagram, selectedTypes: string[], nameFilter
             }
         }
     }
+
     const classDefLines: string[] = [];
     const classAssignLines: string[] = [];
     for (const line of originalLines) {
@@ -346,6 +381,12 @@ function filterByName(parsed: ParsedDiagram, selectedTypes: string[], nameFilter
     newDiagram.push(...classDefLines);
     newDiagram.push(...classAssignLines);
     return newDiagram;
+}
+
+function filterByName(parsed: ParsedDiagram, selectedTypes: string[], nameFilter: string): string[] {
+    const info = parseDiagram(parsed, selectedTypes);
+    const visibleNodes = determineVisibleNodes(info, nameFilter);
+    return buildDiagramLines(parsed, info, visibleNodes);
 }
 export function filterMermaidDiagram(diagram: string, selectedTypes: string[], nameFilter?: string): string {
     if (!selectedTypes || selectedTypes.length === 0) {

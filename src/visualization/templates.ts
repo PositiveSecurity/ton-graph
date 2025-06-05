@@ -1,5 +1,5 @@
 export { generateVisualizationHtml } from "./htmlTemplate";
-import { logError } from '../logger';
+import logger from '../logging/logger';
 // generateErrorHtml remains useful for displaying initialization errors
 export function generateErrorHtml(message: string, mermaidScriptUri?: string): string {
     // Use error styles from "Copy"
@@ -407,7 +407,7 @@ export function filterMermaidDiagram(diagram: string, selectedTypes: string[], n
         const result = lines.join("\n");
         return validateAndFixDiagram(result);
     } catch (error) {
-        logError('Error in filterMermaidDiagram', error);
+        logger.error('Error in filterMermaidDiagram', error);
         return diagram;
     }
 }
@@ -458,7 +458,7 @@ function validateAndFixDiagram(diagramCode: string): string {
 
         return cleanedLines.join('\\n');
     } catch (error) {
-        logError('Error in validateAndFixDiagram', error);
+        logger.error('Error in validateAndFixDiagram', error);
         return diagramCode; // Return original on validation error
     }
 }

@@ -153,8 +153,9 @@ To work with it:
 
 ### Logs
 
-Runtime logs are written to `logs/extension.log` in the project root. The file
-rotates when it reaches 1 MB and up to five log files are kept.
+All runtime messages are written to `logs/extension.log` in the repository root.
+The log file rotates when it reaches 1&nbsp;MB and up to five files are kept.
+You can also view logs directly in VS Code under **Output** → **TON Graph**.
 
 ## Requirements
 

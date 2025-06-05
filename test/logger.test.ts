@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import logger from '../src/logging/logger';
+import logger, { outputChannel } from '../src/logging/logger';
 import { transports as winstonTransports } from 'winston';
 
 describe('Logger', () => {
@@ -8,5 +8,11 @@ describe('Logger', () => {
     expect(fileTransport).to.exist;
     expect((fileTransport as any).maxsize).to.equal(1024 * 1024);
     expect((fileTransport as any).maxFiles).to.equal(5);
+  });
+
+  it('includes output channel transport', () => {
+    const streamTransport = logger.transports.find(t => t instanceof winstonTransports.Stream);
+    expect(streamTransport).to.exist;
+    expect(outputChannel).to.exist;
   });
 });

@@ -12,7 +12,11 @@ const logger = createLogger({
   format: format.json(),
   transports: [
     new transports.Console({ format: format.json() }),
-    new transports.File({ filename: path.join(logsDir, 'extension.log') })
+    new transports.File({
+      filename: path.join(logsDir, 'extension.log'),
+      maxsize: 1024 * 1024,
+      maxFiles: 5
+    })
   ]
 });
 

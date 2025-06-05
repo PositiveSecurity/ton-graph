@@ -39,10 +39,12 @@ function isPathInsideWorkspace(filePath: string): boolean {
 export async function processFuncImports(
     code: string,
     filePath: string,
-    visited: Set<string> = new Set()
-): Promise<{ importedCode: string, importedFilePaths: string[] }> {
+    visited: Set<string> = new Set(),
+    stack: string[] = []
+): Promise<{ importedCode: string, importedFilePaths: string[], cycles: string[] }> {
     const importedFilePaths: string[] = [];
     const importedCode: string[] = [];
+    const cycles: string[] = [];
     const baseDir = path.dirname(filePath);
 
     // Regular expression to find #include directives
@@ -57,11 +59,17 @@ export async function processFuncImports(
             continue;
         }
 
+        if (stack.includes(fullPath)) {
+            cycles.push(fullPath);
+            continue;
+        }
+
         if (visited.has(fullPath)) {
             continue;
         }
 
         visited.add(fullPath);
+        stack.push(fullPath);
 
         try {
             await fs.promises.access(fullPath);
@@ -78,17 +86,20 @@ export async function processFuncImports(
             importedFilePaths.push(fullPath);
 
             // Process nested imports recursively
-            const nestedImports = await processFuncImports(fileContent, fullPath, visited);
+            const nestedImports = await processFuncImports(fileContent, fullPath, visited, stack);
             importedCode.push(nestedImports.importedCode);
             importedFilePaths.push(...nestedImports.importedFilePaths);
+            cycles.push(...nestedImports.cycles);
         } catch (error) {
             logger.error(`Error processing import ${fullPath}`, error);
         }
+        stack.pop();
     }
 
     return {
         importedCode: importedCode.join('\n\n'),
-        importedFilePaths
+        importedFilePaths,
+        cycles
     };
 }
 
@@ -101,10 +112,12 @@ export async function processFuncImports(
 export async function processTactImports(
     code: string,
     filePath: string,
-    visited: Set<string> = new Set()
-): Promise<{ importedCode: string, importedFilePaths: string[] }> {
+    visited: Set<string> = new Set(),
+    stack: string[] = []
+): Promise<{ importedCode: string, importedFilePaths: string[], cycles: string[] }> {
     const importedFilePaths: string[] = [];
     const importedCode: string[] = [];
+    const cycles: string[] = [];
     const baseDir = path.dirname(filePath);
 
     // Regular expression to find import statements
@@ -144,11 +157,17 @@ export async function processTactImports(
             continue;
         }
 
+        if (stack.includes(fullPath)) {
+            cycles.push(fullPath);
+            continue;
+        }
+
         if (visited.has(fullPath)) {
             continue;
         }
 
         visited.add(fullPath);
+        stack.push(fullPath);
 
         try {
             await fs.promises.access(fullPath);
@@ -165,17 +184,20 @@ export async function processTactImports(
             importedFilePaths.push(fullPath);
 
             // Process nested imports recursively
-            const nestedImports = await processTactImports(fileContent, fullPath, visited);
+            const nestedImports = await processTactImports(fileContent, fullPath, visited, stack);
             importedCode.push(nestedImports.importedCode);
             importedFilePaths.push(...nestedImports.importedFilePaths);
+            cycles.push(...nestedImports.cycles);
         } catch (error) {
             logger.error(`Error processing import ${fullPath}`, error);
         }
+        stack.pop();
     }
 
     return {
         importedCode: importedCode.join('\n\n'),
-        importedFilePaths
+        importedFilePaths,
+        cycles
     };
 }
 
@@ -188,10 +210,12 @@ export async function processTactImports(
 export async function processTolkImports(
     code: string,
     filePath: string,
-    visited: Set<string> = new Set()
-): Promise<{ importedCode: string, importedFilePaths: string[] }> {
+    visited: Set<string> = new Set(),
+    stack: string[] = []
+): Promise<{ importedCode: string, importedFilePaths: string[], cycles: string[] }> {
     const importedFilePaths: string[] = [];
     const importedCode: string[] = [];
+    const cycles: string[] = [];
     const baseDir = path.dirname(filePath);
 
     // Regular expression to find import statements
@@ -231,11 +255,17 @@ export async function processTolkImports(
             continue;
         }
 
+        if (stack.includes(fullPath)) {
+            cycles.push(fullPath);
+            continue;
+        }
+
         if (visited.has(fullPath)) {
             continue;
         }
 
         visited.add(fullPath);
+        stack.push(fullPath);
 
         try {
             await fs.promises.access(fullPath);
@@ -252,17 +282,20 @@ export async function processTolkImports(
             importedFilePaths.push(fullPath);
 
             // Process nested imports recursively
-            const nestedImports = await processTolkImports(fileContent, fullPath, visited);
+            const nestedImports = await processTolkImports(fileContent, fullPath, visited, stack);
             importedCode.push(nestedImports.importedCode);
             importedFilePaths.push(...nestedImports.importedFilePaths);
+            cycles.push(...nestedImports.cycles);
         } catch (error) {
             logger.error(`Error processing import ${fullPath}`, error);
         }
+        stack.pop();
     }
 
     return {
         importedCode: importedCode.join('\n\n'),
-        importedFilePaths
+        importedFilePaths,
+        cycles
     };
 }
 
@@ -273,7 +306,7 @@ export async function processImports(
     code: string,
     filePath: string,
     language: string
-): Promise<{ importedCode: string, importedFilePaths: string[] }> {
+): Promise<{ importedCode: string, importedFilePaths: string[], cycles: string[] }> {
     const visited = new Set<string>();
     switch (language) {
         case 'func':
@@ -283,6 +316,6 @@ export async function processImports(
         case 'tolk':
             return processTolkImports(code, filePath, visited);
         default:
-            return { importedCode: '', importedFilePaths: [] };
+            return { importedCode: '', importedFilePaths: [], cycles: [] };
     }
 }

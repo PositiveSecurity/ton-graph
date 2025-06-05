@@ -64,22 +64,23 @@ export async function processFuncImports(
         visited.add(fullPath);
 
         try {
-            // Check if file exists
-            if (fs.existsSync(fullPath)) {
-                // Read the file
-                const fileContent = fs.readFileSync(fullPath, 'utf8');
+            await fs.promises.access(fullPath);
+        } catch {
+            logError(`Included file not found: ${fullPath}`);
+            continue;
+        }
 
-                // Add to our collection
-                importedCode.push(fileContent);
-                importedFilePaths.push(fullPath);
+        try {
+            const fileContent = await fs.promises.readFile(fullPath, 'utf8');
 
-                // Process nested imports recursively
-                const nestedImports = await processFuncImports(fileContent, fullPath, visited);
-                importedCode.push(nestedImports.importedCode);
-                importedFilePaths.push(...nestedImports.importedFilePaths);
-            } else {
-                logError(`Included file not found: ${fullPath}`);
-            }
+            // Add to our collection
+            importedCode.push(fileContent);
+            importedFilePaths.push(fullPath);
+
+            // Process nested imports recursively
+            const nestedImports = await processFuncImports(fileContent, fullPath, visited);
+            importedCode.push(nestedImports.importedCode);
+            importedFilePaths.push(...nestedImports.importedFilePaths);
         } catch (error) {
             logError(`Error processing import ${fullPath}`, error);
         }
@@ -150,22 +151,23 @@ export async function processTactImports(
         visited.add(fullPath);
 
         try {
-            // Check if file exists
-            if (fs.existsSync(fullPath)) {
-                // Read the file
-                const fileContent = fs.readFileSync(fullPath, 'utf8');
+            await fs.promises.access(fullPath);
+        } catch {
+            logError(`Imported file not found: ${fullPath}`);
+            continue;
+        }
 
-                // Add to our collection
-                importedCode.push(fileContent);
-                importedFilePaths.push(fullPath);
+        try {
+            const fileContent = await fs.promises.readFile(fullPath, 'utf8');
 
-                // Process nested imports recursively
-                const nestedImports = await processTactImports(fileContent, fullPath, visited);
-                importedCode.push(nestedImports.importedCode);
-                importedFilePaths.push(...nestedImports.importedFilePaths);
-            } else {
-                logError(`Imported file not found: ${fullPath}`);
-            }
+            // Add to our collection
+            importedCode.push(fileContent);
+            importedFilePaths.push(fullPath);
+
+            // Process nested imports recursively
+            const nestedImports = await processTactImports(fileContent, fullPath, visited);
+            importedCode.push(nestedImports.importedCode);
+            importedFilePaths.push(...nestedImports.importedFilePaths);
         } catch (error) {
             logError(`Error processing import ${fullPath}`, error);
         }
@@ -236,22 +238,23 @@ export async function processTolkImports(
         visited.add(fullPath);
 
         try {
-            // Check if file exists
-            if (fs.existsSync(fullPath)) {
-                // Read the file
-                const fileContent = fs.readFileSync(fullPath, 'utf8');
+            await fs.promises.access(fullPath);
+        } catch {
+            logError(`Imported file not found: ${fullPath}`);
+            continue;
+        }
 
-                // Add to our collection
-                importedCode.push(fileContent);
-                importedFilePaths.push(fullPath);
+        try {
+            const fileContent = await fs.promises.readFile(fullPath, 'utf8');
 
-                // Process nested imports recursively
-                const nestedImports = await processTolkImports(fileContent, fullPath, visited);
-                importedCode.push(nestedImports.importedCode);
-                importedFilePaths.push(...nestedImports.importedFilePaths);
-            } else {
-                logError(`Imported file not found: ${fullPath}`);
-            }
+            // Add to our collection
+            importedCode.push(fileContent);
+            importedFilePaths.push(fullPath);
+
+            // Process nested imports recursively
+            const nestedImports = await processTolkImports(fileContent, fullPath, visited);
+            importedCode.push(nestedImports.importedCode);
+            importedFilePaths.push(...nestedImports.importedFilePaths);
         } catch (error) {
             logError(`Error processing import ${fullPath}`, error);
         }

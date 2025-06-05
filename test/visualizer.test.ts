@@ -22,18 +22,19 @@ mock('vscode', {
 
 import { generateMermaidDiagram, clusterNodes, createVisualizationPanel } from '../src/visualization/visualizer';
 import { ContractGraph } from '../src/types/graph';
+import { GraphNodeKind } from '../src/types/graphNodeKind';
 
 describe('Visualizer', () => {
     describe('clusterNodes', () => {
         it('groups isolated and connected nodes into clusters', () => {
             const graph: ContractGraph = {
                 nodes: [
-                    { id: 'a', label: 'a()', type: 'internal', contractName: '' },
-                    { id: 'b', label: 'b()', type: 'internal', contractName: '' },
-                    { id: 'c', label: 'c()', type: 'internal', contractName: '' },
-                    { id: 'd', label: 'd()', type: 'internal', contractName: '' },
-                    { id: 'e', label: 'e()', type: 'internal', contractName: '' },
-                    { id: 'f', label: 'f()', type: 'internal', contractName: '' },
+                    { id: 'a', label: 'a()', type: GraphNodeKind.Internal, contractName: '' },
+                    { id: 'b', label: 'b()', type: GraphNodeKind.Internal, contractName: '' },
+                    { id: 'c', label: 'c()', type: GraphNodeKind.Internal, contractName: '' },
+                    { id: 'd', label: 'd()', type: GraphNodeKind.Internal, contractName: '' },
+                    { id: 'e', label: 'e()', type: GraphNodeKind.Internal, contractName: '' },
+                    { id: 'f', label: 'f()', type: GraphNodeKind.Internal, contractName: '' },
                 ],
                 edges: [
                     { from: 'a', to: 'b', label: '' },
@@ -57,9 +58,9 @@ describe('Visualizer', () => {
         it('creates a mermaid diagram with nodes and edges', () => {
             const graph: ContractGraph = {
                 nodes: [
-                    { id: 'start', label: 'start()', type: 'entry', contractName: '' },
-                    { id: 'foo', label: 'foo()', type: 'internal', contractName: '' },
-                    { id: 'bar', label: 'bar()', type: 'external', contractName: '' },
+                    { id: 'start', label: 'start()', type: GraphNodeKind.Entry, contractName: '' },
+                    { id: 'foo', label: 'foo()', type: GraphNodeKind.Internal, contractName: '' },
+                    { id: 'bar', label: 'bar()', type: GraphNodeKind.External, contractName: '' },
                 ],
                 edges: [
                     { from: 'start', to: 'foo', label: '' },
@@ -80,9 +81,9 @@ describe('Visualizer', () => {
         it('filters parameter comments in edge labels', () => {
             const graph: ContractGraph = {
                 nodes: [
-                    { id: 'start', label: 'start()', type: 'entry', contractName: '' },
+                    { id: 'start', label: 'start()', type: GraphNodeKind.Entry, contractName: '' },
                     {
-                        id: 'foo', label: 'foo()', type: 'internal', contractName: '',
+                        id: 'foo', label: 'foo()', type: GraphNodeKind.Internal, contractName: '',
                         parameters: ['int a', ';; ignore', '// comment', 'int b // trailing']
                     }
                 ],
@@ -101,7 +102,7 @@ describe('Visualizer', () => {
             const context = { extensionPath: process.cwd(), subscriptions: [] } as any;
             const graph: ContractGraph = {
                 nodes: [
-                    { id: 'n', label: 'n()', type: 'entry', contractName: '' }
+                    { id: 'n', label: 'n()', type: GraphNodeKind.Entry, contractName: '' }
                 ],
                 edges: []
             };
@@ -115,7 +116,7 @@ describe('Visualizer', () => {
             const context = { extensionPath: process.cwd(), subscriptions: [] } as any;
             const graph: ContractGraph = {
                 nodes: [
-                    { id: 'n', label: 'n()', type: 'entry', contractName: '' }
+                    { id: 'n', label: 'n()', type: GraphNodeKind.Entry, contractName: '' }
                 ],
                 edges: []
             };

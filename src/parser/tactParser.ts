@@ -2,6 +2,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as moo from 'moo';
 import { ContractGraph, ContractNode } from '../types/graph';
+import { GraphNodeKind } from '../types/graphNodeKind';
 
 const lexer = moo.compile({
     ws: /[ \t\r]+/,
@@ -91,7 +92,7 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
             const node: ContractNode = {
                 id: name,
                 label: `${name}(${params})`,
-                type: 'function',
+                type: GraphNodeKind.Function,
                 contractName,
                 parameters: params.split(',').map((p: string) => p.trim()).filter(Boolean),
                 functionType: kind

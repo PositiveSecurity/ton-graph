@@ -1,4 +1,3 @@
-import fetch from 'node-fetch';
 import * as vscode from 'vscode';
 import { getCachedResponse, setCachedResponse } from './cache';
 import { getApiKey } from '../secrets/tokenManager';
@@ -18,7 +17,7 @@ export async function callToncenter<T>(
     }
 
     const search = new URLSearchParams({ ...paramsWithKey, method });
-    const res = await fetch(`${BASE_URL}?${search.toString()}`);
+    const res = await globalThis.fetch(`${BASE_URL}?${search.toString()}`);
     if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
     }

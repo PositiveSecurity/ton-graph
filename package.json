@@ -163,7 +163,6 @@
     "@scaleton/tree-sitter-func": "^1.0.1",
     "mermaid": "^11.6.0",
     "moo": "^0.5.2",
-    "node-fetch": "^2.6.7",
     "web-tree-sitter": "^0.25.6",
     "winston": "^3.17.0"
   },

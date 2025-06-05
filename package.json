@@ -25,6 +25,7 @@
     "onCommand:ton-graph.visualize",
     "onCommand:ton-graph.visualizeProject",
     "onCommand:ton-graph.setApiKey",
+    "onCommand:ton-graph.deleteApiKey",
     "onLanguage:func",
     "onLanguage:tact",
     "onLanguage:tolk"
@@ -89,6 +90,10 @@
       {
         "command": "ton-graph.setApiKey",
         "title": "TON Graph: Set API Key"
+      },
+      {
+        "command": "ton-graph.deleteApiKey",
+        "title": "TON Graph: Delete API Key"
       }
     ],
     "menus": {

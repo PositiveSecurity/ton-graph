@@ -135,6 +135,8 @@
     "*.{json,md}": "prettier --check"
   },
   "devDependencies": {
+    "@commitlint/cli": "^17.8.1",
+    "@commitlint/config-conventional": "^17.8.1",
     "@playwright/test": "^1.52.0",
     "@types/chai": "^5.2.2",
     "@types/mocha": "^10.0.10",

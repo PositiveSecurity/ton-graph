@@ -461,116 +461,53 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
         graph.nodes.push(node);
     });
 
-    // Second pass: analyze function calls
+    // Second pass: analyze function calls without nested iterations
+    const baseNameMap = new Map<string, string[]>();
+    functions.forEach((func, name) => {
+        let base = name.includes('::') ? name.split('::')[1] : name;
+        if (base.startsWith('get_fun_')) {
+            base = base.substring(8);
+        }
+        const arr = baseNameMap.get(base) || [];
+        arr.push(name);
+        baseNameMap.set(base, arr);
+    });
+
+    const functionNames = Array.from(baseNameMap.keys()).sort((a, b) => b.length - a.length);
+    const callRegex = new RegExp(`\\b(${functionNames.join('|')})\\s*\\(`, 'g');
+
     functions.forEach((func, funcName) => {
         const funcBody = func.body;
-        const currentContractName = func.contractName;
-
-        // Create a set to track already added edges to avoid duplicates
         const addedEdges = new Set<string>();
+        let match: RegExpExecArray | null;
 
-        // Check for calls to other functions
-        functions.forEach((calledFunc, calledFuncName) => {
-            if (funcName !== calledFuncName) {
-                // Extract the base function name for matching
-                let baseCalledFuncName = calledFuncName;
-                let calledContractName = calledFunc.contractName;
+        while ((match = callRegex.exec(funcBody)) !== null) {
+            const baseCalledName = match[1];
+            const targets = baseNameMap.get(baseCalledName) || [];
+            targets.forEach(targetId => {
+                if (targetId !== funcName) {
+                    const lineStart = funcBody.lastIndexOf('\n', match.index) + 1;
+                    const lineEnd = funcBody.indexOf('\n', match.index);
+                    const line = funcBody.substring(lineStart, lineEnd === -1 ? funcBody.length : lineEnd);
+                    const beforeMatch = line.substring(0, match.index - lineStart);
+                    if (beforeMatch.includes('//') || beforeMatch.includes(';')) {
+                        return;
+                    }
 
-                if (multipleContracts) {
-                    // Handle contract::function format
-                    const parts = calledFuncName.split("::");
-                    if (parts.length === 2) {
-                        calledContractName = parts[0];
-                        baseCalledFuncName = parts[1];
+                    const edgeKey = `${funcName}->${targetId}`;
+                    if (!addedEdges.has(edgeKey)) {
+                        graph.edges.push({
+                            from: funcName,
+                            to: targetId,
+                            label: ''
+                        });
+                        addedEdges.add(edgeKey);
                     }
                 }
+            });
+        }
 
-                if (baseCalledFuncName.startsWith('get_fun_')) {
-                    baseCalledFuncName = baseCalledFuncName.substring(8); // Remove 'get_fun_' prefix
-                }
-
-                // Check for direct function calls (functionName())
-                const pattern = new RegExp(`\\b${baseCalledFuncName.replace(/_/g, '_')}\\s*\\(`, 'g');
-                let match;
-
-                // Only add edge if the called function is in the same contract or explicitly qualified
-                // Trait functions are considered part of the contract that implements them
-                const isSameContract = currentContractName === calledContractName;
-                const isExplicitCall = funcBody.includes(`${calledContractName}.${baseCalledFuncName}`);
-                const isTraitFunction = calledFunc.isTrait;
-
-                if (isSameContract || isExplicitCall || isTraitFunction) {
-                    while ((match = pattern.exec(funcBody)) !== null) {
-                        // Skip if it's an explicitly qualified call to another contract's function
-                        const matchPos = match.index;
-                        const prefixStart = Math.max(0, matchPos - calledContractName.length - 1);
-                        const possiblePrefix = funcBody.substring(prefixStart, matchPos);
-
-                        // If there's an explicit contract qualifier and it's not our contract, skip
-                        if (possiblePrefix.endsWith(`${calledContractName}.`) && !isSameContract) {
-                            continue;
-                        }
-
-                        // Create a unique key for this edge to avoid duplicates
-                        const edgeKey = `${funcName}->${calledFuncName}`;
-
-                        // Add edge if not already added
-                        if (!addedEdges.has(edgeKey)) {
-                            graph.edges.push({
-                                from: funcName,
-                                to: calledFuncName,
-                                label: ''
-                            });
-
-                            addedEdges.add(edgeKey);
-                            break;
-                        }
-                    }
-                }
-
-                // Check for self references like "self.funcName" - these are always in the same contract
-                if (isSameContract) {
-                    const selfPattern = new RegExp(`self\\.${baseCalledFuncName}\\s*\\(`, 'g');
-                    while ((match = selfPattern.exec(funcBody)) !== null) {
-                        // Create a unique key for this edge
-                        const edgeKey = `${funcName}->${calledFuncName}`;
-
-                        // Add edge if not already added
-                        if (!addedEdges.has(edgeKey)) {
-                            graph.edges.push({
-                                from: funcName,
-                                to: calledFuncName,
-                                label: ''
-                            });
-
-                            addedEdges.add(edgeKey);
-                            break;
-                        }
-                    }
-                }
-
-                // Also look for explicit cross-contract calls: "ContractName.functionName()"
-                if (multipleContracts && !isSameContract) {
-                    const crossContractPattern = new RegExp(`\\b${calledContractName}\\.${baseCalledFuncName}\\s*\\(`, 'g');
-                    while ((match = crossContractPattern.exec(funcBody)) !== null) {
-                        // Create a unique key for this edge
-                        const edgeKey = `${funcName}->${calledFuncName}`;
-
-                        // Add edge if not already added
-                        if (!addedEdges.has(edgeKey)) {
-                            graph.edges.push({
-                                from: funcName,
-                                to: calledFuncName,
-                                label: ''
-                            });
-
-                            addedEdges.add(edgeKey);
-                            break;
-                        }
-                    }
-                }
-            }
-        });
+        callRegex.lastIndex = 0;
     });
 
     // Make sure get_fun functions are added to the right cluster

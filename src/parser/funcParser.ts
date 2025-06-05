@@ -251,197 +251,39 @@ export async function parseContractCode(code: string): Promise<ContractGraph> {
         graph.nodes.push(node);
     });
 
-    // Second pass: analyze function calls
+    // Second pass: analyze function calls without nested iterations
+    const functionNames = Array.from(functions.keys()).sort((a, b) => b.length - a.length);
+    const callRegex = new RegExp(`\\b(${functionNames.join('|')})\\s*\\(`, 'g');
+
     functions.forEach((func, funcName) => {
         const funcBody = func.body;
-
-        // Create a set to track already added edges to avoid duplicates
         const addedEdges = new Set<string>();
+        let match: RegExpExecArray | null;
 
-        // Check for calls to other functions
-        functions.forEach((calledFunc, calledFuncName) => {
-            if (funcName !== calledFuncName) {
-                const bodyToSearch = funcBody;
-
-                // Look for variable declarations with function calls - high priority
-                // This covers the tuple assignment pattern `var (a, b) = functionName()` and regular assignments
-                if (bodyToSearch.includes(calledFuncName)) {
-                    // First, check most common tuple pattern
-                    const tuplePatterns = [
-                        // With 'var' keyword - tuple assignment
-                        new RegExp(`var\\s*\\([^)]*\\)\\s*=\\s*${calledFuncName}\\s*\\(`, 'g'),
-                        // Without 'var' keyword - direct tuple assignment
-                        new RegExp(`\\([^)]*\\)\\s*=\\s*${calledFuncName}\\s*\\(`, 'g'),
-                        // Check for direct variable assignments
-                        new RegExp(`var\\s+[a-zA-Z_]\\w*\\s*=\\s*${calledFuncName}\\s*\\(`, 'g'),
-                        // Simple assignment without var
-                        new RegExp(`[a-zA-Z_]\\w*\\s*=\\s*${calledFuncName}\\s*\\(`, 'g')
-                    ];
-
-                    for (const pattern of tuplePatterns) {
-                        const matches = bodyToSearch.match(pattern);
-                        if (matches) {
-                            graph.edges.push({
-                                from: func.id,
-                                to: calledFunc.id,
-                                label: ''
-                            });
-                            addedEdges.add(`${func.id}->${calledFunc.id}`);
-                            break;
-                        }
-                    }
+        while ((match = callRegex.exec(funcBody)) !== null) {
+            const calledFuncName = match[1];
+            if (calledFuncName && calledFuncName !== funcName) {
+                const lineStart = funcBody.lastIndexOf('\n', match.index) + 1;
+                const lineEnd = funcBody.indexOf('\n', match.index);
+                const line = funcBody.substring(lineStart, lineEnd === -1 ? funcBody.length : lineEnd);
+                const beforeMatch = line.substring(0, match.index - lineStart);
+                if (beforeMatch.includes('//') || beforeMatch.includes(';')) {
+                    continue;
                 }
 
-                // If not already added with tuple pattern, try our other patterns
-                if (!addedEdges.has(`${func.id}->${calledFunc.id}`)) {
-                    // Try multiple patterns to catch all possible function call syntaxes
-                    const patterns = [
-                        // Basic function call pattern with word boundary check
-                        new RegExp(`(?:^|[^a-zA-Z0-9_])${calledFuncName}\\s*\\(`, 'g'),
-
-                        // Simple assignment pattern
-                        new RegExp(`=\\s*${calledFuncName}\\s*\\(`, 'g'),
-
-                        // Function call in a return statement
-                        new RegExp(`return\\s+${calledFuncName}\\s*\\(`, 'g'),
-
-                        // Function call as a parameter to another function
-                        new RegExp(`\\([^)]*${calledFuncName}\\s*\\(`, 'g'),
-
-                        // Function call in an if statement or other control structures
-                        new RegExp(`(?:if|while|do|elseif|return)\\s*\\(?[^)]*${calledFuncName}\\s*\\(`, 'g'),
-
-                        // Function call in an expression with operators
-                        new RegExp(`[+\\-*/%<>=!&|^]\\s*${calledFuncName}\\s*\\(`, 'g'),
-
-                        // Function call after a comma (in parameter lists)
-                        new RegExp(`,\\s*${calledFuncName}\\s*\\(`, 'g'),
-
-                        // Function call used in conditional expressions
-                        new RegExp(`\\?\\s*${calledFuncName}\\s*\\(`, 'g'),
-
-                        // Function call nested in complex expressions
-                        new RegExp(`\\(${calledFuncName}\\s*\\(`, 'g')
-                    ];
-
-                    // Process each pattern
-                    for (const pattern of patterns) {
-                        let match;
-                        // Reset the regex lastIndex to ensure we start from the beginning
-                        pattern.lastIndex = 0;
-
-                        while ((match = pattern.exec(bodyToSearch)) !== null) {
-                            const matchPos = match.index;
-
-                            // Find the line containing this match to check for comments
-                            const lineStart = bodyToSearch.lastIndexOf('\n', matchPos) + 1;
-                            const lineEnd = bodyToSearch.indexOf('\n', matchPos);
-                            const line = bodyToSearch.substring(
-                                lineStart,
-                                lineEnd === -1 ? bodyToSearch.length : lineEnd
-                            );
-
-                            // Check for comments on this line (before the match)
-                            const lineBeforeMatch = line.substring(0, matchPos - lineStart);
-                            if (lineBeforeMatch.includes('//') || lineBeforeMatch.includes(';')) {
-                                continue; // Skip if in a comment
-                            }
-
-                            // Create a unique key for this edge to avoid duplicates
-                            const edgeKey = `${func.id}->${calledFunc.id}`;
-
-                            // Add edge if not already added
-                            if (!addedEdges.has(edgeKey)) {
-                                graph.edges.push({
-                                    from: func.id,
-                                    to: calledFunc.id,
-                                    label: ''
-                                });
-
-                                addedEdges.add(edgeKey);
-                                break; // Once we've found and added an edge with this pattern, move to the next pattern
-                            }
-                        }
-
-                        if (addedEdges.has(`${func.id}->${calledFunc.id}`)) {
-                            break; // If we added an edge, no need to check more patterns
-                        }
-                    }
-                }
-
-                // Additional check for direct function calls without various prefix patterns
-                // This is a common case in FunC and might be missed by the regex patterns
-                if (!addedEdges.has(`${func.id}->${calledFunc.id}`)) {
-                    // Check the entire body for any direct function call pattern
-                    let pos = 0;
-                    const searchPattern = `${calledFuncName}(`;
-
-                    while ((pos = bodyToSearch.indexOf(searchPattern, pos)) !== -1) {
-                        // Ensure we have a proper word boundary (not a part of another identifier)
-                        if (pos === 0 || !/[a-zA-Z0-9_]/.test(bodyToSearch.charAt(pos - 1))) {
-                            // Find the line to check if it's in a comment
-                            const lineStart = bodyToSearch.lastIndexOf('\n', pos) + 1;
-                            const lineEnd = bodyToSearch.indexOf('\n', pos);
-                            const line = bodyToSearch.substring(
-                                lineStart,
-                                lineEnd === -1 ? bodyToSearch.length : lineEnd
-                            );
-
-                            // Check for comments
-                            const beforeMatch = line.substring(0, pos - lineStart);
-                            if (!beforeMatch.includes('//') && !beforeMatch.includes(';')) {
-                                graph.edges.push({
-                                    from: func.id,
-                                    to: calledFunc.id,
-                                    label: ''
-                                });
-                                addedEdges.add(`${func.id}->${calledFunc.id}`);
-                                break;
-                            }
-                        }
-                        pos += searchPattern.length;
-                    }
-                }
-
-                // Final deep scan for function calls that might be missed by previous patterns
-                // This performs a thorough character-by-character analysis
-                if (!addedEdges.has(`${func.id}->${calledFunc.id}`)) {
-                    const functionCallRegex = new RegExp(`\\b${calledFuncName}\\s*\\(`, 'g');
-                    let match;
-
-                    while ((match = functionCallRegex.exec(bodyToSearch)) !== null) {
-                        // Check if the match is not inside a comment or string
-                        let isValid = true;
-                        const lineStart = bodyToSearch.lastIndexOf('\n', match.index) + 1;
-                        const lineEnd = bodyToSearch.indexOf('\n', match.index);
-                        const currentLine = bodyToSearch.substring(
-                            lineStart,
-                            lineEnd === -1 ? bodyToSearch.length : lineEnd
-                        );
-
-                        // Check if in a comment
-                        const commentPos1 = currentLine.indexOf('//');
-                        const commentPos2 = currentLine.indexOf(';');
-                        const matchRelativePos = match.index - lineStart;
-
-                        if ((commentPos1 !== -1 && matchRelativePos > commentPos1) ||
-                            (commentPos2 !== -1 && matchRelativePos > commentPos2)) {
-                            isValid = false;
-                        }
-
-                        if (isValid) {
-                            graph.edges.push({
-                                from: func.id,
-                                to: calledFunc.id,
-                                label: ''
-                            });
-                            addedEdges.add(`${func.id}->${calledFunc.id}`);
-                            break;
-                        }
-                    }
+                const edgeKey = `${funcName}->${calledFuncName}`;
+                if (!addedEdges.has(edgeKey)) {
+                    graph.edges.push({
+                        from: funcName,
+                        to: calledFuncName,
+                        label: ''
+                    });
+                    addedEdges.add(edgeKey);
                 }
             }
-        });
+        }
+
+        callRegex.lastIndex = 0;
     });
 
     return graph;

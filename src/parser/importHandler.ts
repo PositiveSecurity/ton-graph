@@ -22,7 +22,8 @@ function isPathInsideWorkspace(filePath: string): boolean {
  */
 export async function processFuncImports(
     code: string,
-    filePath: string
+    filePath: string,
+    visited: Set<string> = new Set()
 ): Promise<{ importedCode: string, importedFilePaths: string[] }> {
     const importedFilePaths: string[] = [];
     const importedCode: string[] = [];
@@ -40,6 +41,12 @@ export async function processFuncImports(
             continue;
         }
 
+        if (visited.has(fullPath)) {
+            continue;
+        }
+
+        visited.add(fullPath);
+
         try {
             // Check if file exists
             if (fs.existsSync(fullPath)) {
@@ -51,7 +58,7 @@ export async function processFuncImports(
                 importedFilePaths.push(fullPath);
 
                 // Process nested imports recursively
-                const nestedImports = await processFuncImports(fileContent, fullPath);
+                const nestedImports = await processFuncImports(fileContent, fullPath, visited);
                 importedCode.push(nestedImports.importedCode);
                 importedFilePaths.push(...nestedImports.importedFilePaths);
             } else {
@@ -76,7 +83,8 @@ export async function processFuncImports(
  */
 export async function processTactImports(
     code: string,
-    filePath: string
+    filePath: string,
+    visited: Set<string> = new Set()
 ): Promise<{ importedCode: string, importedFilePaths: string[] }> {
     const importedFilePaths: string[] = [];
     const importedCode: string[] = [];
@@ -119,6 +127,12 @@ export async function processTactImports(
             continue;
         }
 
+        if (visited.has(fullPath)) {
+            continue;
+        }
+
+        visited.add(fullPath);
+
         try {
             // Check if file exists
             if (fs.existsSync(fullPath)) {
@@ -130,7 +144,7 @@ export async function processTactImports(
                 importedFilePaths.push(fullPath);
 
                 // Process nested imports recursively
-                const nestedImports = await processTactImports(fileContent, fullPath);
+                const nestedImports = await processTactImports(fileContent, fullPath, visited);
                 importedCode.push(nestedImports.importedCode);
                 importedFilePaths.push(...nestedImports.importedFilePaths);
             } else {
@@ -155,7 +169,8 @@ export async function processTactImports(
  */
 export async function processTolkImports(
     code: string,
-    filePath: string
+    filePath: string,
+    visited: Set<string> = new Set()
 ): Promise<{ importedCode: string, importedFilePaths: string[] }> {
     const importedFilePaths: string[] = [];
     const importedCode: string[] = [];
@@ -198,6 +213,12 @@ export async function processTolkImports(
             continue;
         }
 
+        if (visited.has(fullPath)) {
+            continue;
+        }
+
+        visited.add(fullPath);
+
         try {
             // Check if file exists
             if (fs.existsSync(fullPath)) {
@@ -209,7 +230,7 @@ export async function processTolkImports(
                 importedFilePaths.push(fullPath);
 
                 // Process nested imports recursively
-                const nestedImports = await processTolkImports(fileContent, fullPath);
+                const nestedImports = await processTolkImports(fileContent, fullPath, visited);
                 importedCode.push(nestedImports.importedCode);
                 importedFilePaths.push(...nestedImports.importedFilePaths);
             } else {
@@ -234,14 +255,15 @@ export async function processImports(
     filePath: string,
     language: string
 ): Promise<{ importedCode: string, importedFilePaths: string[] }> {
+    const visited = new Set<string>();
     switch (language) {
         case 'func':
-            return processFuncImports(code, filePath);
+            return processFuncImports(code, filePath, visited);
         case 'tact':
-            return processTactImports(code, filePath);
+            return processTactImports(code, filePath, visited);
         case 'tolk':
-            return processTolkImports(code, filePath);
+            return processTolkImports(code, filePath, visited);
         default:
             return { importedCode: '', importedFilePaths: [] };
     }
-} 
+}

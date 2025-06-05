@@ -6,7 +6,7 @@ import logger from '../logging/logger';
 function isPathInsideWorkspace(filePath: string): boolean {
     const folders = vscode.workspace && vscode.workspace.workspaceFolders;
     if (!folders) {
-        return true;
+        return false;
     }
 
     // Resolve symlinks for the file path

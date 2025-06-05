@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as moo from 'moo';
-import { ContractGraph, GraphNode } from '../types/graph';
+import { ContractGraph, ContractNode } from '../types/graph';
 
 const lexer = moo.compile({
     ws: /[ \t\r]+/,
@@ -88,7 +88,7 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
             const params = tokens.slice(paramsStart, paramsEnd).map(t => t.value).join('');
             const bodyText = tokens.slice(bodyStart, bodyEnd).map(t => t.value).join('');
             functions.set(name, { body: bodyText, params });
-            const node: GraphNode = {
+            const node: ContractNode = {
                 id: name,
                 label: `${name}(${params})`,
                 type: 'function',

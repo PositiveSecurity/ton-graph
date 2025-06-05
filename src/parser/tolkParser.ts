@@ -1,6 +1,6 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ContractGraph, GraphNode } from '../types/graph';
+import { ContractGraph, ContractNode } from '../types/graph';
 
 // List of built-in functions to exclude
 const BUILT_IN_FUNCTIONS = new Set([
@@ -179,7 +179,7 @@ export async function parseTolkContract(code: string): Promise<ContractGraph> {
 
     // Create nodes for each function
     functions.forEach((func, name) => {
-        const node: GraphNode = {
+        const node: ContractNode = {
             id: name,
             label: `${name}(${func.params})`,
             type: 'function',

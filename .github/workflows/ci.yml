@@ -22,5 +22,14 @@ jobs:
         run: npm ci
       - name: Run tests
         run: npm test
+      - name: Generate coverage report
+        if: always()
+        run: npx nyc report --reporter=lcov --report-dir=coverage
+      - name: Upload coverage to Codecov
+        if: always()
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          directory: coverage
       - name: Package extension
         run: npx vsce package

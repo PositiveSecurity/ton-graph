@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import { ContractGraph } from '../types/graph';
 import { generateVisualizationHtml, filterMermaidDiagram } from './templates';
 
-// Store the original graph
-let originalGraph: ContractGraph;
+// Map panels to their original graphs
+const panelGraphs = new WeakMap<vscode.WebviewPanel, ContractGraph>();
 
 // Add a variable to track if Mermaid has been cached
 let cachedMermaidUri: vscode.Uri | undefined;
@@ -14,10 +14,7 @@ export function createVisualizationPanel(
     functionTypeFilters: { value: string; label: string; }[],
     title: string = 'TON Graph'
 ): vscode.WebviewPanel {
-    // Store the original graph
-    originalGraph = graph;
-
-    // Create and show panel
+    // Store the original graph associated with this panel
     const panel = vscode.window.createWebviewPanel(
         'tonMessageFlow',
         title,
@@ -30,6 +27,8 @@ export function createVisualizationPanel(
             ]
         }
     );
+
+    panelGraphs.set(panel, graph);
 
     // Get path to the visualization lib directory
     const extensionPath = context.extensionPath;
@@ -80,8 +79,8 @@ export function createVisualizationPanel(
     // Handle panel disposal
     panel.onDidDispose(
         () => {
-            // Clean up resources
-            originalGraph = undefined as any;
+            // Clean up resources for this panel
+            panelGraphs.delete(panel);
         },
         null,
         context.subscriptions
@@ -152,11 +151,20 @@ async function getMermaidScriptUri(context: vscode.ExtensionContext, webview: vs
  */
 function handleFilterRequest(panel: vscode.WebviewPanel, selectedTypes: string[], mermaidScriptUri: string, nameFilter?: string) {
     try {
+        const graph = panelGraphs.get(panel);
+        if (!graph) {
+            panel.webview.postMessage({
+                command: 'filterError',
+                error: 'Original graph not found for this panel.'
+            });
+            return;
+        }
+
         // Get name filter from the message if it exists
         const nameFilterValue = nameFilter?.trim();
 
         // 1. Always generate the full diagram from the original graph
-        const fullMermaidDiagram = generateMermaidDiagram(originalGraph);
+        const fullMermaidDiagram = generateMermaidDiagram(graph);
 
         // 2. Apply filtering (both type and name) using filterMermaidDiagram
         const filteredDiagram = filterMermaidDiagram(

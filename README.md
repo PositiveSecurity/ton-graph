@@ -139,6 +139,16 @@ chmod +x rebuild.sh && ./rebuild.sh
 # The Mermaid library is bundled locally, so the build works offline
 ```
 
+### Developing with Dev Containers
+
+A Dev Container configuration is provided in `.devcontainer`.
+To work with it:
+
+1. Install the [Dev Containers](https://marketplace.visualstudio.com/items?itemName=ms-vscode-remote.remote-containers) extension for VS Code.
+2. Run **Remote-Containers: Open Folder in Container...** from the command palette and select this repository.
+3. Wait for the container to build and dependencies to install.
+4. You can now run `npm test` or other tasks inside the container.
+
 ## Requirements
 
 - Visual Studio Code 1.60.0 or newer

@@ -1,0 +1,5 @@
+{
+    "name": "TON Graph Dev Container",
+    "image": "mcr.microsoft.com/devcontainers/node:18-bullseye",
+    "postCreateCommand": "npm ci && npx playwright install --with-deps chromium"
+}

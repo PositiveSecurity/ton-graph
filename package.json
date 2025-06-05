@@ -188,6 +188,10 @@
     ],
     "require": [
       "ts-node/register"
-    ]
+    ],
+    "check-coverage": true,
+    "lines": 85,
+    "branches": 80,
+    "functions": 85
   }
 }

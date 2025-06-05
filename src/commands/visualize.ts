@@ -3,7 +3,7 @@ import { createVisualizationPanel } from '../visualization/visualizer';
 import { handleExport } from '../export/exportHandler';
 import { ContractGraph } from '../types/graph';
 import { detectLanguage, parseContractByLanguage, getFunctionTypeFilters } from '../parser/parserUtils';
-import { logError } from '../logger';
+import logger from '../logging/logger';
 import { applyFilters } from './filterUtils';
 
 let panel: vscode.WebviewPanel | undefined;
@@ -51,7 +51,7 @@ export async function visualize(context: vscode.ExtensionContext, fileUri?: vsco
             async (message) => {
                 if (message.command === 'applyFilters') {
                     if (!originalGraph) {
-                        logError('Original graph data not available for filtering');
+                        logger.error('Original graph data not available for filtering');
                         vscode.window.showErrorMessage('Cannot apply filters: original graph data is missing.');
                         return;
                     }
@@ -69,7 +69,7 @@ export async function visualize(context: vscode.ExtensionContext, fileUri?: vsco
 
         panel!.reveal(vscode.ViewColumn.Beside);
     } catch (error: any) {
-        logError('Error visualizing contract', error);
+        logger.error('Error visualizing contract', error);
         vscode.window.showErrorMessage(`Error visualizing contract: ${error.message || String(error)}`);
         originalGraph = null;
     }

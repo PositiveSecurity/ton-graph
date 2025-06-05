@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import { ContractGraph } from '../types/graph';
 import { generateMermaidDiagram } from '../visualization/visualizer';
-import { logError } from '../logger';
+import logger from '../logging/logger';
 
 export function applyFilters(
     panel: vscode.WebviewPanel,
@@ -69,7 +69,7 @@ export function applyFilters(
             diagram: newMermaidDiagram,
         });
     } catch (filterError: any) {
-        logError('Error applying filters', filterError);
+        logger.error('Error applying filters', filterError);
         vscode.window.showErrorMessage(`Error applying filters: ${filterError.message || String(filterError)}`);
         panel.webview.postMessage({
             command: 'filterError',

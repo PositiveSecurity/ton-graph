@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { logError } from '../logger';
+import logger from '../logging/logger';
 
 function isPathInsideWorkspace(filePath: string): boolean {
     const folders = vscode.workspace.workspaceFolders;
@@ -53,7 +53,7 @@ export async function processFuncImports(
         const includePath = match[1];
         const fullPath = path.resolve(baseDir, includePath);
         if (!isPathInsideWorkspace(fullPath)) {
-            logError(`Import outside workspace: ${includePath}`);
+            logger.error(`Import outside workspace: ${includePath}`);
             continue;
         }
 
@@ -66,7 +66,7 @@ export async function processFuncImports(
         try {
             await fs.promises.access(fullPath);
         } catch {
-            logError(`Included file not found: ${fullPath}`);
+            logger.error(`Included file not found: ${fullPath}`);
             continue;
         }
 
@@ -82,7 +82,7 @@ export async function processFuncImports(
             importedCode.push(nestedImports.importedCode);
             importedFilePaths.push(...nestedImports.importedFilePaths);
         } catch (error) {
-            logError(`Error processing import ${fullPath}`, error);
+            logger.error(`Error processing import ${fullPath}`, error);
         }
     }
 
@@ -126,7 +126,7 @@ export async function processTactImports(
                 fullPath = packagePath;
                 // Could further resolve subpaths here
             } else {
-                logError(`Package not found: ${packageName}`);
+                logger.error(`Package not found: ${packageName}`);
                 continue;
             }
         } else {
@@ -140,7 +140,7 @@ export async function processTactImports(
         }
 
         if (!isPathInsideWorkspace(fullPath)) {
-            logError(`Import outside workspace: ${importPath}`);
+            logger.error(`Import outside workspace: ${importPath}`);
             continue;
         }
 
@@ -153,7 +153,7 @@ export async function processTactImports(
         try {
             await fs.promises.access(fullPath);
         } catch {
-            logError(`Imported file not found: ${fullPath}`);
+            logger.error(`Imported file not found: ${fullPath}`);
             continue;
         }
 
@@ -169,7 +169,7 @@ export async function processTactImports(
             importedCode.push(nestedImports.importedCode);
             importedFilePaths.push(...nestedImports.importedFilePaths);
         } catch (error) {
-            logError(`Error processing import ${fullPath}`, error);
+            logger.error(`Error processing import ${fullPath}`, error);
         }
     }
 
@@ -213,7 +213,7 @@ export async function processTolkImports(
                 fullPath = packagePath;
                 // Could further resolve subpaths here
             } else {
-                logError(`Package not found: ${packageName}`);
+                logger.error(`Package not found: ${packageName}`);
                 continue;
             }
         } else {
@@ -227,7 +227,7 @@ export async function processTolkImports(
         }
 
         if (!isPathInsideWorkspace(fullPath)) {
-            logError(`Import outside workspace: ${importPath}`);
+            logger.error(`Import outside workspace: ${importPath}`);
             continue;
         }
 
@@ -240,7 +240,7 @@ export async function processTolkImports(
         try {
             await fs.promises.access(fullPath);
         } catch {
-            logError(`Imported file not found: ${fullPath}`);
+            logger.error(`Imported file not found: ${fullPath}`);
             continue;
         }
 
@@ -256,7 +256,7 @@ export async function processTolkImports(
             importedCode.push(nestedImports.importedCode);
             importedFilePaths.push(...nestedImports.importedFilePaths);
         } catch (error) {
-            logError(`Error processing import ${fullPath}`, error);
+            logger.error(`Error processing import ${fullPath}`, error);
         }
     }
 

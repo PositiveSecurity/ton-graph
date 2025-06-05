@@ -1,0 +1,3 @@
+int malicious<script>window.xss=true</script>() {
+    return 0;
+}

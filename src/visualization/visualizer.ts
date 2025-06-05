@@ -297,7 +297,7 @@ export function generateMermaidDiagram(graph: ContractGraph): string {
 /**
  * Cluster nodes in the graph
  */
-function clusterNodes(graph: ContractGraph): Map<string, number> {
+export function clusterNodes(graph: ContractGraph): Map<string, number> {
     const nodeClusters = new Map<string, number>();
     let currentCluster = 0;
 

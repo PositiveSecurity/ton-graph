@@ -123,7 +123,7 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "lint": "eslint src --ext ts",
-    "test": "mocha -r ts-node/register test/**/*.test.ts",
+    "test": "nyc mocha -r ts-node/register test/**/*.test.ts",
     "build:webview": "ts-node scripts/build-webview.ts"
   },
   "lint-staged": {
@@ -153,7 +153,8 @@
     "mock-require": "^3.0.3",
     "terser": "^5.41.0",
     "ts-node": "^10.9.1",
-    "typescript": "^4.x.x"
+    "typescript": "^4.x.x",
+    "nyc": "^15.1.0"
   },
   "dependencies": {
     "@scaleton/tree-sitter-func": "^1.0.1",
@@ -171,5 +172,19 @@
     "pic/**/*",
     "README.md",
     "LICENSE"
-  ]
+  ],
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "include": [
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "**/*.test.ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ]
+  }
 }

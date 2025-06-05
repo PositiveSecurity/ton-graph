@@ -29,7 +29,7 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 </a>
 
 - Automatic color coding of different function clusters
-- Optimized performance with Mermaid library caching
+- Bundled Mermaid library for offline use
 
 ## Installation
 
@@ -118,7 +118,7 @@ ton-graph/
 │   └── export/               # Export functionality
 │       └── exportHandler.ts  # Export handlers
 ├── out/                      # Compiled output
-└── cached/                   # Cache directory for Mermaid library
+└── cached/                   # Bundled Mermaid library
 ```
 
 ### Building From Source
@@ -134,6 +134,8 @@ npm run compile
 
 # Package the extension (creates a .vsix file)
 chmod +x rebuild.sh && ./rebuild.sh
+
+# The Mermaid library is bundled locally, so the build works offline
 ```
 
 ## Requirements

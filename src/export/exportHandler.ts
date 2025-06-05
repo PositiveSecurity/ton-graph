@@ -2,8 +2,8 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import { filterMermaidDiagram, generateVisualizationHtml } from '../visualization/templates';
 
-// Reference to cached Mermaid URI
-let cachedMermaidUri: vscode.Uri | undefined;
+// URI to the bundled Mermaid script
+let bundledMermaidUri: vscode.Uri | undefined;
 
 export async function handleExport(
     panel: vscode.WebviewPanel,
@@ -128,35 +128,13 @@ async function handleApplyFilters(
 }
 
 /**
- * Get the Mermaid script URI, either from cache or fall back to CDN
+ * Get the Mermaid script URI bundled with the extension
  */
 async function getMermaidScriptUri(context: vscode.ExtensionContext, webview: vscode.Webview): Promise<string> {
-    // Default CDN URL
-    const cdnUrl = "https://cdn.jsdelivr.net/npm/mermaid@11.6.0/dist/mermaid.min.js";
-
-    // Check if we already have a cached version
-    if (cachedMermaidUri) {
-        return webview.asWebviewUri(cachedMermaidUri).toString();
+    if (!bundledMermaidUri) {
+        bundledMermaidUri = vscode.Uri.joinPath(context.extensionUri, 'cached', 'mermaid.min.js');
     }
-
-    try {
-        // Try to find the cached file
-        const cachedDir = vscode.Uri.joinPath(context.extensionUri, 'cached');
-        const localMermaidPath = vscode.Uri.joinPath(cachedDir, 'mermaid.min.js');
-
-        try {
-            // Check if file exists locally
-            await vscode.workspace.fs.stat(localMermaidPath);
-            cachedMermaidUri = localMermaidPath;
-            return webview.asWebviewUri(localMermaidPath).toString();
-        } catch {
-            // File doesn't exist, use CDN
-            return cdnUrl;
-        }
-    } catch (error) {
-        console.error('Error checking cached Mermaid:', error);
-        return cdnUrl;
-    }
+    return webview.asWebviewUri(bundledMermaidUri).toString();
 }
 
 async function handleMermaidExport(

@@ -167,7 +167,8 @@
     "mermaid": "^11.6.0",
     "moo": "^0.5.2",
     "web-tree-sitter": "^0.25.6",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "dompurify": "^3.2.6"
   },
   "files": [
     "out/**/*",

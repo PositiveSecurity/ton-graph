@@ -1,12 +1,15 @@
 /* eslint-disable */
 // @ts-nocheck
+import DOMPurify from 'dompurify';
 declare const filterSet: { value: string; label: string; }[];
 let currentZoom = 1;
 const zoomStep = 0.05;
 let selectedFilters = [];
 function initializeFilters() {
 const typeFiltersContainer = document.getElementById('typeFilters');
-typeFiltersContainer.innerHTML = '';
+while (typeFiltersContainer.firstChild) {
+  typeFiltersContainer.removeChild(typeFiltersContainer.firstChild);
+}
 filterSet.forEach(function(filter) {
 const filterDiv = document.createElement('div');
 filterDiv.className = 'filter-option';
@@ -59,7 +62,8 @@ htmlLabels: true
 mermaid.render('mermaid-diagram-svg', document.getElementById('mermaid-diagram').textContent).then(function(result) {
 const originalCode = document.getElementById('mermaid-diagram').textContent;
 document.getElementById('mermaid-diagram').setAttribute('data-original-code', originalCode);
-document.getElementById('mermaid-diagram').innerHTML = result.svg;
+const sanitizedSvg = DOMPurify.sanitize(result.svg);
+document.getElementById('mermaid-diagram').innerHTML = sanitizedSvg;
 setupPanZoom();
 logMessage('Diagram rendered successfully', 'success');
 document.getElementById('loadingOverlay').classList.add('hidden');
@@ -95,7 +99,8 @@ htmlLabels: true
 }
 });
 mermaid.render('mermaid-diagram-svg', message.diagram).then(function(result) {
-mermaidDiagram.innerHTML = result.svg;
+const sanitizedUpdateSvg = DOMPurify.sanitize(result.svg);
+mermaidDiagram.innerHTML = sanitizedUpdateSvg;
 setupPanZoom();
 logMessage('Diagram updated with filters', 'success');
 }).catch(function(error) {

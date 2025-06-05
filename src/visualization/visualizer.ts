@@ -8,6 +8,18 @@ const panelGraphs = new WeakMap<vscode.WebviewPanel, ContractGraph>();
 // URI to the bundled Mermaid script
 let bundledMermaidUri: vscode.Uri | undefined;
 
+function escapeMermaidLabel(text: string): string {
+    return text
+        .replace(/"/g, "'")
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/\*/g, '\\*')
+        .replace(/\+/g, '\\+')
+        .replace(/\-/g, '\\-')
+        .replace(/\[/g, '\\[')
+        .replace(/\]/g, '\\]');
+}
+
 export function createVisualizationPanel(
     context: vscode.ExtensionContext,
     graph: ContractGraph,
@@ -184,15 +196,7 @@ export function generateMermaidDiagram(graph: ContractGraph): string {
             let label = node.label.split('(')[0];
 
             // Escape any markdown characters in labels
-            label = label
-                .replace(/"/g, '\'')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/\*/g, '\\*')
-                .replace(/\+/g, '\\+')
-                .replace(/\-/g, '\\-')
-                .replace(/\[/g, '\\[')
-                .replace(/\]/g, '\\]');
+            label = escapeMermaidLabel(label);
 
             // Use different node shapes based on function type
             if (node.type === 'entry') {
@@ -238,15 +242,7 @@ export function generateMermaidDiagram(graph: ContractGraph): string {
         }
 
         // Escape any markdown characters in labels
-        label = label
-            .replace(/"/g, '\'')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/\*/g, '\\*')
-            .replace(/\+/g, '\\+')
-            .replace(/\-/g, '\\-')
-            .replace(/\[/g, '\\[')
-            .replace(/\]/g, '\\]');
+        label = escapeMermaidLabel(label);
 
         // Check if this is a cross-cluster edge
         const fromCluster = nodeClusters.get(edge.from) || 0;

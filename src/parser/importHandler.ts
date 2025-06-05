@@ -3,6 +3,17 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { logError } from '../logger';
 
+function isPathInsideWorkspace(filePath: string): boolean {
+    const folders = vscode.workspace.workspaceFolders;
+    if (!folders) {
+        return true;
+    }
+    return folders.some(folder => {
+        const relative = path.relative(folder.uri.fsPath, filePath);
+        return !relative.startsWith('..') && !path.isAbsolute(relative);
+    });
+}
+
 /**
  * Processes import statements in FunC code (#include)
  * @param code The source code to process
@@ -24,6 +35,10 @@ export async function processFuncImports(
     while ((match = includeRegex.exec(code)) !== null) {
         const includePath = match[1];
         const fullPath = path.resolve(baseDir, includePath);
+        if (!isPathInsideWorkspace(fullPath)) {
+            logError(`Import outside workspace: ${includePath}`);
+            continue;
+        }
 
         try {
             // Check if file exists
@@ -99,6 +114,11 @@ export async function processTactImports(
             }
         }
 
+        if (!isPathInsideWorkspace(fullPath)) {
+            logError(`Import outside workspace: ${importPath}`);
+            continue;
+        }
+
         try {
             // Check if file exists
             if (fs.existsSync(fullPath)) {
@@ -171,6 +191,11 @@ export async function processTolkImports(
             if (!path.extname(fullPath)) {
                 fullPath += '.tolk';
             }
+        }
+
+        if (!isPathInsideWorkspace(fullPath)) {
+            logError(`Import outside workspace: ${importPath}`);
+            continue;
         }
 
         try {

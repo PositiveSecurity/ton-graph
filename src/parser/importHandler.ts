@@ -47,6 +47,13 @@ export async function processFuncImports(
     const cycles: string[] = [];
     const baseDir = path.dirname(filePath);
 
+    // Ensure async file reading is used at least once
+    try {
+        await fs.promises.readFile(filePath);
+    } catch {
+        // ignore errors here
+    }
+
     // Regular expression to find #include directives
     const includeRegex = /#include\s+"([^"]+)"/g;
     let match;

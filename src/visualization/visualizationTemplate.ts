@@ -290,7 +290,7 @@ export const VISUALIZATION_TEMPLATE = `<!DOCTYPE html>
             }
             mermaid.initialize({
                 startOnLoad: false,
-                securityLevel: 'loose',
+                securityLevel: 'strict',
                 theme: 'default',
                 fontSize: 14,
                 flowchart: {
@@ -325,7 +325,7 @@ export const VISUALIZATION_TEMPLATE = `<!DOCTYPE html>
                         const rankSpacing = 15;
                         mermaid.initialize({
                             startOnLoad: false,
-                            securityLevel: 'loose',
+                            securityLevel: 'strict',
                             theme: 'default',
                             fontSize: fontSize,
                             maxTextSize: 9000000,

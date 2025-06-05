@@ -3,6 +3,7 @@ import { createVisualizationPanel, generateMermaidDiagram } from './visualizatio
 import { handleExport } from './export/exportHandler';
 import { ContractGraph } from './types/graph';
 import { detectLanguage, parseContractByLanguage, getFunctionTypeFilters, parseContractWithImports } from './parser/parserUtils';
+import { logError } from './logger';
 
 export function activate(context: vscode.ExtensionContext) {
 
@@ -57,7 +58,7 @@ export function activate(context: vscode.ExtensionContext) {
                 async (message) => {
                     if (message.command === 'applyFilters') {
                         if (!originalGraph) {
-                            console.error('Original graph data not available for filtering.');
+                            logError('Original graph data not available for filtering');
                             vscode.window.showErrorMessage('Cannot apply filters: original graph data is missing.');
                             return;
                         }
@@ -135,7 +136,7 @@ export function activate(context: vscode.ExtensionContext) {
                             });
 
                         } catch (filterError: any) {
-                            console.error('Error applying filters:', filterError);
+                            logError('Error applying filters', filterError);
                             vscode.window.showErrorMessage(`Error applying filters: ${filterError.message || String(filterError)}`);
                             // Send error message back to WebView
                             panel.webview.postMessage({
@@ -155,7 +156,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             panel.reveal(vscode.ViewColumn.Beside);
         } catch (error: any) {
-            console.error('Error visualizing contract:', error);
+            logError('Error visualizing contract', error);
             vscode.window.showErrorMessage(`Error visualizing contract: ${error.message || String(error)}`);
             originalGraph = null; // Reset on error
         }
@@ -295,7 +296,7 @@ export function activate(context: vscode.ExtensionContext) {
                                 });
 
                             } catch (filterError: any) {
-                                console.error('Error applying filters:', filterError);
+                                logError('Error applying filters', filterError);
                                 vscode.window.showErrorMessage(`Error applying filters: ${filterError.message || String(filterError)}`);
                                 panel.webview.postMessage({
                                     command: 'filterError',
@@ -315,7 +316,7 @@ export function activate(context: vscode.ExtensionContext) {
                 panel.reveal(vscode.ViewColumn.Beside);
             });
         } catch (error: any) {
-            console.error('Error visualizing contract project:', error);
+            logError('Error visualizing contract project', error);
             vscode.window.showErrorMessage(`Error visualizing contract project: ${error.message || String(error)}`);
         }
     });

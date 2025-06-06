@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import mock = require('mock-require');
 mock('vscode', { window: { createOutputChannel: () => ({ appendLine: () => {} }) } });
 import { parseMoveContract } from '../src/parser/moveParser';
+import { parseMove } from '../src/parser/moveParser';
 
 const sample = `module M {
     fun init() {
@@ -50,5 +51,16 @@ describe('parseMoveContract', () => {
         const script = graph.nodes.find(n => n.id === 'M::run');
         expect(entry?.functionType).to.equal('entry');
         expect(script?.functionType).to.equal('script');
+    });
+
+    it('parses use declarations with aliases and multiple items', () => {
+        const code = `module M {\n    use std::option::{Self, Option as Opt};\n    use 0x1::foo::Bar as Baz;\n}`;
+        const { ast } = parseMove(code);
+        const uses = ast.modules[0].uses;
+        expect(uses).to.deep.include.members([
+            { alias: 'Self', path: 'std::option::Self' },
+            { alias: 'Opt', path: 'std::option::Option' },
+            { alias: 'Baz', path: '0x1::foo::Bar' }
+        ]);
     });
 });

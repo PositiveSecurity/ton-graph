@@ -22,7 +22,7 @@ test('webview contains mermaid', async () => {
     ]
   });
 
-  expect(exitCode).toBeUndefined();
+  expect(exitCode).toBe(0);
 });
 
 test('graph screenshot matches golden', async ({ page }, testInfo) => {
@@ -44,7 +44,7 @@ test('graph screenshot matches golden', async ({ page }, testInfo) => {
     testRunnerEnv: { OUTPUT_HTML: htmlPath }
   });
 
-  expect(exitCode).toBeUndefined();
+  expect(exitCode).toBe(0);
 
   await page.goto('file://' + htmlPath);
   await page.waitForSelector('.mermaid svg');

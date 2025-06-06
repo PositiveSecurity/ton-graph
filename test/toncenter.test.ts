@@ -95,4 +95,21 @@ describe('callToncenter', () => {
         expect(result2).to.deep.equal({ ok: true });
         expect(calls).to.equal(1);
     });
+
+    it('retries once on HTTP 500 and then throws', async () => {
+        let calls = 0;
+        server.use(
+            rest.get('https://toncenter.com/api/v2/', (_req, res, ctx) => {
+                calls++;
+                return res(ctx.status(500));
+            })
+        );
+        const context = { workspaceState: new TestMemento(), secrets: new TestSecrets() } as any;
+        try {
+            await callToncenter(context, 'test', {}, 50, 1);
+            expect.fail('should throw');
+        } catch {
+            expect(calls).to.equal(2);
+        }
+    });
 });

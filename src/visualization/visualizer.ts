@@ -58,7 +58,7 @@ export function createVisualizationPanel(
         const mermaidDiagram = generateMermaidDiagram(graph);
 
         // Generate the final HTML with function type filters
-        const html = generateVisualizationHtml(mermaidDiagram, mermaidScriptUri, functionTypeFilters, webviewScriptUri);
+        const html = generateVisualizationHtml(mermaidDiagram, mermaidScriptUri, functionTypeFilters, webviewScriptUri, panel.webview);
 
         // Set the HTML content for the panel
         panel.webview.html = html;

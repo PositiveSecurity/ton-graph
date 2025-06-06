@@ -127,7 +127,7 @@ async function handleApplyFilters(
 
         // Update the webview content
         try {
-            const html = generateVisualizationHtml(filteredDiagram, mermaidScriptUri, functionTypeFilters, webviewScriptUri);
+            const html = generateVisualizationHtml(filteredDiagram, mermaidScriptUri, functionTypeFilters, webviewScriptUri, panel.webview);
             panel.webview.html = html;
 
             // Notify the webview that filters have been applied

@@ -62,7 +62,7 @@ htmlLabels: true
 mermaid.render('mermaid-diagram-svg', document.getElementById('mermaid-diagram').textContent).then(function(result) {
 const originalCode = document.getElementById('mermaid-diagram').textContent;
 document.getElementById('mermaid-diagram').setAttribute('data-original-code', originalCode);
-const sanitizedSvg = DOMPurify.sanitize(result.svg);
+const sanitizedSvg = DOMPurify.sanitize(result.svg, {USE_PROFILES: {svg: true, svgFilters: true}});
 document.getElementById('mermaid-diagram').innerHTML = sanitizedSvg;
 setupPanZoom();
 logMessage('Diagram rendered successfully', 'success');
@@ -99,7 +99,7 @@ htmlLabels: true
 }
 });
 mermaid.render('mermaid-diagram-svg', message.diagram).then(function(result) {
-const sanitizedUpdateSvg = DOMPurify.sanitize(result.svg);
+const sanitizedUpdateSvg = DOMPurify.sanitize(result.svg, {USE_PROFILES: {svg: true, svgFilters: true}});
 mermaidDiagram.innerHTML = sanitizedUpdateSvg;
 setupPanZoom();
 logMessage('Diagram updated with filters', 'success');

@@ -44,6 +44,36 @@ describe('ImportHandler', () => {
         expect(result.importedFilePaths.length).to.equal(0);
     });
 
+    it('rejects symlink swap during import', async () => {
+        const externalDir = fs.mkdtempSync(path.join(os.tmpdir(), 'swap-'));
+        const externalFile = path.join(externalDir, 'outside.fc');
+        fs.writeFileSync(externalFile, 'out');
+
+        const swapDir = path.join(testRoot, 'swap');
+        fs.rmSync(swapDir, { recursive: true, force: true });
+        fs.mkdirSync(swapDir, { recursive: true });
+        const legit = path.join(swapDir, 'legit.fc');
+        fs.writeFileSync(legit, 'int a() { return 1; }');
+        const linkPath = path.join(swapDir, 'link.fc');
+        fs.symlinkSync(legit, linkPath);
+
+        const originalAccess = fs.promises.access;
+        let swapped = false;
+        (fs.promises as any).access = async (...args: any[]): Promise<void> => {
+            await (originalAccess as any)(...args);
+            if (!swapped) {
+                fs.unlinkSync(linkPath);
+                fs.symlinkSync(externalFile, linkPath);
+                swapped = true;
+            }
+        };
+
+        const code = '#include "link.fc"';
+        const result = await processFuncImports(code, path.join(swapDir, 'dummy.fc'));
+        (fs.promises as any).access = originalAccess;
+        expect(result.importedFilePaths.length).to.equal(0);
+    });
+
     it('handles cyclic imports without throwing', async () => {
         const cycleDir = path.join(testRoot, 'cycle');
         fs.mkdirSync(cycleDir, { recursive: true });

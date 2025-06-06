@@ -3,6 +3,13 @@ import * as path from 'path';
 import * as fs from 'fs';
 import logger from '../logging/logger';
 
+async function safeReadFile(filePath: string): Promise<string> {
+    const handle = await fs.promises.open(filePath, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);
+    const data = await handle.readFile('utf8');
+    await handle.close();
+    return data;
+}
+
 function isPathInsideWorkspace(filePath: string): boolean {
     const folders = vscode.workspace && vscode.workspace.workspaceFolders;
     if (!folders) {
@@ -107,7 +114,7 @@ export async function processFuncImports(
         inodeStack.push(inode);
 
         try {
-            const fileContent = await fs.promises.readFile(fullPath, 'utf8');
+            const fileContent = await safeReadFile(fullPath);
 
             // Add to our collection
             importedCode.push(fileContent);
@@ -227,7 +234,7 @@ export async function processTactImports(
         inodeStack.push(inode);
 
         try {
-            const fileContent = await fs.promises.readFile(fullPath, 'utf8');
+            const fileContent = await safeReadFile(fullPath);
 
             // Add to our collection
             importedCode.push(fileContent);
@@ -347,7 +354,7 @@ export async function processTolkImports(
         inodeStack.push(inode);
 
         try {
-            const fileContent = await fs.promises.readFile(fullPath, 'utf8');
+            const fileContent = await safeReadFile(fullPath);
 
             // Add to our collection
             importedCode.push(fileContent);

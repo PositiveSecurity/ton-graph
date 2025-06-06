@@ -201,6 +201,8 @@ We welcome your feedback and contributions to improve this extension!
 
 - File issues and suggestions [on GitHub](https://github.com/PositiveSecurity/ton-graph/issues)
 - Fork the repository and submit pull requests
+- Review the [security policy](SECURITY.md) for vulnerability reporting instructions
+- Project decision-making is documented in [GOVERNANCE.md](GOVERNANCE.md)
 
 ## License
 

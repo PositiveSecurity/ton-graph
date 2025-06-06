@@ -190,9 +190,10 @@
     "dompurify": "^3.2.6",
     "mermaid": "^11.6.0",
     "moo": "^0.5.2",
+    "tree-sitter-move": "github:tzakian/tree-sitter-move",
+    "vscode-languageclient": "^9.0.1",
     "web-tree-sitter": "^0.25.6",
-    "winston": "^3.17.0",
-    "vscode-languageclient": "^9.0.1"
+    "winston": "^3.17.0"
   },
   "files": [
     "out/**/*",

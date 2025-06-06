@@ -1,7 +1,7 @@
 {
   "name": "ton-graph",
   "displayName": "TON Graph",
-  "description": "Visualize function calls for TON smart contracts",
+  "description": "Visualize function call graphs for FunC, Tact, Tolk and Move contracts. Move support requires the move-analyzer utility",
   "version": "0.2.6",
   "publisher": "positiveweb3",
   "icon": "pic/logo.png",

@@ -207,7 +207,8 @@
     "vscode-languageclient": "^9.0.1",
     "web-tree-sitter": "^0.25.6",
     "winston": "^3.17.0",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "toml": "^3.0.0"
   },
   "files": [
     "out/**/*",

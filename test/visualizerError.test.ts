@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import mock = require('mock-require');
 
 let received: any;
+let disposeCb: any;
 const messages: any[] = [];
 const panelStub = {
   webview: {
@@ -10,7 +11,7 @@ const panelStub = {
     onDidReceiveMessage: (cb: any) => { received = cb; },
     postMessage: (msg: any) => { messages.push(msg); return Promise.resolve(true); }
   },
-  onDidDispose: () => {}
+  onDidDispose: (cb: any) => { disposeCb = cb; }
 };
 
 mock('vscode', {
@@ -42,5 +43,21 @@ describe('createVisualizationPanel error handling', () => {
     if (typeof received === 'function') {
       expect(() => received({ command: 'applyFilters', selectedTypes: [] })).not.to.throw();
     }
+  });
+
+  it('posts filterError when graph is missing and message is invalid', async () => {
+    const context = { extensionPath: process.cwd(), subscriptions: [] } as any;
+    createVisualizationPanel(context, { nodes: [], edges: [] }, []);
+    await new Promise(r => setTimeout(r, 0));
+    if (typeof disposeCb === 'function') {
+      disposeCb();
+    }
+    messages.length = 0;
+    if (typeof received === 'function') {
+      await received({ command: 'applyFilters' } as any);
+    }
+    const errMsg = messages.find(m => m.command === 'filterError');
+    expect(errMsg).to.exist;
+    expect(errMsg.error).to.equal('Original graph not found for this panel.');
   });
 });

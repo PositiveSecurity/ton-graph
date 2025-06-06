@@ -71,7 +71,6 @@ export function findFunctionDeclarations(lines: string[], globalVariables: Set<s
 
             const decorators = new Set<string>();
             const currentLine = lines[i];
-            const prevLine = i > 0 ? lines[i - 1] : '';
 
             let decoratorMatch: RegExpExecArray | null;
             const decoratorRegex = /@([a-zA-Z_]+)/g;
@@ -79,11 +78,13 @@ export function findFunctionDeclarations(lines: string[], globalVariables: Set<s
                 decorators.add(decoratorMatch[1]);
             }
 
-            if (prevLine.trim().startsWith('@') && !prevLine.includes('fun')) {
-                const prevDecorators = prevLine.match(/@([a-zA-Z_]+)/g) || [];
+            let prevIndex = i - 1;
+            while (prevIndex >= 0 && lines[prevIndex].trim().startsWith('@') && !lines[prevIndex].includes('fun')) {
+                const prevDecorators = lines[prevIndex].match(/@([a-zA-Z_]+)/g) || [];
                 for (const dec of prevDecorators) {
                     decorators.add(dec.substring(1));
                 }
+                prevIndex--;
             }
 
             if (BUILT_IN_FUNCTIONS.has(funcName) || globalVariables.has(funcName)) {

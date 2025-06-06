@@ -67,12 +67,24 @@ export function parseMove(code: string): { ast: MoveAST; tree: Parser.Tree } {
     if (body) {
       for (const child of body.namedChildren) {
         if (child.type === 'use_declaration') {
-          let text = child.text.replace(/^public\s+/, '');
-          text = text.replace(/^use\s+/, '').replace(/;$/, '').trim();
-          const parts = text.split(/\s+as\s+/);
-          const path = parts[0].trim();
-          const alias = parts[1] ? parts[1].trim() : path.split('::').pop()!;
-          uses.push({ alias, path });
+          const pathNode = child.namedChildren.find(c => c.type === 'path');
+          if (!pathNode) continue;
+          const aliasNode = child.namedChildren.find(c => c.type === 'alias');
+          const items = child.namedChildren.filter(c => c.type === 'use_item');
+          if (items.length === 0) {
+            const path = pathNode.text;
+            const alias = aliasNode ? aliasNode.text : path.split('::').pop()!;
+            uses.push({ alias, path });
+          } else {
+            for (const it of items) {
+              const itemAlias = it.namedChildren.find(c => c.type === 'alias');
+              const itemPath = it.namedChildren.find(c => c.type === 'path');
+              const name = itemPath ? itemPath.text : it.text;
+              const alias = itemAlias ? itemAlias.text : name.split('::').pop()!;
+              const path = `${pathNode.text}::${name}`;
+              uses.push({ alias, path });
+            }
+          }
         } else if (child.type === 'function_definition') {
           const nameNode = child.childForFieldName('name');
           if (!nameNode) continue;

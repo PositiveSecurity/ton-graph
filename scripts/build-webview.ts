@@ -1,7 +1,8 @@
 import { build } from 'esbuild';
 import { minify } from 'terser';
 import { writeFile, mkdir } from 'fs/promises';
-import logger from '../src/logging/logger';
+// Use console to avoid requiring the VS Code logger during standalone builds
+const logger = console;
 
 async function bundle() {
   const result = await build({

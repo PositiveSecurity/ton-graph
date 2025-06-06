@@ -16,7 +16,7 @@ export function generateVisualizationHtml(
 ): string {
     const nonce = getNonce();
     const filtersJson = JSON.stringify(functionTypeFilters);
-    const cspMetaTag = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}' vscode-resource:; img-src vscode-resource: data:">`;
+    const cspMetaTag = `<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}' vscode-resource:; img-src vscode-resource: data:;">`;
     return VISUALIZATION_TEMPLATE.replace('<head>', `<head>${cspMetaTag}`)
         .replace(/{{NONCE}}/g, nonce)
         .replace('{{MERMAID_DIAGRAM}}', mermaidDiagram)

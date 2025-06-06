@@ -1,6 +1,18 @@
 /* eslint-disable */
 // @ts-nocheck
 import DOMPurify from 'dompurify';
+
+const ALLOWED_TAGS = [
+  'svg', 'g', 'path', 'rect', 'circle', 'ellipse', 'line', 'polygon', 'polyline',
+  'text', 'defs', 'marker', 'style', 'filter', 'linearGradient', 'stop', 'title',
+  'foreignObject', 'image'
+];
+const ALLOWED_ATTR = [
+  'class', 'style', 'x', 'y', 'width', 'height', 'viewBox', 'fill', 'stroke', 'd',
+  'points', 'rx', 'ry', 'cx', 'cy', 'r', 'x1', 'x2', 'y1', 'y2', 'xmlns',
+  'transform', 'id', 'font-size', 'text-anchor', 'dominant-baseline',
+  'preserveAspectRatio', 'offset', 'stop-color'
+];
 declare const filterSet: { value: string; label: string; }[];
 declare const mermaidTheme: string;
 let currentZoom = 1;
@@ -63,7 +75,11 @@ htmlLabels: true
 mermaid.render('mermaid-diagram-svg', document.getElementById('mermaid-diagram').textContent).then(function(result) {
 const originalCode = document.getElementById('mermaid-diagram').textContent;
 document.getElementById('mermaid-diagram').setAttribute('data-original-code', originalCode);
-const sanitizedSvg = DOMPurify.sanitize(result.svg, {USE_PROFILES: {svg: true, svgFilters: true}});
+const sanitizedSvg = DOMPurify.sanitize(result.svg, {
+  ALLOWED_TAGS,
+  ALLOWED_ATTR,
+  SAFE_FOR_TEMPLATES: true
+});
 document.getElementById('mermaid-diagram').innerHTML = sanitizedSvg;
 setupPanZoom();
 logMessage('Diagram rendered successfully', 'success');
@@ -104,7 +120,11 @@ htmlLabels: true
 }
 });
 mermaid.render('mermaid-diagram-svg', message.diagram).then(function(result) {
-const sanitizedUpdateSvg = DOMPurify.sanitize(result.svg, {USE_PROFILES: {svg: true, svgFilters: true}});
+const sanitizedUpdateSvg = DOMPurify.sanitize(result.svg, {
+  ALLOWED_TAGS,
+  ALLOWED_ATTR,
+  SAFE_FOR_TEMPLATES: true
+});
 mermaidDiagram.innerHTML = sanitizedUpdateSvg;
 setupPanZoom();
 logMessage('Diagram updated with filters', 'success');

@@ -44,6 +44,23 @@ describe('Logger', () => {
     expect(lastFour[0]).to.not.include('/tmp/secret.txt');
   });
 
+  it('filters api keys in nested objects and arrays', () => {
+    logger.error('nested object', { cfg: { auth: { apiKey: 'SECRET1' } } });
+    logger.error('array of values', {
+      items: [
+        { 'x-api-key': 'SECRET2' },
+        { deep: { api_key: 'SECRET3' } },
+      ],
+    });
+    const lastTwo = outputChannel.messages.slice(-2);
+    for (const msg of lastTwo) {
+      expect(msg).to.not.include('SECRET1');
+      expect(msg).to.not.include('SECRET2');
+      expect(msg).to.not.include('SECRET3');
+      expect(msg).to.include('[FILTERED]');
+    }
+  });
+
   it('redacts absolute paths with spaces and quotes', () => {
     logger.info('opening "C:\\Secret Folder\\file.txt"');
     logger.info("processing '/tmp/some file '");

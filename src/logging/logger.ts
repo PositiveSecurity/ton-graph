@@ -65,7 +65,7 @@ const outputStream = new Writable({
 });
 
 const logger = createLogger({
-  level: 'info',
+  level: process.env.TON_GRAPH_LOG_LEVEL || 'debug',
   format: logFormat,
   transports: [
     new transports.File({

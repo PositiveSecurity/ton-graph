@@ -35,6 +35,7 @@ export async function handleExport(
     context: vscode.ExtensionContext
 ): Promise<void> {
     try {
+        logger.info(`handleExport received command ${message.command}`);
         // Get the current file name without extension
         const editor = vscode.window.activeTextEditor;
         let baseFileName = "diagram";
@@ -50,18 +51,23 @@ export async function handleExport(
 
         switch (message.command) {
             case 'saveMermaid':
+                logger.debug('Exporting Mermaid diagram');
                 await handleMermaidExport(panel, message, baseFileName, basePath);
                 break;
             case 'saveSvg':
+                logger.debug('Exporting SVG diagram');
                 await handleSvgExport(panel, message, baseFileName, basePath);
                 break;
             case 'savePng':
+                logger.debug('Exporting PNG diagram');
                 await handlePngExport(panel, message, baseFileName, basePath);
                 break;
             case 'saveJpg':
+                logger.debug('Exporting JPG diagram');
                 await handleJpgExport(panel, message, baseFileName, basePath);
                 break;
             case 'applyFilters':
+                logger.debug('Applying filters via export handler');
                 await handleApplyFilters(panel, message, context);
                 break;
             case 'mermaidContent':
@@ -88,6 +94,7 @@ async function handleApplyFilters(
     context: vscode.ExtensionContext
 ): Promise<void> {
     try {
+        logger.info('Applying filters from export handler');
         const { selectedTypes, nameFilter } = message;
 
         // Get original graph content
@@ -137,6 +144,7 @@ async function handleApplyFilters(
                 selectedTypes,
                 nameFilter
             });
+            logger.info('Filters applied successfully');
         } catch (updateError) {
             logger.error('Error updating webview content', updateError);
             throw updateError;
@@ -181,6 +189,7 @@ async function handleMermaidExport(
     baseFileName: string,
     basePath: string
 ): Promise<void> {
+    logger.info('Starting Mermaid export');
     // Get the current diagram content from the webview
     panel.webview.postMessage({ command: 'getMermaidContent' });
 
@@ -208,6 +217,7 @@ async function handleMermaidExport(
         const data = encoder.encode(mermaidContent);
         await vscode.workspace.fs.writeFile(mermaidUri, data);
         vscode.window.showInformationMessage('Mermaid diagram saved successfully!');
+        logger.info(`Mermaid diagram saved at ${mermaidUri.fsPath}`);
         panel.webview.postMessage({
             command: 'saveResult',
             success: true,
@@ -223,6 +233,7 @@ async function handleSvgExport(
     baseFileName: string,
     basePath: string
 ): Promise<void> {
+    logger.info('Starting SVG export');
     // Get the current SVG content from the webview
     panel.webview.postMessage({ command: 'getSvgContent' });
 
@@ -255,6 +266,7 @@ async function handleSvgExport(
         const data = encoder.encode(svgContent);
         await vscode.workspace.fs.writeFile(svgUri, data);
         vscode.window.showInformationMessage('SVG diagram saved successfully!');
+        logger.info(`SVG diagram saved at ${svgUri.fsPath}`);
         panel.webview.postMessage({
             command: 'saveResult',
             success: true,
@@ -270,6 +282,7 @@ async function handlePngExport(
     baseFileName: string,
     basePath: string
 ): Promise<void> {
+    logger.info('Starting PNG export');
     // Show save dialog first
     const pngUri = await vscode.window.showSaveDialog({
         defaultUri: vscode.Uri.file(path.join(basePath, `${baseFileName}.png`)),
@@ -346,6 +359,7 @@ async function handleJpgExport(
     baseFileName: string,
     basePath: string
 ): Promise<void> {
+    logger.info('Starting JPG export');
     // Show save dialog first
     const jpgUri = await vscode.window.showSaveDialog({
         defaultUri: vscode.Uri.file(path.join(basePath, `${baseFileName}.jpg`)),
@@ -402,6 +416,7 @@ async function handleJpgExport(
 
             await vscode.workspace.fs.writeFile(jpgUri, jpgBinary);
             vscode.window.showInformationMessage('JPG diagram saved successfully!');
+            logger.info(`JPG diagram saved at ${jpgUri.fsPath}`);
             panel.webview.postMessage({
                 command: 'saveResult',
                 success: true,

@@ -14,7 +14,8 @@
             "dom"
         ],
         "paths": {
-            "@move-analyzer/parser": ["./src/move-analyzer/parser"]
+            "@move-analyzer/parser": ["./src/move-analyzer/parser"],
+            "@parser/move": ["./src/parser/moveParser"]
         }
     },
     "include": [

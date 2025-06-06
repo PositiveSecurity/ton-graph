@@ -176,7 +176,7 @@ You can also view logs directly in VS Code under **Output** → **TON Graph**.
 
 ## Requirements
 
-- Visual Studio Code 1.60.0 or newer
+ - Visual Studio Code 1.75.0 or newer
 
 ## Known Issues
 

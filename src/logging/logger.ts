@@ -30,7 +30,7 @@ const sanitizeFormat = format((info) => {
     }
     if (typeof value === 'string') {
       value = redactPaths(value);
-      const apiKeyPattern = /(api[_-]?key\s*[=:]\s*)([^\s]+)/i;
+      const apiKeyPattern = /(api[_-]?key[^\s]*?[=:])([^\s]*)/i;
       return value.replace(apiKeyPattern, '$1[FILTERED]');
     }
     return value;

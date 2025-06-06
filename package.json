@@ -193,7 +193,8 @@
     "tree-sitter-move": "github:tzakian/tree-sitter-move",
     "vscode-languageclient": "^9.0.1",
     "web-tree-sitter": "^0.25.6",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "zod": "^3.22.4"
   },
   "files": [
     "out/**/*",

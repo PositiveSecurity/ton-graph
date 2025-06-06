@@ -155,9 +155,10 @@ To work with it:
 
 ### Testing
 
-Run the test suite with coverage using:
+Install dependencies and run the test suite with coverage using:
 
 ```bash
+npm ci
 npm test
 ```
 

@@ -2,12 +2,15 @@
 
 [![codecov](https://codecov.io/gh/PositiveSecurity/ton-graph/branch/work/graph/badge.svg)](https://codecov.io/gh/PositiveSecurity/ton-graph)
 
-A Visual Studio Code extension for visualizing function call graphs in TON smart contracts written in FunC, Tact, and Tolk.
+A Visual Studio Code extension for visualizing function call graphs in smart contracts written in FunC, Tact, Tolk and Move.
 
 Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 
 <a href="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr01.jpg" target="_blank">
   <img src="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr01.jpg" width="400" alt="TON Graph visualization">
+</a>
+<a href="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr05.jpg" target="_blank">
+  <img src="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr05.jpg" width="400" alt="Move call graph">
 </a>
 
 ## Features
@@ -16,6 +19,7 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
   - FunC (*.fc, *.func)
   - Tact (*.tact)
   - Tolk (*.tolk)
+  - Move (*.move)
 - Interactive diagram with cluster-based organization
 - Zoom functionality for better navigation
 - Filter functions by type (regular, impure, inline, method_id)
@@ -40,10 +44,11 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 3. Search for "TON Graph"
 4. Click Install
 5. Run "TON Graph: Set API Key" from the command palette and enter your Toncenter API key
+6. Install the `move-analyzer` binary and ensure it is available in your PATH
 
 ## Usage
 
-1. Open a contract file (*.fc, *.func, *.tact, or *.tolk)
+1. Open a contract file (*.fc, *.func, *.tact, *.tolk, or *.move)
 2. You can visualize a contract in multiple ways:
    - Press F1 or Ctrl+Shift+P to open the command palette and type "TON Graph: Visualize Contract"
    - Right-click on contract code in the editor → TON Graph: Visualize Contract

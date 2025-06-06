@@ -1,7 +1,7 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { ContractGraph, ContractNode, GraphEdge } from '../types/graph';
-import { GraphNodeKind } from '../types/graphNodeKind';
+import { ContractGraph, ContractNode, GraphEdge } from '../../types/graph';
+import { GraphNodeKind } from '../../types/graphNodeKind';
 
 // List of built-in functions to exclude
 const BUILT_IN_FUNCTIONS = new Set([

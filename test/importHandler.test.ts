@@ -15,12 +15,12 @@ import {
     processTactImports,
     processTolkImports,
     processImports
-} from '../src/parser/importHandler';
+} from '../src/languages/func/importHandler';
 
 describe('ImportHandler', () => {
     afterEach(() => {
         mock.stopAll();
-        delete require.cache[require.resolve('../src/parser/importHandler')];
+        delete require.cache[require.resolve('../src/languages/func/importHandler')];
     });
     it('rejects imports outside workspace', async () => {
         const code = '#include "../../etc/passwd"';
@@ -196,7 +196,7 @@ describe('ImportHandler', () => {
             window: { createOutputChannel: () => ({ appendLine: () => {} }) },
             workspace: { }
         });
-        const { processFuncImports: proc } = require('../src/parser/importHandler');
+        const { processFuncImports: proc } = require('../src/languages/func/importHandler');
         const code = '#include "./file.fc"';
         const res = await proc(code, path.join(testRoot, 'dummy.fc'));
         expect(res.importedFilePaths.length).to.equal(0);
@@ -215,7 +215,7 @@ describe('ImportHandler', () => {
             window: { createOutputChannel: () => ({ appendLine: () => {} }) },
             workspace: { workspaceFolders: [{ uri: { fsPath: tactLoop } }] }
         });
-        const { processTactImports: procT } = require('../src/parser/importHandler');
+        const { processTactImports: procT } = require('../src/languages/func/importHandler');
 
         try {
             await procT(fs.readFileSync(main, 'utf8'), main);
@@ -241,7 +241,7 @@ describe('ImportHandler', () => {
             window: { createOutputChannel: () => ({ appendLine: () => {} }) },
             workspace: {}
         });
-        const { processTactImports: proc } = require('../src/parser/importHandler');
+        const { processTactImports: proc } = require('../src/languages/func/importHandler');
         const res = await proc('import "./lib.tact";', path.join(testRoot, 'dummy.tact'));
         expect(res.importedFilePaths.length).to.equal(0);
     });
@@ -251,7 +251,7 @@ describe('ImportHandler', () => {
             window: { createOutputChannel: () => ({ appendLine: () => {} }) },
             workspace: {}
         });
-        const { processTolkImports: proc } = require('../src/parser/importHandler');
+        const { processTolkImports: proc } = require('../src/languages/func/importHandler');
         const res = await proc('import "./lib.tolk";', path.join(testRoot, 'dummy.tolk'));
         expect(res.importedFilePaths.length).to.equal(0);
     });
@@ -269,7 +269,7 @@ describe('ImportHandler', () => {
             window: { createOutputChannel: () => ({ appendLine: () => {} }) },
             workspace: { workspaceFolders: [{ uri: { fsPath: tolkLoop } }] }
         });
-        const { processTolkImports: proc } = require('../src/parser/importHandler');
+        const { processTolkImports: proc } = require('../src/languages/func/importHandler');
         try {
             await proc(fs.readFileSync(main, 'utf8'), main);
             expect.fail('should throw due to symlink loop');

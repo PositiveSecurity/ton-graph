@@ -3,6 +3,10 @@ import * as path from 'path';
 import { visualize, visualizeProject } from './commands';
 import { setApiKey, deleteApiKey } from './secrets/tokenManager';
 import logger from './logging/logger';
+import adapters from './languages/func';
+import movelangAdapter from './languages/move';
+import { GraphProvider } from './core/graphProvider';
+import { startMoveClient } from './lsp-clients/moveClient';
 
 export function activate(context: vscode.ExtensionContext) {
     logger.info('Activating TON Graph extension');
@@ -14,6 +18,16 @@ export function activate(context: vscode.ExtensionContext) {
         // Directory might already exist, that's fine
         logger.debug('Cached directory already exists');
     }
+
+    adapters.push(movelangAdapter);
+    adapters.forEach(adapter => {
+        adapter.fileExtensions.forEach(ext => {
+            const selector = { pattern: `**/*${ext}` };
+            const provider = new GraphProvider(adapter);
+            context.subscriptions.push(vscode.languages.registerDocumentSymbolProvider(selector, provider));
+        });
+    });
+    startMoveClient(context);
 
     context.subscriptions.push(
         vscode.commands.registerCommand('ton-graph.visualize', async (fileUri?: vscode.Uri) => {

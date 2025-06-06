@@ -40,7 +40,7 @@ describe('exportHandler', () => {
     afterEach(() => {
         mock.stopAll();
         delete require.cache[require.resolve('../src/export/exportHandler')];
-        const paths = ['../src/parser/importHandler', '../src/parser/parserUtils'];
+        const paths = ['../src/languages/func/importHandler', '../src/parser/parserUtils'];
         for (const p of paths) {
             if (require.cache[require.resolve(p)]) {
                 delete require.cache[require.resolve(p)];

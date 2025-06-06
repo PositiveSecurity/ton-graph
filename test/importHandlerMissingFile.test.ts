@@ -8,7 +8,7 @@ mock('vscode', {
   workspace: { workspaceFolders: [{ uri: { fsPath: tmpDir } }] }
 });
 
-import { processFuncImports } from '../src/parser/importHandler';
+import { processFuncImports } from '../src/languages/func/importHandler';
 
 describe('processFuncImports missing file', () => {
   it('returns no imports when file missing', async () => {

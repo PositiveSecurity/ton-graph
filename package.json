@@ -30,7 +30,11 @@
     "onCommand:ton-graph.savePng",
     "onCommand:ton-graph.saveJpg",
     "onCommand:ton-graph.setApiKey",
-    "onCommand:ton-graph.deleteApiKey"
+    "onCommand:ton-graph.deleteApiKey",
+    "onLanguage:func",
+    "onLanguage:tact",
+    "onLanguage:tolk",
+    "onLanguage:move"
   ],
   "contributes": {
     "languages": [
@@ -60,6 +64,15 @@
         ],
         "aliases": [
           "Func"
+        ]
+      },
+      {
+        "id": "move",
+        "extensions": [
+          ".move"
+        ],
+        "aliases": [
+          "Move"
         ]
       }
     ],
@@ -178,7 +191,8 @@
     "mermaid": "^11.6.0",
     "moo": "^0.5.2",
     "web-tree-sitter": "^0.25.6",
-    "winston": "^3.17.0"
+    "winston": "^3.17.0",
+    "vscode-languageclient": "^9.0.1"
   },
   "files": [
     "out/**/*",

@@ -13,6 +13,9 @@
             "es2018",
             "dom"
         ],
+        "paths": {
+            "@move-analyzer/parser": ["./src/move-analyzer/parser"]
+        }
     },
     "include": [
         "src",

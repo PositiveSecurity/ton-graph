@@ -1,12 +1,13 @@
 import * as path from 'path';
 import { ContractGraph } from '../types/graph';
-import { parseContractCode } from './funcParser';
-import { parseTactContract } from './tactParser';
-import { parseTolkContract } from './tolkParser';
-import { processImports } from './importHandler';
+import { parseContractCode } from '../languages/func/funcParser';
+import { parseTactContract } from '../languages/func/tactParser';
+import { parseTolkContract } from '../languages/func/tolkParser';
+import { processImports } from '../languages/func/importHandler';
+import { parseMoveContract } from '../languages/move/moveParser';
 import * as vscode from 'vscode';
 
-export type ContractLanguage = 'func' | 'tact' | 'tolk';
+export type ContractLanguage = 'func' | 'tact' | 'tolk' | 'move';
 
 /**
  * Detects the language based on file extension
@@ -14,7 +15,9 @@ export type ContractLanguage = 'func' | 'tact' | 'tolk';
 export function detectLanguage(filePath: string): ContractLanguage {
     const extension = path.extname(filePath).toLowerCase();
 
-    if (extension === '.tact') {
+    if (extension === '.move') {
+        return 'move';
+    } else if (extension === '.tact') {
         return 'tact';
     } else if (extension === '.tolk') {
         return 'tolk';
@@ -29,6 +32,8 @@ export function detectLanguage(filePath: string): ContractLanguage {
  */
 export async function parseContractByLanguage(code: string, language: ContractLanguage): Promise<ContractGraph> {
     switch (language) {
+        case 'move':
+            return await parseMoveContract(code);
         case 'tact':
             return await parseTactContract(code);
         case 'tolk':
@@ -47,6 +52,9 @@ export async function parseContractWithImports(
     filePath: string,
     language: ContractLanguage
 ): Promise<ContractGraph> {
+    if (language === 'move') {
+        return parseMoveContract(code);
+    }
     // Process imports first
     const { importedCode } = await processImports(code, filePath, language);
 
@@ -75,6 +83,10 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
                 { value: 'pure_fun', label: 'Pure Fun' },
                 { value: 'inline_fun', label: 'Inline Fun' },
                 { value: 'get', label: 'Get' }
+            ];
+        case 'move':
+            return [
+                { value: 'regular', label: 'Regular' }
             ];
         case 'func':
         default:

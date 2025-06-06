@@ -127,7 +127,7 @@ describe('Parser', () => {
         fs.writeFileSync(main, '#include "lib.fc"\nint main() { lib(); }');
         const code = fs.readFileSync(main, 'utf8');
         mock('vscode', { window: { createOutputChannel: () => ({ appendLine: () => {} }) }, workspace: { workspaceFolders: [{ uri: { fsPath: tmp } }] } });
-        delete require.cache[require.resolve('../src/parser/importHandler')];
+        delete require.cache[require.resolve('../src/languages/func/importHandler')];
         delete require.cache[require.resolve('../src/parser/parserUtils')];
         const { parseContractWithImports: parseWithImports } = require('../src/parser/parserUtils');
         const graph = await parseWithImports(code, main, 'func');

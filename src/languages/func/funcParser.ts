@@ -2,8 +2,8 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as WebTreeSitter from 'web-tree-sitter';
 import { loadFunC } from '@scaleton/tree-sitter-func';
-import { ContractGraph, ContractNode } from '../types/graph';
-import { GraphNodeKind } from '../types/graphNodeKind';
+import { ContractGraph, ContractNode } from '../../types/graph';
+import { GraphNodeKind } from '../../types/graphNodeKind';
 
 const BUILT_IN_FUNCTIONS = new Set([
     'if', 'elseif', 'while', 'for', 'switch', 'return', 'throw', 'throw_unless',

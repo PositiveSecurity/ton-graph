@@ -153,6 +153,20 @@ To work with it:
 5. Docker build caching is enabled via the `cacheFrom` property to speed up subsequent builds.
 6. You can now run `npm test` or other tasks inside the container.
 
+### Testing
+
+Run the test suite with coverage using:
+
+```bash
+npm test
+```
+
+The project enforces minimum coverage thresholds via `nyc`:
+
+- Lines: 70%
+- Branches: 59%
+- Functions: 70%
+
 ### Logs
 
 All runtime messages are written to `logs/extension.log` in the repository root.

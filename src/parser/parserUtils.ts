@@ -7,6 +7,14 @@ import { processImports } from '../languages/func/importHandler';
 import { parseMoveContract } from '../languages/move/moveParser';
 import * as vscode from 'vscode';
 
+const parseCache = new Map<string, ContractGraph>();
+
+if (vscode.workspace && typeof vscode.workspace.onDidChangeTextDocument === 'function') {
+    vscode.workspace.onDidChangeTextDocument(e => {
+        parseCache.delete(`${e.document.uri.toString()}-${detectLanguage(e.document.fileName)}`);
+    });
+}
+
 export type ContractLanguage = 'func' | 'tact' | 'tolk' | 'move';
 
 /**
@@ -30,18 +38,31 @@ export function detectLanguage(filePath: string): ContractLanguage {
 /**
  * Parses contract code using the appropriate parser based on the detected language
  */
-export async function parseContractByLanguage(code: string, language: ContractLanguage): Promise<ContractGraph> {
+export async function parseContractByLanguage(code: string, language: ContractLanguage, uri?: vscode.Uri): Promise<ContractGraph> {
+    const key = uri ? `${uri.toString()}-${language}` : undefined;
+    if (key && parseCache.has(key)) {
+        return parseCache.get(key)!;
+    }
+    let graph: ContractGraph;
     switch (language) {
         case 'move':
-            return await parseMoveContract(code);
+            graph = await parseMoveContract(code);
+            break;
         case 'tact':
-            return await parseTactContract(code);
+            graph = await parseTactContract(code);
+            break;
         case 'tolk':
-            return await parseTolkContract(code);
+            graph = await parseTolkContract(code);
+            break;
         case 'func':
         default:
-            return await parseContractCode(code);
+            graph = await parseContractCode(code);
+            break;
     }
+    if (key) {
+        parseCache.set(key, graph);
+    }
+    return graph;
 }
 
 /**

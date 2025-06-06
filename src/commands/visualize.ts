@@ -40,7 +40,7 @@ export async function visualize(context: vscode.ExtensionContext, fileUri?: vsco
     try {
         const language = detectLanguage(document.fileName);
         logger.debug(`Detected language ${language}`);
-        originalGraph = await parseContractByLanguage(code, language);
+        originalGraph = await parseContractByLanguage(code, language, document.uri);
         logger.debug('Parsed contract to graph');
 
         if (panel) {

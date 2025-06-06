@@ -153,4 +153,23 @@ describe('Parser', () => {
         expect(graph.edges).to.deep.include({ from: 'A::a', to: 'B::b', label: '' });
         expect(graph.edges).to.deep.include({ from: 'A::a', to: 'C::c', label: '' });
     });
+
+    it('skips dependencies outside workspace', async () => {
+        const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'moveout-'));
+        const external = fs.mkdtempSync(path.join(os.tmpdir(), 'ext-'));
+        const rel = path.relative(tmp, external).replace(/\\/g, '/');
+        fs.writeFileSync(
+            path.join(tmp, 'Move.toml'),
+            `[package]\nname="Test"\n\n[dependencies]\nexternal = { local = "${rel}" }`
+        );
+        fs.writeFileSync(path.join(tmp, 'A.move'), 'module A { public fun a() {} }');
+        fs.writeFileSync(path.join(external, 'B.move'), 'module B { public fun b() {} }');
+        const code = fs.readFileSync(path.join(tmp, 'A.move'), 'utf8');
+        mock('vscode', { window: { createOutputChannel: () => ({ appendLine: () => {} }) }, workspace: { workspaceFolders: [{ uri: { fsPath: tmp } }] } });
+        delete require.cache[require.resolve('../src/parser/parserUtils')];
+        const { parseContractWithImports: parseWithImports } = require('../src/parser/parserUtils');
+        const graph = await parseWithImports(code, path.join(tmp, 'A.move'), 'move');
+        const ids = graph.nodes.map((n: any) => n.id);
+        expect(ids).to.deep.equal(['A::a']);
+    });
 });

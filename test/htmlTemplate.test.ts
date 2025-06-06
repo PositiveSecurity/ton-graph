@@ -13,7 +13,7 @@ describe("generateVisualizationHtml", () => {
       "dark"
     );
     expect(html).to.include("Content-Security-Policy");
-    expect(html).to.include(`nonce-${webview.cspSource}`);
+    expect(html).to.match(/nonce="[A-Za-z0-9]{32}"/);
     expect(html).to.include("graph TB;");
     expect(html).to.include("mermaid.js");
     expect(html).to.include("script.js");

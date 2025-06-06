@@ -76,17 +76,21 @@ document.getElementById('loadingOverlay').classList.add('hidden');
 });
 var vscode = acquireVsCodeApi();
 window.addEventListener('message', function(event) {
-const message = event.data;
-switch (message.command) {
-case 'updateDiagram':
-const mermaidDiagram = document.getElementById('mermaid-diagram');
-mermaidDiagram.textContent = message.diagram;
-mermaidDiagram.setAttribute('data-original-code', message.diagram);
-const fontSize = 14;
-const nodeSpacing = 15;
-const rankSpacing = 15;
-mermaid.initialize({
-startOnLoad: false,
+  const message = event.data;
+  if (!message || typeof message !== 'object' || typeof message.command !== 'string') {
+    return;
+  }
+  switch (message.command) {
+  case 'updateDiagram':
+    if (typeof message.diagram !== 'string') return;
+    const mermaidDiagram = document.getElementById('mermaid-diagram');
+    mermaidDiagram.textContent = message.diagram;
+    mermaidDiagram.setAttribute('data-original-code', message.diagram);
+    const fontSize = 14;
+    const nodeSpacing = 15;
+    const rankSpacing = 15;
+    mermaid.initialize({
+      startOnLoad: false,
 securityLevel: 'strict',
 theme: mermaidTheme || 'default',
 fontSize: fontSize,
@@ -108,14 +112,15 @@ logMessage('Diagram updated with filters', 'success');
 document.getElementById('errorContainer').textContent = 'Error updating diagram: ' + error;
 document.getElementById('errorContainer').style.display = 'block';
 logMessage('Error updating diagram: ' + error, 'error');
-});
-break;
-case 'filterError':
-document.getElementById('errorContainer').textContent = message.error;
-document.getElementById('errorContainer').style.display = 'block';
-logMessage('Filter error: ' + message.error, 'error');
-break;
-}
+    });
+    break;
+  case 'filterError':
+    if (typeof message.error !== 'string') return;
+    document.getElementById('errorContainer').textContent = message.error;
+    document.getElementById('errorContainer').style.display = 'block';
+    logMessage('Filter error: ' + message.error, 'error');
+    break;
+  }
 });
 function logMessage(message, type) {
 const logContainer = document.getElementById('logContainer');

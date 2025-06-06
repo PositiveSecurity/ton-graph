@@ -4,7 +4,7 @@ export const VISUALIZATION_TEMPLATE = `<!DOCTYPE html>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>TON Graph</title>
-        <style>
+        <style nonce="{{NONCE}}">
             body {
                 margin: 0;
                 padding: 0;
@@ -261,9 +261,9 @@ export const VISUALIZATION_TEMPLATE = `<!DOCTYPE html>
             <canvas id="imageCanvas" style="display:none;"></canvas>
             <a id="downloadLink" style="display: none;">Download</a>
         </div>
-        <script>window.filterSet = {{FILTERS_JSON}};</script>
-        <script>window.mermaidTheme = "{{MERMAID_THEME}}";</script>
-        <script src="{{MERMAID_SCRIPT_URI}}"></script>
-        <script src="{{WEBVIEW_SCRIPT_URI}}"></script>
+        <script nonce="{{NONCE}}">window.filterSet = {{FILTERS_JSON}};</script>
+        <script nonce="{{NONCE}}">window.mermaidTheme = "{{MERMAID_THEME}}";</script>
+        <script nonce="{{NONCE}}" src="{{MERMAID_SCRIPT_URI}}"></script>
+        <script nonce="{{NONCE}}" src="{{WEBVIEW_SCRIPT_URI}}"></script>
     </body>
     </html>`;

@@ -22,8 +22,9 @@ export type ContractLanguage = 'func' | 'tact' | 'tolk' | 'move';
  */
 export function detectLanguage(filePath: string): ContractLanguage {
     const extension = path.extname(filePath).toLowerCase();
+    const base = path.basename(filePath).toLowerCase();
 
-    if (extension === '.move') {
+    if (extension === '.move' || base === 'move.toml') {
         return 'move';
     } else if (extension === '.tact') {
         return 'tact';
@@ -74,7 +75,59 @@ export async function parseContractWithImports(
     language: ContractLanguage
 ): Promise<ContractGraph> {
     if (language === 'move') {
-        return parseMoveContract(code);
+        const fs = await import('fs');
+        const moveFiles: string[] = [];
+
+        function collect(dir: string) {
+            if (!fs.existsSync(dir)) return;
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+                const full = path.join(dir, entry.name);
+                if (entry.isDirectory()) {
+                    collect(full);
+                } else if (entry.isFile() && full.endsWith('.move')) {
+                    moveFiles.push(full);
+                }
+            }
+        }
+
+        function findRoot(start: string): string | null {
+            let cur = start;
+            while (true) {
+                const p = path.join(cur, 'Move.toml');
+                if (fs.existsSync(p)) return cur;
+                const parent = path.dirname(cur);
+                if (parent === cur) break;
+                cur = parent;
+            }
+            return null;
+        }
+
+        const root = findRoot(path.dirname(filePath));
+        if (root) {
+            collect(root);
+            const tomlPath = path.join(root, 'Move.toml');
+            try {
+                const text = fs.readFileSync(tomlPath, 'utf8');
+                const depSection = text.split(/\[dependencies\]/i)[1];
+                if (depSection) {
+                    for (const line of depSection.split(/\n/)) {
+                        const m = line.match(/local\s*=\s*"([^"]+)"/);
+                        if (m) {
+                            const depDir = path.resolve(root, m[1]);
+                            collect(depDir);
+                        }
+                        if (line.startsWith('[')) break;
+                    }
+                }
+            } catch {
+                /* ignore */
+            }
+        } else {
+            moveFiles.push(filePath);
+        }
+
+        const combined = moveFiles.map(f => fs.readFileSync(f, 'utf8')).join('\n\n');
+        return parseMoveContract(combined);
     }
     // Process imports first
     const { importedCode } = await processImports(code, filePath, language);

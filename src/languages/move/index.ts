@@ -1,28 +1,54 @@
-import { parse } from '../../move-analyzer/parser';
+import { parseMove, MoveAST } from '@parser/move';
 import { AST, Edge, LanguageAdapter } from '../../core/types';
 
 export const movelangAdapter: LanguageAdapter = {
   fileExtensions: ['.move'],
   parse(source: string): AST {
-    return parse(source);        // full AST
+    return parseMove(source).ast as unknown as AST;
   },
   buildCallGraph(ast: AST): Edge[] {
     const edges: Edge[] = [];
-    const funcs = new Map<string, any>();
-    const a = ast as any;
+    const a = ast as unknown as MoveAST;
+    const funcs = new Map<string, { module: string; name: string; body?: any }>();
 
-    // 1️⃣ collect all function declarations
-    a.functions.forEach((fn: any) => funcs.set(fn.name, fn));
+    for (const m of a.modules) {
+      for (const f of m.functions) {
+        funcs.set(`${m.name}::${f.name}`, { module: m.name, name: f.name, body: f.body });
+      }
+    }
 
-    // 2️⃣ walk bodies and record call expressions
-    a.functions.forEach((fn: any) => {
-      fn.body.replace(/(\w+)\s*\(/g, (m: string, name: string) => {
-        if (funcs.has(name)) {
-          edges.push({ from: fn.name, to: name });
+    const walk = (node: any, type: string): any[] => {
+      const res: any[] = [];
+      const stack = [node];
+      while (stack.length) {
+        const n = stack.pop();
+        if (!n) continue;
+        if (n.type === type) res.push(n);
+        stack.push(...n.namedChildren);
+      }
+      return res;
+    };
+
+    for (const m of a.modules) {
+      const useMap = new Map<string, string>();
+      m.uses.forEach(u => useMap.set(u.alias, u.path));
+      for (const f of m.functions) {
+        if (!f.body) continue;
+        const from = `${m.name}::${f.name}`;
+        for (const call of walk(f.body, 'call_expression')) {
+          const access = call.namedChildren[0]?.namedChildren?.find((c: any) => c.fieldName === 'access') || call.childForFieldName('access');
+          let path = access ? access.text : '';
+          if (!path) continue;
+          if (!path.includes('::')) {
+            path = useMap.get(path) || `${m.name}::${path}`;
+          }
+          const to = path;
+          if (funcs.has(to)) {
+            edges.push({ from, to });
+          }
         }
-        return m;
-      });
-    });
+      }
+    }
     return edges;
   }
 };

@@ -111,6 +111,7 @@ describe('Parser', () => {
         expect(detectLanguage('a.tact')).to.equal('tact');
         expect(detectLanguage('a.tolk')).to.equal('tolk');
         expect(detectLanguage('a.fc')).to.equal('func');
+        expect(detectLanguage('Move.toml')).to.equal('move');
     });
 
     it('provides function type filters per language', () => {
@@ -133,5 +134,23 @@ describe('Parser', () => {
         const graph = await parseWithImports(code, main, 'func');
         const ids = graph.nodes.map((n: any) => n.id);
         expect(ids).to.include.members(['lib', 'main']);
+    });
+
+    it('parses Move project with Move.toml', async () => {
+        const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'moveproj-'));
+        fs.writeFileSync(path.join(tmp, 'Move.toml'), '[package]\nname="Test"\n\n[dependencies]\ndep = { local = "./dep" }');
+        fs.writeFileSync(path.join(tmp, 'A.move'), 'module A { use B; use C; public fun a() { B::b(); C::c(); } }');
+        fs.writeFileSync(path.join(tmp, 'B.move'), 'module B { public fun b() {} }');
+        fs.mkdirSync(path.join(tmp, 'dep'), { recursive: true });
+        fs.writeFileSync(path.join(tmp, 'dep', 'C.move'), 'module C { public fun c() {} }');
+        const code = fs.readFileSync(path.join(tmp, 'A.move'), 'utf8');
+        mock('vscode', { window: { createOutputChannel: () => ({ appendLine: () => {} }) }, workspace: { workspaceFolders: [{ uri: { fsPath: tmp } }] } });
+        delete require.cache[require.resolve('../src/parser/parserUtils')];
+        const { parseContractWithImports: parseWithImports } = require('../src/parser/parserUtils');
+        const graph = await parseWithImports(code, path.join(tmp, 'A.move'), 'move');
+        const ids = graph.nodes.map((n: any) => n.id);
+        expect(ids).to.include.members(['A::a', 'B::b', 'C::c']);
+        expect(graph.edges).to.deep.include({ from: 'A::a', to: 'B::b', label: '' });
+        expect(graph.edges).to.deep.include({ from: 'A::a', to: 'C::c', label: '' });
     });
 });

@@ -45,7 +45,7 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 3. Search for "TON Graph"
 4. Click Install
 5. Run "TON Graph: Set API Key" from the command palette and enter your Toncenter API key
-6. Install the `move-analyzer` binary and ensure it is available in your PATH (required for Move support)
+6. Install the `move-analyzer` binary and ensure it is available in your PATH (required for Move support). If the binary is located elsewhere, set the `ton-graph.moveAnalyzerPath` setting to its full path.
 
 ## Usage
 
@@ -184,6 +184,10 @@ You can also view logs directly in VS Code under **Output** → **TON Graph**.
 ## Requirements
 
  - Visual Studio Code 1.75.0 or newer
+
+## Configuration
+
+- `ton-graph.moveAnalyzerPath` – path to the `move-analyzer` executable used for Move language support. Defaults to `move-analyzer`.
 
 ## Limitations
 

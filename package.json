@@ -135,6 +135,16 @@
           "group": "navigation"
         }
       ]
+    },
+    "configuration": {
+      "title": "TON Graph",
+      "properties": {
+        "ton-graph.moveAnalyzerPath": {
+          "type": "string",
+          "default": "move-analyzer",
+          "description": "Path to the Move analyzer executable"
+        }
+      }
     }
   },
   "scripts": {

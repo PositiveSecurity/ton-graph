@@ -29,12 +29,12 @@ describe('Visualizer', () => {
         it('groups isolated and connected nodes into clusters', () => {
             const graph: ContractGraph = {
                 nodes: [
-                    { id: 'a', label: 'a()', type: GraphNodeKind.Internal, contractName: '' },
-                    { id: 'b', label: 'b()', type: GraphNodeKind.Internal, contractName: '' },
-                    { id: 'c', label: 'c()', type: GraphNodeKind.Internal, contractName: '' },
-                    { id: 'd', label: 'd()', type: GraphNodeKind.Internal, contractName: '' },
-                    { id: 'e', label: 'e()', type: GraphNodeKind.Internal, contractName: '' },
-                    { id: 'f', label: 'f()', type: GraphNodeKind.Internal, contractName: '' },
+                    { id: 'a', label: 'a()', type: GraphNodeKind.Internal, contractName: 'file1' },
+                    { id: 'b', label: 'b()', type: GraphNodeKind.Internal, contractName: 'file1' },
+                    { id: 'c', label: 'c()', type: GraphNodeKind.Internal, contractName: 'file1' },
+                    { id: 'd', label: 'd()', type: GraphNodeKind.Internal, contractName: 'file2' },
+                    { id: 'e', label: 'e()', type: GraphNodeKind.Internal, contractName: 'file2' },
+                    { id: 'f', label: 'f()', type: GraphNodeKind.Internal, contractName: 'file3' },
                 ],
                 edges: [
                     { from: 'a', to: 'b', label: '' },
@@ -44,27 +44,27 @@ describe('Visualizer', () => {
             };
 
             const clusters = clusterNodes(graph);
-            expect(clusters.get('f')).to.equal(0);
-            expect(clusters.get('a')).to.equal(1);
-            expect(clusters.get('b')).to.equal(1);
-            expect(clusters.get('c')).to.equal(1);
-            expect(clusters.get('d')).to.equal(2);
-            expect(clusters.get('e')).to.equal(2);
+            expect(clusters.get('f')).to.equal('file3');
+            expect(clusters.get('a')).to.equal('file1');
+            expect(clusters.get('b')).to.equal('file1');
+            expect(clusters.get('c')).to.equal('file1');
+            expect(clusters.get('d')).to.equal('file2');
+            expect(clusters.get('e')).to.equal('file2');
             expect(clusters.size).to.equal(6);
         });
 
         it('handles multiple isolated nodes and several components', () => {
             const graph: ContractGraph = {
                 nodes: [
-                    { id: 'a', label: 'a()', type: GraphNodeKind.Internal, contractName: '' },
-                    { id: 'b', label: 'b()', type: GraphNodeKind.Internal, contractName: '' },
-                    { id: 'c', label: 'c()', type: GraphNodeKind.Internal, contractName: '' },
-                    { id: 'd', label: 'd()', type: GraphNodeKind.Internal, contractName: '' },
-                    { id: 'e', label: 'e()', type: GraphNodeKind.Internal, contractName: '' },
-                    { id: 'f', label: 'f()', type: GraphNodeKind.Internal, contractName: '' },
-                    { id: 'g', label: 'g()', type: GraphNodeKind.Internal, contractName: '' },
-                    { id: 'h', label: 'h()', type: GraphNodeKind.Internal, contractName: '' },
-                    { id: 'i', label: 'i()', type: GraphNodeKind.Internal, contractName: '' },
+                    { id: 'a', label: 'a()', type: GraphNodeKind.Internal, contractName: 'file1' },
+                    { id: 'b', label: 'b()', type: GraphNodeKind.Internal, contractName: 'file1' },
+                    { id: 'c', label: 'c()', type: GraphNodeKind.Internal, contractName: 'file1' },
+                    { id: 'd', label: 'd()', type: GraphNodeKind.Internal, contractName: 'file2' },
+                    { id: 'e', label: 'e()', type: GraphNodeKind.Internal, contractName: 'file2' },
+                    { id: 'f', label: 'f()', type: GraphNodeKind.Internal, contractName: 'file3' },
+                    { id: 'g', label: 'g()', type: GraphNodeKind.Internal, contractName: 'file3' },
+                    { id: 'h', label: 'h()', type: GraphNodeKind.Internal, contractName: 'file4' },
+                    { id: 'i', label: 'i()', type: GraphNodeKind.Internal, contractName: 'file4' },
                 ],
                 edges: [
                     { from: 'a', to: 'b', label: '' },
@@ -75,19 +75,15 @@ describe('Visualizer', () => {
             };
 
             const clusters = clusterNodes(graph);
-            // isolated nodes should be in cluster 0
-            expect(clusters.get('h')).to.equal(0);
-            expect(clusters.get('i')).to.equal(0);
-            // first connected component
-            expect(clusters.get('a')).to.equal(1);
-            expect(clusters.get('b')).to.equal(1);
-            expect(clusters.get('c')).to.equal(1);
-            // second component
-            expect(clusters.get('d')).to.equal(2);
-            expect(clusters.get('e')).to.equal(2);
-            // third component
-            expect(clusters.get('f')).to.equal(3);
-            expect(clusters.get('g')).to.equal(3);
+            expect(clusters.get('h')).to.equal('file4');
+            expect(clusters.get('i')).to.equal('file4');
+            expect(clusters.get('a')).to.equal('file1');
+            expect(clusters.get('b')).to.equal('file1');
+            expect(clusters.get('c')).to.equal('file1');
+            expect(clusters.get('d')).to.equal('file2');
+            expect(clusters.get('e')).to.equal('file2');
+            expect(clusters.get('f')).to.equal('file3');
+            expect(clusters.get('g')).to.equal('file3');
             expect(clusters.size).to.equal(9);
         });
     });
@@ -96,9 +92,9 @@ describe('Visualizer', () => {
         it('creates a mermaid diagram with nodes and edges', () => {
             const graph: ContractGraph = {
                 nodes: [
-                    { id: 'start', label: 'start()', type: GraphNodeKind.Entry, contractName: '' },
-                    { id: 'foo', label: 'foo()', type: GraphNodeKind.Internal, contractName: '' },
-                    { id: 'bar', label: 'bar()', type: GraphNodeKind.External, contractName: '' },
+                    { id: 'start', label: 'start()', type: GraphNodeKind.Entry, contractName: 'file1' },
+                    { id: 'foo', label: 'foo()', type: GraphNodeKind.Internal, contractName: 'file1' },
+                    { id: 'bar', label: 'bar()', type: GraphNodeKind.External, contractName: 'file2' },
                 ],
                 edges: [
                     { from: 'start', to: 'foo', label: '' },
@@ -108,7 +104,8 @@ describe('Visualizer', () => {
 
             const diagram = generateMermaidDiagram(graph);
             expect(diagram.startsWith('graph TB;')).to.be.true;
-            expect(diagram).to.include('subgraph Cluster_0["Main"]');
+            expect(diagram).to.include('subgraph Cluster_0["file1"]');
+            expect(diagram).to.include('subgraph Cluster_1["file2"]');
             expect(diagram).to.include('start_regular(["start"])');
             expect(diagram).to.include('foo_regular["foo"]');
             expect(diagram).to.include('bar_regular[["bar"]]');
@@ -119,9 +116,9 @@ describe('Visualizer', () => {
         it('filters parameter comments in edge labels', () => {
             const graph: ContractGraph = {
                 nodes: [
-                    { id: 'start', label: 'start()', type: GraphNodeKind.Entry, contractName: '' },
+                    { id: 'start', label: 'start()', type: GraphNodeKind.Entry, contractName: 'file1' },
                     {
-                        id: 'foo', label: 'foo()', type: GraphNodeKind.Internal, contractName: '',
+                        id: 'foo', label: 'foo()', type: GraphNodeKind.Internal, contractName: 'file1',
                         parameters: ['int a', ';; ignore', '// comment', 'int b // trailing']
                     }
                 ],
@@ -137,8 +134,8 @@ describe('Visualizer', () => {
         it('escapes special characters in node labels', () => {
             const graph: ContractGraph = {
                 nodes: [
-                    { id: 'plus+', label: 'plus+()', type: GraphNodeKind.Entry, contractName: '' },
-                    { id: 'cash$', label: 'cash$()', type: GraphNodeKind.Internal, contractName: '' }
+                    { id: 'plus+', label: 'plus+()', type: GraphNodeKind.Entry, contractName: 'file1' },
+                    { id: 'cash$', label: 'cash$()', type: GraphNodeKind.Internal, contractName: 'file1' }
                 ],
                 edges: []
             };

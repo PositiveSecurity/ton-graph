@@ -454,7 +454,7 @@ describe('exportHandler', () => {
         let html = '';
         mock('../src/visualization/templates', {
             filterMermaidDiagram: () => 'filtered',
-            generateVisualizationHtml: (_d: string, _m: string, _f: any, _w: string, _wv: any) => 'filtered-html'
+            generateVisualizationHtml: (_d: string, _m: string, _f: any, _w: string, _wv: any, _t: string) => 'filtered-html'
         });
         mock('vscode', {
             window: {
@@ -486,7 +486,7 @@ describe('exportHandler', () => {
         const messages: any[] = [];
         mock('../src/visualization/templates', {
             filterMermaidDiagram: () => 'filtered',
-            generateVisualizationHtml: (_d: string, _m: string, _f: any, _w: string, _wv: any) => 'filtered-html'
+            generateVisualizationHtml: (_d: string, _m: string, _f: any, _w: string, _wv: any, _t: string) => 'filtered-html'
         });
         mock('vscode', {
             window: {

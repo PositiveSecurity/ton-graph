@@ -10,6 +10,7 @@ describe("generateVisualizationHtml", () => {
       [{ value: "regular", label: "Regular" }],
       "script.js",
       webview,
+      "dark"
     );
     expect(html).to.include("Content-Security-Policy");
     expect(html).to.include(`nonce-${webview.cspSource}`);
@@ -19,5 +20,6 @@ describe("generateVisualizationHtml", () => {
     expect(html).to.not.include("{{MERMAID_DIAGRAM}}");
     expect(html).to.not.include("{{MERMAID_SCRIPT_URI}}");
     expect(html).to.not.include("{{WEBVIEW_SCRIPT_URI}}");
+    expect(html).to.include("dark");
   });
 });

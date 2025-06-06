@@ -123,6 +123,7 @@ async function handleApplyFilters(
         // Get Mermaid script URI (either cached or from CDN)
         const mermaidScriptUri = await getMermaidScriptUri(context, panel.webview);
         const webviewScriptUri = await getWebviewScriptUri(context, panel.webview);
+        const theme = vscode.workspace.getConfiguration('ton-graph').get<string>('theme', 'default');
 
         // Define function type filters based on selected types
         const functionTypeFilters = [
@@ -134,7 +135,7 @@ async function handleApplyFilters(
 
         // Update the webview content
         try {
-            const html = generateVisualizationHtml(filteredDiagram, mermaidScriptUri, functionTypeFilters, webviewScriptUri, panel.webview);
+            const html = generateVisualizationHtml(filteredDiagram, mermaidScriptUri, functionTypeFilters, webviewScriptUri, panel.webview, theme);
             panel.webview.html = html;
 
             // Notify the webview that filters have been applied

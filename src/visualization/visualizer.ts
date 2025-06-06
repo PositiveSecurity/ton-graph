@@ -72,10 +72,29 @@ export function createVisualizationPanel(
         message => {
             try {
                 if (message.command === 'applyFilters') {
-                    const mermaidUri = bundledMermaidUri ? panel.webview.asWebviewUri(bundledMermaidUri).toString() : '';
-                    handleFilterRequest(panel, message.selectedTypes, mermaidUri, message.nameFilter);
-                } else if (message.command === 'saveMermaid' || message.command === 'saveSvg' ||
-                    message.command === 'savePng' || message.command === 'saveJpg') {
+                    if (!panelGraphs.get(panel)) {
+                        panel.webview.postMessage({
+                            command: 'filterError',
+                            error: 'Original graph not found for this panel.'
+                        });
+                        return;
+                    }
+
+                    const mermaidUri = bundledMermaidUri
+                        ? panel.webview.asWebviewUri(bundledMermaidUri).toString()
+                        : '';
+                    handleFilterRequest(
+                        panel,
+                        message.selectedTypes,
+                        mermaidUri,
+                        message.nameFilter
+                    );
+                } else if (
+                    message.command === 'saveMermaid' ||
+                    message.command === 'saveSvg' ||
+                    message.command === 'savePng' ||
+                    message.command === 'saveJpg'
+                ) {
                     // Handle other messages (export commands, etc.)
                 }
             } catch (error) {

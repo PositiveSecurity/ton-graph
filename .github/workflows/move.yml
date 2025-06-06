@@ -1,0 +1,42 @@
+name: move
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node-version: [18, 20]
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install move-analyzer (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          curl -L -o move-analyzer https://github.com/movebit/aptos-move-analyzer/releases/latest/download/aptos-move-analyzer-ubuntu20.04-x86_64-v1.1.1
+          chmod +x move-analyzer
+          sudo mv move-analyzer /usr/local/bin/move-analyzer
+      - name: Install move-analyzer (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          curl -L -o move-analyzer https://github.com/movebit/aptos-move-analyzer/releases/latest/download/aptos-move-analyzer-mac-x86_64-v1.1.1
+          chmod +x move-analyzer
+          sudo mv move-analyzer /usr/local/bin/move-analyzer
+      - name: Install move-analyzer (Windows)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          Invoke-WebRequest -Uri https://github.com/movebit/aptos-move-analyzer/releases/latest/download/aptos-move-analyzer-win-x86_64-v1.1.1.exe -OutFile move-analyzer.exe
+          Move-Item move-analyzer.exe 'C:\\Windows\\System32\\move-analyzer.exe'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run tests
+        run: npm test

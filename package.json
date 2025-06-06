@@ -22,6 +22,16 @@
     "Programming Languages"
   ],
   "main": "./out/extension.js",
+  "activationEvents": [
+    "onCommand:ton-graph.visualize",
+    "onCommand:ton-graph.visualizeProject",
+    "onCommand:ton-graph.saveMermaid",
+    "onCommand:ton-graph.saveSvg",
+    "onCommand:ton-graph.savePng",
+    "onCommand:ton-graph.saveJpg",
+    "onCommand:ton-graph.setApiKey",
+    "onCommand:ton-graph.deleteApiKey"
+  ],
   "contributes": {
     "languages": [
       {

@@ -162,7 +162,9 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
             ];
         case 'move':
             return [
-                { value: 'regular', label: 'Regular' }
+                { value: 'regular', label: 'Regular' },
+                { value: 'entry', label: 'Entry' },
+                { value: 'script', label: 'Script' }
             ];
         case 'func':
         default:

@@ -118,6 +118,9 @@ describe('Parser', () => {
         expect(getFunctionTypeFilters('func')[0].value).to.equal('impure');
         expect(getFunctionTypeFilters('tact')[0].value).to.equal('init');
         expect(getFunctionTypeFilters('tolk')[0].value).to.equal('fun');
+        const moveFilters = getFunctionTypeFilters('move').map(f => f.value);
+        expect(moveFilters).to.include('entry');
+        expect(moveFilters).to.include('script');
     });
 
     it('parses contract with imports', async () => {

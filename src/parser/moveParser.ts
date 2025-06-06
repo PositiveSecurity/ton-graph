@@ -11,6 +11,8 @@ export interface MoveImport {
 export interface MoveFunction {
   name: string;
   isPublic: boolean;
+  isEntry: boolean;
+  isScript: boolean;
   body?: Parser.SyntaxNode;
 }
 
@@ -76,15 +78,24 @@ export function parseMove(code: string): { ast: MoveAST; tree: Parser.Tree } {
           if (!nameNode) continue;
           const sig = child.child(0);
           let isPublic = false;
+          let isEntry = false;
+          let isScript = false;
           if (sig) {
             for (const sc of sig.namedChildren) {
-              if (sc.type === 'modifier' && sc.text.startsWith('public')) {
-                isPublic = true;
+              if (sc.type === 'modifier') {
+                if (sc.text.startsWith('public')) {
+                  isPublic = true;
+                  if (sc.text.includes('script')) {
+                    isScript = true;
+                  }
+                } else if (sc.text === 'entry') {
+                  isEntry = true;
+                }
               }
             }
           }
           const bodyNode = child.childForFieldName('body');
-          functions.push({ name: nameNode.text, isPublic, body: bodyNode || undefined });
+          functions.push({ name: nameNode.text, isPublic, isEntry, isScript, body: bodyNode || undefined });
         }
       }
     }
@@ -114,13 +125,21 @@ export async function parseMoveContract(code: string): Promise<ContractGraph> {
   for (const m of ast.modules) {
     for (const f of m.functions) {
       const id = `${m.name}::${f.name}`;
+      let functionType: string = 'regular';
+      if (f.isScript) {
+        functionType = 'script';
+      } else if (f.isEntry) {
+        functionType = 'entry';
+      } else if (f.isPublic) {
+        functionType = 'public';
+      }
       const node: ContractNode = {
         id,
         label: `${f.name}()`,
         type: GraphNodeKind.Function,
         contractName: m.name,
         parameters: [],
-        functionType: f.isPublic ? 'public' : 'regular'
+        functionType
       };
       graph.nodes.push(node);
       funcMap.set(id, node);

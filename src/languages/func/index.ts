@@ -1,4 +1,4 @@
-import { AST, Edge, LanguageAdapter } from '../../core/types';
+import { AST, Edge, LanguageAdapter } from '../../types/core';
 import { parseContractCode } from './funcParser';
 import { parseTactContract } from './tactParser';
 import { parseTolkContract } from './tolkParser';

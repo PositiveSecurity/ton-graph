@@ -1,5 +1,5 @@
 import { parseMove, MoveAST } from '@parser/move';
-import { AST, Edge, LanguageAdapter } from '../../core/types';
+import { AST, Edge, LanguageAdapter } from '../../types/core';
 
 export const movelangAdapter: LanguageAdapter = {
   fileExtensions: ['.move'],

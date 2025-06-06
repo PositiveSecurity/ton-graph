@@ -5,6 +5,18 @@ import * as vscode from 'vscode';
 import { Writable } from 'stream';
 
 const sanitizeFormat = format((info) => {
+  function redactPaths(text: string): string {
+    return text
+      .split(/\s+/)
+      .map(part => {
+        const cleaned = part.replace(/['"`]/g, '');
+        return path.isAbsolute(cleaned) || path.win32.isAbsolute(cleaned)
+          ? '[REDACTED_PATH]'
+          : part;
+      })
+      .join(' ');
+  }
+
   const sanitize = (value: any): any => {
     if (value && typeof value === 'object') {
       for (const k of Object.keys(value)) {
@@ -17,8 +29,7 @@ const sanitizeFormat = format((info) => {
       return value;
     }
     if (typeof value === 'string') {
-      const pathPattern = /(?:[A-Za-z]:)?[\\/][^\s]+/g;
-      value = value.replace(pathPattern, '[REDACTED_PATH]');
+      value = redactPaths(value);
       const apiKeyPattern = /(api[_-]?key\s*[=:]\s*)([^\s]+)/i;
       return value.replace(apiKeyPattern, '$1[FILTERED]');
     }

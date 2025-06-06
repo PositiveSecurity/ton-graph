@@ -37,4 +37,12 @@ describe('Logger', () => {
     expect(last).to.not.include('SECRET');
     expect(last).to.not.include('/tmp/secret.txt');
   });
+
+  it('redacts absolute paths with spaces and quotes', () => {
+    logger.info('opening "C:\\Secret Folder\\file.txt"');
+    logger.info("processing '/tmp/some file '");
+    const lastTwo = outputChannel.messages.slice(-2);
+    expect(lastTwo[0]).to.not.include('C:\\Secret Folder\\file.txt');
+    expect(lastTwo[1]).to.not.include('/tmp/some file');
+  });
 });

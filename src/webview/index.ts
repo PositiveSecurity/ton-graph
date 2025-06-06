@@ -2,6 +2,7 @@
 // @ts-nocheck
 import DOMPurify from 'dompurify';
 declare const filterSet: { value: string; label: string; }[];
+declare const mermaidTheme: string;
 let currentZoom = 1;
 const zoomStep = 0.05;
 let selectedFilters = [];
@@ -49,7 +50,7 @@ logMessage('Applying filters...', 'info');
 mermaid.initialize({
 startOnLoad: false,
 securityLevel: 'strict',
-theme: 'default',
+theme: mermaidTheme || 'default',
 fontSize: 14,
 flowchart: {
 nodeSpacing: 15,
@@ -87,7 +88,7 @@ const rankSpacing = 15;
 mermaid.initialize({
 startOnLoad: false,
 securityLevel: 'strict',
-theme: 'default',
+theme: mermaidTheme || 'default',
 fontSize: fontSize,
 maxTextSize: 9000000,
 flowchart: {

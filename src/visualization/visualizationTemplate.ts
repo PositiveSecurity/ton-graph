@@ -262,6 +262,7 @@ export const VISUALIZATION_TEMPLATE = `<!DOCTYPE html>
             <a id="downloadLink" style="display: none;">Download</a>
         </div>
         <script>window.filterSet = {{FILTERS_JSON}};</script>
+        <script>window.mermaidTheme = "{{MERMAID_THEME}}";</script>
         <script src="{{MERMAID_SCRIPT_URI}}"></script>
         <script src="{{WEBVIEW_SCRIPT_URI}}"></script>
     </body>

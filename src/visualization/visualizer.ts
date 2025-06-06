@@ -54,11 +54,13 @@ export function createVisualizationPanel(
         getWebviewScriptUri(context, panel.webview)
     ]).then(([mermaidScriptUri, webviewScriptUri]) => {
 
+        const theme = vscode.workspace.getConfiguration('ton-graph').get<string>('theme', 'default');
+
         // Generate Mermaid diagram from graph
         const mermaidDiagram = generateMermaidDiagram(graph);
 
         // Generate the final HTML with function type filters
-        const html = generateVisualizationHtml(mermaidDiagram, mermaidScriptUri, functionTypeFilters, webviewScriptUri, panel.webview);
+        const html = generateVisualizationHtml(mermaidDiagram, mermaidScriptUri, functionTypeFilters, webviewScriptUri, panel.webview, theme);
 
         // Set the HTML content for the panel
         panel.webview.html = html;
@@ -194,35 +196,31 @@ export function generateMermaidDiagram(graph: ContractGraph): string {
     // Apply clustering to organize the graph
     const nodeClusters = clusterNodes(graph);
 
-    // Group nodes by cluster
     const clusterGroups: Record<string, typeof graph.nodes> = {};
+    const clusterIds = new Map<string, number>();
+    let cid = 0;
+
     graph.nodes.forEach(node => {
-        const cluster = nodeClusters.get(node.id) || 0;
-        if (!clusterGroups[cluster]) {
-            clusterGroups[cluster] = [];
+        const clusterName = nodeClusters.get(node.id) || '';
+        if (!clusterIds.has(clusterName)) {
+            clusterIds.set(clusterName, cid++);
         }
-        clusterGroups[cluster].push(node);
+        const id = clusterIds.get(clusterName)!;
+        if (!clusterGroups[id]) {
+            clusterGroups[id] = [];
+        }
+        clusterGroups[id].push(node);
     });
 
-    // Generate cluster names
     const clusterNames: Record<string, string> = {};
-    Object.entries(clusterGroups).forEach(([cluster]) => {
-        const clusterIndex = Number(cluster);
-        if (clusterIndex === 0) {
-            // Main cluster (entry points) named after the file
-            clusterNames[cluster] = "Main";
-        } else {
-            // Other clusters just use letters
-            const letter = String.fromCharCode(64 + clusterIndex); // 65 is ASCII for 'A', but we start from 1
-            clusterNames[cluster] = `Cluster ${letter}`;
-        }
+    clusterIds.forEach((index, name) => {
+        clusterNames[String(index)] = name || 'Main';
     });
 
     // Generate subgraphs for each cluster
     Object.entries(clusterGroups).forEach(([cluster, nodes]) => {
         const clusterIndex = Number(cluster);
 
-        // Create subgraph
         diagram += `    subgraph Cluster_${clusterIndex}["${clusterNames[cluster]}"]\n`;
 
         // Add nodes
@@ -237,7 +235,9 @@ export function generateMermaidDiagram(graph: ContractGraph): string {
             label = escapeMermaidLabel(label);
 
             // Use different node shapes based on function type
-            if (node.type === GraphNodeKind.Entry) {
+            if (node.functionType === 'public') {
+                diagram += `        ${nodeId}(("${label}"))\n`;
+            } else if (node.type === GraphNodeKind.Entry) {
                 diagram += `        ${nodeId}(["${label}"])\n`;
             } else if (node.type === GraphNodeKind.External) {
                 diagram += `        ${nodeId}[["${label}"]]\n`;
@@ -283,8 +283,10 @@ export function generateMermaidDiagram(graph: ContractGraph): string {
         label = escapeMermaidLabel(label);
 
         // Check if this is a cross-cluster edge
-        const fromCluster = nodeClusters.get(edge.from) || 0;
-        const toCluster = nodeClusters.get(edge.to) || 0;
+        const fromClusterName = nodeClusters.get(edge.from) || '';
+        const toClusterName = nodeClusters.get(edge.to) || '';
+        const fromCluster = clusterIds.get(fromClusterName) || 0;
+        const toCluster = clusterIds.get(toClusterName) || 0;
 
         // Add function type to node IDs
         const fromNode = graph.nodes.find(node => node.id === edge.from);
@@ -308,13 +310,18 @@ export function generateMermaidDiagram(graph: ContractGraph): string {
         const color = colors[index % colors.length];
         diagram += `    classDef cluster${cluster} fill:${color},stroke:#333,stroke-width:1px;\n`;
     });
+    diagram += `    classDef public fill:#ffd966,stroke:#333,stroke-width:2px;\n`;
 
     // Apply styles to nodes
     graph.nodes.forEach(node => {
         const id = node.id.replace(/[^a-zA-Z0-9]/g, '_');
         const nodeId = `${id}_${node.functionType || 'regular'}`;
-        const cluster = nodeClusters.get(node.id) || 0;
+        const clusterName = nodeClusters.get(node.id) || '';
+        const cluster = clusterIds.get(clusterName) || 0;
         diagram += `    class ${nodeId} cluster${cluster};\n`;
+        if (node.functionType === 'public') {
+            diagram += `    class ${nodeId} public;\n`;
+        }
     });
 
     return diagram;
@@ -323,66 +330,10 @@ export function generateMermaidDiagram(graph: ContractGraph): string {
 /**
  * Cluster nodes in the graph
  */
-export function clusterNodes(graph: ContractGraph): Map<string, number> {
-    const nodeClusters = new Map<string, number>();
-    let currentCluster = 0;
-
-    // First, identify connected nodes
-    const connectedNodes = new Set<string>();
-    graph.edges.forEach(edge => {
-        connectedNodes.add(edge.from);
-        connectedNodes.add(edge.to);
-    });
-
-    // Group all isolated nodes into one cluster
-    const isolatedNodes = graph.nodes
-        .filter(node => !connectedNodes.has(node.id))
-        .map(node => node.id);
-
-    if (isolatedNodes.length > 0) {
-        isolatedNodes.forEach(nodeId => {
-            nodeClusters.set(nodeId, currentCluster);
-        });
-        currentCluster++;
-    }
-
-    // Process connected components
-    const visited = new Set<string>();
-
+export function clusterNodes(graph: ContractGraph): Map<string, string> {
+    const nodeClusters = new Map<string, string>();
     graph.nodes.forEach(node => {
-        if (!visited.has(node.id) && connectedNodes.has(node.id)) {
-            const component = findConnectedComponent(node.id, graph);
-            component.forEach(nodeId => {
-                nodeClusters.set(nodeId, currentCluster);
-                visited.add(nodeId);
-            });
-            currentCluster++;
-        }
+        nodeClusters.set(node.id, node.contractName || '');
     });
-
     return nodeClusters;
-}
-
-function findConnectedComponent(startNodeId: string, graph: ContractGraph): Set<string> {
-    const component = new Set<string>();
-    const queue = [startNodeId];
-
-    while (queue.length > 0) {
-        const nodeId = queue.shift()!;
-        if (!component.has(nodeId)) {
-            component.add(nodeId);
-
-            // Add connected nodes through edges
-            graph.edges.forEach(edge => {
-                if (edge.from === nodeId && !component.has(edge.to)) {
-                    queue.push(edge.to);
-                }
-                if (edge.to === nodeId && !component.has(edge.from)) {
-                    queue.push(edge.from);
-                }
-            });
-        }
-    }
-
-    return component;
 }

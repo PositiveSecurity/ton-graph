@@ -288,6 +288,43 @@ describe('exportHandler', () => {
         expect(result.success).to.be.false;
     });
 
+    it('fails to save Mermaid when content is empty', async () => {
+        const tmp = path.join(os.tmpdir(), 'out.mmd');
+        let written: Buffer | undefined;
+        const messages: any[] = [];
+        mock('vscode', {
+            window: {
+                activeTextEditor: undefined,
+                showSaveDialog: async () => ({ fsPath: tmp }),
+                showInformationMessage: () => {},
+                showErrorMessage: () => {},
+                createOutputChannel: () => ({ appendLine: () => {} })
+            },
+            workspace: {
+                fs: {
+                    writeFile: async (_uri: any, data: any) => {
+                        written = Buffer.from(data);
+                    }
+                }
+            },
+            Uri: { file: (p: string) => ({ fsPath: p, toString() { return p; } }) }
+        });
+        handleExport = require('../src/export/exportHandler').handleExport;
+        const panel = createPanel({
+            getMermaidContent: { command: 'mermaidContent', content: '' }
+        }, messages);
+        let threw = false;
+        try {
+            await handleExport(panel, { command: 'saveMermaid' }, { extensionPath: '.' });
+        } catch {
+            threw = true;
+        }
+        expect(threw).to.be.true;
+        expect(written).to.be.undefined;
+        const result = messages.find(m => m.command === 'saveResult');
+        expect(result.success).to.be.false;
+    });
+
     it('saves JPG when data URL is valid', async () => {
         const tmp = path.join(os.tmpdir(), 'out.jpg');
         let written: Buffer | undefined;

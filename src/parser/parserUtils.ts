@@ -3,7 +3,7 @@ import { ContractGraph } from '../types/graph';
 import { parseContractCode } from '../languages/func/funcParser';
 import { parseTactContract } from '../languages/func/tactParser';
 import { parseTolkContract } from '../languages/func/tolkParser';
-import { processImports } from '../languages/func/importHandler';
+import { processImports, isPathInsideWorkspace } from '../languages/func/importHandler';
 import { parseMoveContract } from './moveParser';
 import * as vscode from 'vscode';
 
@@ -114,7 +114,9 @@ export async function parseContractWithImports(
                         const m = line.match(/local\s*=\s*"([^"]+)"/);
                         if (m) {
                             const depDir = path.resolve(root, m[1]);
-                            collect(depDir);
+                            if (isPathInsideWorkspace(depDir)) {
+                                collect(depDir);
+                            }
                         }
                         if (line.startsWith('[')) break;
                     }

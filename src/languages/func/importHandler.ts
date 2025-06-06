@@ -20,7 +20,7 @@ async function safeReadFile(filePath: string): Promise<string> {
     return data;
 }
 
-function isPathInsideWorkspace(filePath: string): boolean {
+export function isPathInsideWorkspace(filePath: string): boolean {
     const folders = vscode.workspace && vscode.workspace.workspaceFolders;
     if (!folders) {
         return false;

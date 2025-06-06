@@ -418,19 +418,20 @@ export function filterMermaidDiagram(diagram: string, selectedTypes: string[], n
 function validateAndFixDiagram(diagramCode: string): string {
     try {
         const lines = diagramCode.split('\\n');
-        const cleanedLines = [];
+        const cleanedLines: string[] = [];
         let graphDirectiveFound = false;
         let inSubgraph = false;
+        const directiveRegex = /^(graph|flowchart)\s+(TB|LR|RL|BT|TD)\s*;?/i;
+        const inlineDirectiveRegex = /(graph|flowchart)\s+(TB|LR|RL|BT|TD)\s*;?/i;
 
         for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
 
-            // Handle graph directive - ensure it's only included once at the beginning
-            if (line.startsWith('graph ') || line.startsWith('flowchart ')) {
+            // Handle graph or flowchart directive - ensure it's only included once at the beginning
+            if (directiveRegex.test(line)) {
                 if (!graphDirectiveFound) {
-                    cleanedLines.push(lines[i]); // Keep original whitespace
+                    cleanedLines.push(line.replace(inlineDirectiveRegex, '$1 $2;'));
                     graphDirectiveFound = true;
-                } else {
                 }
                 continue;
             }
@@ -442,10 +443,9 @@ function validateAndFixDiagram(diagramCode: string): string {
                 inSubgraph = false;
             }
 
-            // If we find another graph directive inside a subgraph, that's the problem
-            // We'll remove it while keeping the rest of the line
-            if (inSubgraph && line.includes('graph ')) {
-                const fixedLine = lines[i].replace(/graph\s+(TB|LR|RL|BT|TD);?/g, '').trim();
+            // If we find another directive inside a subgraph, remove it while keeping the rest of the line
+            if (inSubgraph && inlineDirectiveRegex.test(line)) {
+                const fixedLine = line.replace(inlineDirectiveRegex, '').trim();
                 if (fixedLine) {
                     cleanedLines.push(fixedLine);
                 }

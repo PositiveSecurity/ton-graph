@@ -17,6 +17,21 @@ class TestSecrets {
 }
 
 describe('tokenManager', () => {
+    it('stores and retrieves the API key', async () => {
+        const context = { secrets: new TestSecrets() } as any;
+        await setApiKey(context, 'SECRET');
+        const value = await getApiKey(context);
+        expect(value).to.equal('SECRET');
+    });
+
+    it('overwrites the stored API key when updated', async () => {
+        const context = { secrets: new TestSecrets() } as any;
+        await setApiKey(context, 'OLD_SECRET');
+        await setApiKey(context, 'NEW_SECRET');
+        const value = await getApiKey(context);
+        expect(value).to.equal('NEW_SECRET');
+    });
+
     it('removes the stored API key', async () => {
         const context = { secrets: new TestSecrets() } as any;
         await setApiKey(context, 'SECRET');

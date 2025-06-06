@@ -8,9 +8,17 @@ describe('webview sanitize', () => {
     const { window } = new JSDOM('<!DOCTYPE html>');
     const DOMPurify = createDOMPurify(window as any);
     const dirty = '<svg><rect/><script>alert(1)</script></svg>';
-    const clean = DOMPurify.sanitize(dirty, {USE_PROFILES: {svg: true, svgFilters: true}});
+    const clean = DOMPurify.sanitize(dirty, { ALLOWED_TAGS: ['svg','rect'], ALLOWED_ATTR: [], SAFE_FOR_TEMPLATES: true });
     expect(clean).to.not.include('<script>');
     expect(clean).to.include('<rect');
+  });
+
+  it('removes event handler attributes from SVG', () => {
+    const { window } = new JSDOM('<!DOCTYPE html>');
+    const DOMPurify = createDOMPurify(window as any);
+    const dirty = '<svg onload="alert(1)"><rect/></svg>';
+    const clean = DOMPurify.sanitize(dirty, { ALLOWED_TAGS: ['svg','rect'], ALLOWED_ATTR: ['width','height'], SAFE_FOR_TEMPLATES: true });
+    expect(clean).to.not.include('onload');
   });
 
   it('ignores malicious message events', async () => {
@@ -27,7 +35,7 @@ describe('webview sanitize', () => {
     };
 
     const DOMPurify = createDOMPurify(dom.window as any);
-    const sanitizeMock = (s: string) => DOMPurify.sanitize(s, { USE_PROFILES: { svg: true, svgFilters: true } });
+    const sanitizeMock = (s: string) => DOMPurify.sanitize(s, { ALLOWED_TAGS: ['svg'], ALLOWED_ATTR: [], SAFE_FOR_TEMPLATES: true });
     mock('dompurify', { default: { sanitize: sanitizeMock } });
     delete require.cache[require.resolve('../src/webview/index.ts')];
     require('../src/webview/index.ts');

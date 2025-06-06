@@ -24,7 +24,7 @@ mock('vscode', {
 });
 
 mock('../src/visualization/templates', {
-  generateVisualizationHtml: () => 'html',
+  generateVisualizationHtml: (_d: string, _m: string, _f: any, _w: string, _wv: any) => 'html',
   filterMermaidDiagram: () => { throw new Error('bad'); }
 });
 

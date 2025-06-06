@@ -183,6 +183,11 @@ You can also view logs directly in VS Code under **Output** → **TON Graph**.
 
  - Visual Studio Code 1.75.0 or newer
 
+## Limitations
+
+- Imports cannot follow symbolic links that resolve outside the opened workspace
+  directory. Any such attempts will result in an error.
+
 ## Known Issues
 
 - Large contracts with many functions may take longer to process

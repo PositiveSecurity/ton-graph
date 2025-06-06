@@ -19,5 +19,5 @@ test('malicious names are sanitized', async () => {
     ]
   });
 
-  expect(exitCode).toBeUndefined();
+  expect(exitCode).toBe(0);
 });

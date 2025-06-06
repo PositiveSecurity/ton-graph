@@ -1,0 +1,6 @@
+func bar() {
+}
+
+func foo() {
+  bar();
+}

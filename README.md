@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/PositiveSecurity/ton-graph/branch/work/graph/badge.svg)](https://codecov.io/gh/PositiveSecurity/ton-graph)
 [![move](https://github.com/PositiveSecurity/ton-graph/actions/workflows/move.yml/badge.svg)](https://github.com/PositiveSecurity/ton-graph/actions/workflows/move.yml)
 
-A Visual Studio Code extension for visualizing function call graphs in smart contracts written in FunC, Tact, Tolk and Move.
+A Visual Studio Code extension for visualizing function call graphs in smart contracts written in FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence and Michelson.
 
 Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 
@@ -21,6 +21,10 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
   - Tact (*.tact)
   - Tolk (*.tolk)
   - Move (*.move) - requires `move-analyzer`
+  - Cairo (*.cairo)
+  - Plutus (*.plutus)
+  - Cadence (*.cdc)
+  - Michelson (*.tz)
 - Interactive diagram with cluster-based organization
 - Zoom functionality for better navigation
 - Filter functions by type (regular, impure, inline, method_id)

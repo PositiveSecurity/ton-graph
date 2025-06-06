@@ -3,8 +3,7 @@ import * as path from 'path';
 import { visualize, visualizeProject } from './commands';
 import { setApiKey, deleteApiKey } from './secrets/tokenManager';
 import logger from './logging/logger';
-import adapters from './languages/func';
-import movelangAdapter from './languages/move';
+import adapters from './languages';
 import { GraphProvider } from './core/graphProvider';
 import { startMoveClient } from './lsp-clients/moveClient';
 
@@ -19,7 +18,6 @@ export function activate(context: vscode.ExtensionContext) {
         logger.debug('Cached directory already exists');
     }
 
-    adapters.push(movelangAdapter);
     adapters.forEach(adapter => {
         adapter.fileExtensions.forEach(ext => {
             const selector = { pattern: `**/*${ext}` };

@@ -27,4 +27,16 @@ describe('templates utilities', () => {
     const out = filterMermaidDiagram(invalid, ['impure', 'regular']);
     expect(out.match(/^graph /gm)?.length).to.equal(1);
   });
+
+  it('removes spaced duplicate directives', () => {
+    const invalid = 'graph TB;\nsubgraph Y\n  graph    LR \n  A_impure --> B_regular\nend';
+    const out = filterMermaidDiagram(invalid, ['impure', 'regular']);
+    expect(out.match(/^(graph|flowchart)/gm)?.length).to.equal(1);
+  });
+
+  it('removes duplicate flowchart directive without semicolon', () => {
+    const invalid = 'graph TB;\nflowchart RL\nA_impure --> B_regular';
+    const out = filterMermaidDiagram(invalid, ['impure', 'regular']);
+    expect(out.match(/^(graph|flowchart)/gm)?.length).to.equal(1);
+  });
 });

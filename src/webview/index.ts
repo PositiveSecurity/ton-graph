@@ -80,7 +80,9 @@ const sanitizedSvg = DOMPurify.sanitize(result.svg, {
   ALLOWED_ATTR,
   SAFE_FOR_TEMPLATES: true
 });
-document.getElementById('mermaid-diagram').innerHTML = sanitizedSvg;
+const diagramContainer = document.getElementById('mermaid-diagram');
+diagramContainer.innerHTML = sanitizedSvg;
+secureLinks(diagramContainer);
 setupPanZoom();
 logMessage('Diagram rendered successfully', 'success');
 document.getElementById('loadingOverlay').classList.add('hidden');
@@ -126,6 +128,7 @@ const sanitizedUpdateSvg = DOMPurify.sanitize(result.svg, {
   SAFE_FOR_TEMPLATES: true
 });
 mermaidDiagram.innerHTML = sanitizedUpdateSvg;
+secureLinks(mermaidDiagram);
 setupPanZoom();
 logMessage('Diagram updated with filters', 'success');
 }).catch(function(error) {
@@ -240,4 +243,17 @@ codeDisplay.style.display = 'block';
 mermaidContainer.style.display = 'none';
 document.getElementById('showCodeBtn').textContent = 'Show Diagram';
 }
+}
+
+function secureLinks(container) {
+  const anchors = container.querySelectorAll('a');
+  anchors.forEach(function(anchor) {
+    const href = anchor.getAttribute('href');
+    if (href && /^\s*javascript:/i.test(href)) {
+      anchor.removeAttribute('href');
+    } else if (href) {
+      anchor.setAttribute('target', '_blank');
+      anchor.setAttribute('rel', 'noopener noreferrer');
+    }
+  });
 }

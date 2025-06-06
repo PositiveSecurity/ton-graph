@@ -15,20 +15,11 @@
   },
   "homepage": "https://github.com/PositiveSecurity/ton-graph",
   "engines": {
-    "vscode": "^1.60.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Visualization",
     "Programming Languages"
-  ],
-  "activationEvents": [
-    "onCommand:ton-graph.visualize",
-    "onCommand:ton-graph.visualizeProject",
-    "onCommand:ton-graph.setApiKey",
-    "onCommand:ton-graph.deleteApiKey",
-    "onLanguage:func",
-    "onLanguage:tact",
-    "onLanguage:tolk"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -150,7 +141,7 @@
     "@types/moo": "^0.5.10",
     "@types/node": "^18.x.x",
     "@types/node-fetch": "^2.6.12",
-    "@types/vscode": "^1.60.0",
+    "@types/vscode": "^1.75.0",
     "@typescript-eslint/eslint-plugin": "^4.x.x",
     "@typescript-eslint/parser": "^4.x.x",
     "@vscode/vsce": "^3.5.0",

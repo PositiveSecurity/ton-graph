@@ -4,6 +4,7 @@ mock('vscode', {});
 import { rest } from 'msw';
 import { setupServer } from 'msw/node';
 import { callToncenter } from '../src/api/toncenter';
+import { z } from 'zod';
 
 class TestMemento {
     private store: Record<string, any> = {};
@@ -37,6 +38,8 @@ class TestSecrets {
 
 const server = setupServer();
 
+const schema = z.object({ ok: z.boolean() });
+
 before(() => server.listen());
 afterEach(() => server.resetHandlers());
 after(() => server.close());
@@ -51,7 +54,7 @@ describe('callToncenter', () => {
         const context = { workspaceState: new TestMemento(), secrets: new TestSecrets() } as any;
         const start = Date.now();
         try {
-            await callToncenter(context, 'test', {}, 50);
+            await callToncenter(context, 'test', {}, schema, { timeoutMs: 50, maxRetries: 1 });
             expect.fail('should throw');
         } catch {
             const elapsed = Date.now() - start;
@@ -70,7 +73,7 @@ describe('callToncenter', () => {
         const context = { workspaceState: new TestMemento(), secrets: new TestSecrets() } as any;
         const start = Date.now();
         try {
-            await callToncenter(context, 'test', {}, 50, 2);
+            await callToncenter(context, 'test', {}, schema, { timeoutMs: 50, maxRetries: 2 });
             expect.fail('should throw');
         } catch {
             const elapsed = Date.now() - start;
@@ -88,10 +91,10 @@ describe('callToncenter', () => {
             })
         );
         const context = { workspaceState: new TestMemento(), secrets: new TestSecrets() } as any;
-        const result1 = await callToncenter(context, 'test', { q: 1 });
+        const result1 = await callToncenter(context, 'test', { q: 1 }, schema);
         expect(result1).to.deep.equal({ ok: true });
         expect(calls).to.equal(1);
-        const result2 = await callToncenter(context, 'test', { q: 1 });
+        const result2 = await callToncenter(context, 'test', { q: 1 }, schema);
         expect(result2).to.deep.equal({ ok: true });
         expect(calls).to.equal(1);
     });
@@ -106,10 +109,43 @@ describe('callToncenter', () => {
         );
         const context = { workspaceState: new TestMemento(), secrets: new TestSecrets() } as any;
         try {
-            await callToncenter(context, 'test', {}, 50, 1);
+            await callToncenter(context, 'test', {}, schema, { timeoutMs: 50, maxRetries: 1 });
             expect.fail('should throw');
         } catch {
             expect(calls).to.equal(2);
+        }
+    });
+
+    it('rejects malformed responses without caching', async () => {
+        server.use(
+            rest.get('https://toncenter.com/api/v2/', (_req, res, ctx) => {
+                return res(ctx.json({ wrong: true }));
+            })
+        );
+        const context = { workspaceState: new TestMemento(), secrets: new TestSecrets() } as any;
+        try {
+            await callToncenter(context, 'test', {}, schema);
+            expect.fail('should throw');
+        } catch {
+            const cached = context.workspaceState.get('tonGraphCache');
+            expect(cached).to.be.undefined;
+        }
+    });
+
+    it('stops after max retries on timeouts', async () => {
+        let attempts = 0;
+        server.use(
+            rest.get('https://toncenter.com/api/v2/', (_req, res, ctx) => {
+                attempts++;
+                return res(ctx.delay(200), ctx.json({ ok: true }));
+            })
+        );
+        const context = { workspaceState: new TestMemento(), secrets: new TestSecrets() } as any;
+        try {
+            await callToncenter(context, 'test', {}, schema, { timeoutMs: 50, maxRetries: 2 });
+            expect.fail('should throw');
+        } catch {
+            expect(attempts).to.equal(3);
         }
     });
 });

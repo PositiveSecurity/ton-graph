@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { getCachedResponse, setCachedResponse } from './cache';
 import { getApiKey } from '../secrets/tokenManager';
+import { z } from 'zod';
 
 const BASE_URL = 'https://toncenter.com/api/v2/';
 
@@ -8,9 +9,10 @@ export async function callToncenter<T>(
     context: vscode.ExtensionContext,
     method: string,
     params: Record<string, unknown>,
-    timeoutMs = 10000,
-    maxRetries = 1
+    schema: z.ZodSchema<T>,
+    options: { timeoutMs?: number; maxRetries?: number } = {}
 ): Promise<T> {
+    const { timeoutMs = 3000, maxRetries = 3 } = options;
     const apiKey = await getApiKey(context);
     const paramsWithKey = apiKey ? { ...params, api_key: apiKey } : { ...params };
     const cached = await getCachedResponse<T>(context, method, paramsWithKey);
@@ -20,7 +22,7 @@ export async function callToncenter<T>(
 
     const search = new URLSearchParams({ ...paramsWithKey, method });
 
-    for (let attempt = 0; ; attempt++) {
+    for (let attempt = 0; attempt <= maxRetries; attempt++) {
         const controller = new AbortController();
         const timer = setTimeout(() => controller.abort(), timeoutMs);
         try {
@@ -30,13 +32,13 @@ export async function callToncenter<T>(
             if (!res.ok) {
                 const isServerError = res.status >= 500 && res.status < 600;
                 if (attempt < maxRetries && isServerError) {
-                    const delay = Math.pow(2, attempt) * 100;
-                    await new Promise(resolve => setTimeout(resolve, delay));
+                    await new Promise(resolve => setTimeout(resolve, 100));
                     continue;
                 }
                 throw new Error(`HTTP ${res.status}`);
             }
-            const data = (await res.json()) as T;
+            const raw = await res.json();
+            const data = schema.parse(raw);
             await setCachedResponse(context, method, paramsWithKey, data);
             return data;
         } catch (err: any) {
@@ -44,9 +46,8 @@ export async function callToncenter<T>(
             if (attempt >= maxRetries) {
                 throw err;
             }
-            const delay = Math.pow(2, attempt) * 100;
-            await new Promise(resolve => setTimeout(resolve, delay));
-            continue;
+            await new Promise(resolve => setTimeout(resolve, 100));
         }
     }
+    throw new Error('unreachable');
 }

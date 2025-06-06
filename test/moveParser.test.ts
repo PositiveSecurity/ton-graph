@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import mock = require('mock-require');
 mock('vscode', { window: { createOutputChannel: () => ({ appendLine: () => {} }) } });
-import { parseMoveContract } from '../src/languages/move/moveParser';
+import { parseMoveContract } from '../src/parser/moveParser';
 
 const sample = `module M {
     fun init() {
@@ -28,14 +28,14 @@ describe('parseMoveContract', () => {
 
     it('uses cache for repeated parses', async () => {
         let called = 0;
-        mock.stop('../src/languages/move/moveParser');
-        mock('../src/languages/move/moveParser', { parseMoveContract: async () => { called++; return { nodes: [], edges: [] }; } });
+        mock.stop('../src/parser/moveParser');
+        mock('../src/parser/moveParser', { parseMoveContract: async () => { called++; return { nodes: [], edges: [] }; } });
         delete require.cache[require.resolve('../src/parser/parserUtils')];
         const { parseContractByLanguage } = require('../src/parser/parserUtils');
         const uri = { toString() { return 'file:///cache.move'; } } as any;
         await parseContractByLanguage('code', 'move', uri);
         await parseContractByLanguage('code', 'move', uri);
         expect(called).to.equal(1);
-        mock.stop('../src/languages/move/moveParser');
+        mock.stop('../src/parser/moveParser');
     });
 });

@@ -2,7 +2,7 @@ import { expect } from 'chai';
 import fs from 'fs';
 import mock = require('mock-require');
 mock('vscode', { window: { createOutputChannel: () => ({ appendLine: () => {} }) } });
-import { parseMoveContract } from '../src/languages/move/moveParser';
+import { parseMoveContract } from '../src/parser/moveParser';
 
 function load(name: string) {
   return fs.readFileSync(`src/__tests__/move/${name}.move`, 'utf8');

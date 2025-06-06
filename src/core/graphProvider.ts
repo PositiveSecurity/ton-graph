@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { LanguageAdapter, AST } from './types';
+import { LanguageAdapter, AST } from '../types/core';
 
 const parseCache = new WeakMap<vscode.Uri, { version: number; ast: AST }>();
 

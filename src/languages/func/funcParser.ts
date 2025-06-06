@@ -2,8 +2,8 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import * as WebTreeSitter from 'web-tree-sitter';
 import { loadFunC } from '@scaleton/tree-sitter-func';
-import { ContractGraph, ContractNode } from '../../types/graph';
-import { GraphNodeKind } from '../../types/graphNodeKind';
+import { ContractGraph } from '../../types/graph';
+import { ParsedFunction, buildFunctionGraph } from './functionGraphBuilder';
 
 const BUILT_IN_FUNCTIONS = new Set([
     'if', 'elseif', 'while', 'for', 'switch', 'return', 'throw', 'throw_unless',
@@ -42,60 +42,27 @@ async function getParser(): Promise<WebTreeSitter.Parser> {
 export async function parseContractCode(code: string): Promise<ContractGraph> {
     const parser = await getParser();
     const tree = parser.parse(code);
-    const graph: ContractGraph = { nodes: [], edges: [] };
     if (!tree) {
-        return graph;
+        return { nodes: [], edges: [] };
     }
     const contractName = vscode.window.activeTextEditor
         ? path.basename(vscode.window.activeTextEditor.document.fileName).split('.')[0]
         : 'Contract';
 
-    const functions = tree.rootNode.descendantsOfType('function_definition');
-    const bodies = new Map<string, WebTreeSitter.Node>();
-
-    for (const fn of functions) {
+    const functions = new Map<string, ParsedFunction>();
+    const nodes = tree.rootNode.descendantsOfType('function_definition');
+    for (const fn of nodes) {
         if (!fn) continue;
         const nameNode = fn.descendantsOfType('function_name')[0];
         if (!nameNode) continue;
         const funcName = nameNode.text;
         if (BUILT_IN_FUNCTIONS.has(funcName)) continue;
-
         const paramNode = fn.descendantsOfType('parameter_list')[0];
         const params = paramNode ? paramNode.text.slice(1, -1) : '';
         const bodyNode = fn.descendantsOfType('block_statement')[0];
-        if (bodyNode) bodies.set(funcName, bodyNode);
-
-        const node: ContractNode = {
-            id: funcName,
-            label: `${funcName}(${params})`,
-            type: GraphNodeKind.Function,
-            contractName,
-            parameters: params.split(',').map((p: string) => p.trim()).filter(Boolean),
-            functionType: 'regular'
-        };
-        graph.nodes.push(node);
+        const bodyText = bodyNode ? bodyNode.text : '';
+        functions.set(funcName, { name: funcName, params, body: bodyText, type: 'regular' });
     }
 
-    for (const fn of functions) {
-        if (!fn) continue;
-        const nameNode = fn.descendantsOfType('function_name')[0];
-        if (!nameNode) continue;
-        const from = nameNode.text;
-        const bodyNode = fn.descendantsOfType('block_statement')[0];
-        if (!bodyNode) continue;
-        const calls = bodyNode.descendantsOfType('function_application');
-        const added = new Set<string>();
-        for (const call of calls) {
-            if (!call) continue;
-            const idNode = call.child(0);
-            if (!idNode) continue;
-            const to = idNode.text;
-            if (bodies.has(to) && to !== from && !added.has(to)) {
-                graph.edges.push({ from, to, label: '' });
-                added.add(to);
-            }
-        }
-    }
-
-    return graph;
+    return buildFunctionGraph(functions, contractName);
 }

@@ -1,8 +1,8 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as moo from 'moo';
-import { ContractGraph, ContractNode } from '../../types/graph';
-import { GraphNodeKind } from '../../types/graphNodeKind';
+import { ContractGraph } from '../../types/graph';
+import { ParsedFunction, buildFunctionGraph } from './functionGraphBuilder';
 
 const lexer = moo.compile({
     ws: /[ \t\r]+/,
@@ -38,12 +38,10 @@ function tokenize(code: string) {
 
 export async function parseTactContract(code: string): Promise<ContractGraph> {
     const tokens = tokenize(code);
-    const graph: ContractGraph = { nodes: [], edges: [] };
     const contractName = vscode.window.activeTextEditor
         ? path.basename(vscode.window.activeTextEditor.document.fileName).split('.')[0]
         : 'Contract';
-
-    const functions = new Map<string, { body: string; params: string }>();
+    const functions = new Map<string, ParsedFunction>();
 
     let i = 0;
     while (i < tokens.length) {
@@ -92,34 +90,11 @@ export async function parseTactContract(code: string): Promise<ContractGraph> {
             const bodyEnd = i - 1;
             const params = tokens.slice(paramsStart, paramsEnd).map(t => t.value).join('');
             const bodyText = tokens.slice(bodyStart, bodyEnd).map(t => t.value).join('');
-            functions.set(name, { body: bodyText, params });
-            const node: ContractNode = {
-                id: name,
-                label: `${name}(${params})`,
-                type: GraphNodeKind.Function,
-                contractName,
-                parameters: params.split(',').map((p: string) => p.trim()).filter(Boolean),
-                functionType: kind
-            };
-            graph.nodes.push(node);
+            functions.set(name, { name, params, body: bodyText, type: kind });
         } else {
             i++;
         }
     }
 
-    const functionNames = Array.from(functions.keys());
-    const callRegex = new RegExp(`\\b(${functionNames.join('|')})\\s*\\(`, 'g');
-    for (const [from, info] of functions) {
-        const added = new Set<string>();
-        let m: RegExpExecArray | null;
-        while ((m = callRegex.exec(info.body)) !== null) {
-            const to = m[1];
-            if (to !== from && !added.has(to)) {
-                graph.edges.push({ from, to, label: '' });
-                added.add(to);
-            }
-        }
-    }
-
-    return graph;
+    return buildFunctionGraph(functions, contractName);
 }

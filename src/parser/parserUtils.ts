@@ -4,7 +4,7 @@ import { parseContractCode } from '../languages/func/funcParser';
 import { parseTactContract } from '../languages/func/tactParser';
 import { parseTolkContract } from '../languages/func/tolkParser';
 import { processImports } from '../languages/func/importHandler';
-import { parseMoveContract } from '../languages/move/moveParser';
+import { parseMoveContract } from './moveParser';
 import * as vscode from 'vscode';
 
 const parseCache = new Map<string, ContractGraph>();

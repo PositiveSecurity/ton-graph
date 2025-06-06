@@ -5,6 +5,10 @@ import { parseTactContract } from '../languages/func/tactParser';
 import { parseTolkContract } from '../languages/func/tolkParser';
 import { processImports, isPathInsideWorkspace } from '../languages/func/importHandler';
 import { parseMoveContract } from './moveParser';
+import { parseCairoContract } from '../languages/cairo';
+import { parsePlutusContract } from '../languages/plutus';
+import { parseCadenceContract } from '../languages/cadence';
+import { parseMichelsonContract } from '../languages/michelson';
 import * as vscode from 'vscode';
 import * as toml from 'toml';
 import logger from '../logging/logger';
@@ -17,7 +21,15 @@ if (vscode.workspace && typeof vscode.workspace.onDidChangeTextDocument === 'fun
     });
 }
 
-export type ContractLanguage = 'func' | 'tact' | 'tolk' | 'move';
+export type ContractLanguage =
+  | 'func'
+  | 'tact'
+  | 'tolk'
+  | 'move'
+  | 'cairo'
+  | 'plutus'
+  | 'cadence'
+  | 'michelson';
 
 /**
  * Detects the language based on file extension
@@ -32,6 +44,14 @@ export function detectLanguage(filePath: string): ContractLanguage {
         return 'tact';
     } else if (extension === '.tolk') {
         return 'tolk';
+    } else if (extension === '.cairo') {
+        return 'cairo';
+    } else if (extension === '.plutus') {
+        return 'plutus';
+    } else if (extension === '.cdc') {
+        return 'cadence';
+    } else if (extension === '.tz') {
+        return 'michelson';
     }
 
     // Default to FunC
@@ -56,6 +76,18 @@ export async function parseContractByLanguage(code: string, language: ContractLa
             break;
         case 'tolk':
             graph = await parseTolkContract(code);
+            break;
+        case 'cairo':
+            graph = parseCairoContract(code);
+            break;
+        case 'plutus':
+            graph = parsePlutusContract(code);
+            break;
+        case 'cadence':
+            graph = parseCadenceContract(code);
+            break;
+        case 'michelson':
+            graph = parseMichelsonContract(code);
             break;
         case 'func':
         default:
@@ -165,6 +197,13 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
                 { value: 'regular', label: 'Regular' },
                 { value: 'entry', label: 'Entry' },
                 { value: 'script', label: 'Script' }
+            ];
+        case 'cairo':
+        case 'plutus':
+        case 'cadence':
+        case 'michelson':
+            return [
+                { value: 'regular', label: 'Regular' }
             ];
         case 'func':
         default:

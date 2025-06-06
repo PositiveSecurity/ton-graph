@@ -4,7 +4,17 @@ import * as fs from 'fs';
 import logger from '../../logging/logger';
 
 async function safeReadFile(filePath: string): Promise<string> {
-    const handle = await fs.promises.open(filePath, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);
+    const resolved = path.resolve(filePath);
+    const lstat = await fs.promises.lstat(resolved);
+
+    if (lstat.isSymbolicLink()) {
+        const real = await fs.promises.realpath(resolved);
+        if (!isPathInsideWorkspace(real)) {
+            throw new Error(`Symbolic link outside workspace: ${filePath}`);
+        }
+    }
+
+    const handle = await fs.promises.open(resolved, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);
     const data = await handle.readFile('utf8');
     await handle.close();
     return data;
@@ -16,23 +26,26 @@ function isPathInsideWorkspace(filePath: string): boolean {
         return false;
     }
 
-    // Resolve symlinks for the file path
-    let resolvedPath: string;
+    const resolvedPath = path.resolve(filePath);
+    let realPath: string;
+
     try {
-        resolvedPath = fs.realpathSync(path.resolve(filePath));
+        realPath = fs.realpathSync(resolvedPath);
     } catch {
-        // If resolving fails, treat path as is
-        resolvedPath = path.resolve(filePath);
+        realPath = resolvedPath;
     }
 
     return folders.some(folder => {
-        let workspacePath: string;
+        const base = path.resolve(folder.uri.fsPath);
+        let baseReal: string;
+
         try {
-            workspacePath = fs.realpathSync(folder.uri.fsPath);
+            baseReal = fs.realpathSync(base);
         } catch {
-            workspacePath = folder.uri.fsPath;
+            baseReal = base;
         }
-        const relative = path.relative(workspacePath, resolvedPath);
+
+        const relative = path.relative(baseReal, realPath);
         return !relative.startsWith('..') && !path.isAbsolute(relative);
     });
 }

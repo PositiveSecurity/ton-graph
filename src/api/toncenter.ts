@@ -28,6 +28,12 @@ export async function callToncenter<T>(
                 { signal: controller.signal });
             clearTimeout(timer);
             if (!res.ok) {
+                const isServerError = res.status >= 500 && res.status < 600;
+                if (attempt < maxRetries && isServerError) {
+                    const delay = Math.pow(2, attempt) * 100;
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    continue;
+                }
                 throw new Error(`HTTP ${res.status}`);
             }
             const data = (await res.json()) as T;
@@ -35,8 +41,7 @@ export async function callToncenter<T>(
             return data;
         } catch (err: any) {
             clearTimeout(timer);
-            const isHttpError = err instanceof Error && err.message.startsWith('HTTP');
-            if (attempt >= maxRetries || isHttpError) {
+            if (attempt >= maxRetries) {
                 throw err;
             }
             const delay = Math.pow(2, attempt) * 100;

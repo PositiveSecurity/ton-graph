@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import mock = require('mock-require');
 mock('vscode', { window: { activeTextEditor: undefined, createOutputChannel: () => ({ appendLine: () => {} }) } });
-import { parseTactContract } from '../src/parser/tactParser';
+import { parseTactContract } from '../src/languages/func/tactParser';
 
 describe('parseTactContract', () => {
     it('parses init, receive, fun and get fun', async () => {

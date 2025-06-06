@@ -1,8 +1,8 @@
 import * as path from 'path';
 import * as vscode from 'vscode';
 import * as moo from 'moo';
-import { ContractGraph, ContractNode } from '../types/graph';
-import { GraphNodeKind } from '../types/graphNodeKind';
+import { ContractGraph, ContractNode } from '../../types/graph';
+import { GraphNodeKind } from '../../types/graphNodeKind';
 
 const lexer = moo.compile({
     ws: /[ \t\r]+/,

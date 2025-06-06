@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import logger from '../logging/logger';
+import logger from '../../logging/logger';
 
 async function safeReadFile(filePath: string): Promise<string> {
     const handle = await fs.promises.open(filePath, fs.constants.O_RDONLY | fs.constants.O_NOFOLLOW);

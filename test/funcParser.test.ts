@@ -1,7 +1,7 @@
 import { expect } from 'chai';
 import mock = require('mock-require');
 mock('vscode', { window: { createOutputChannel: () => ({ appendLine: () => {} }) } });
-import { parseContractCode } from '../src/parser/funcParser';
+import { parseContractCode } from '../src/languages/func/funcParser';
 
 describe('parseContractCode', () => {
     it('parses functions and calls without built-ins', async () => {

@@ -9,13 +9,13 @@ const processImportsStub = async (...args: any[]) => {
   calledWith = args;
   return { importedCode: 'int lib() { return 1; }', importedFilePaths: [], cycles: [] };
 };
-mock('../src/parser/importHandler.ts', { processImports: processImportsStub });
+mock('../src/languages/func/importHandler', { processImports: processImportsStub });
 
 const parserUtils = require('../src/parser/parserUtils');
 
 describe('parserUtils.parseContractWithImports', () => {
   after(() => {
-    mock.stop('../src/parser/importHandler.ts');
+    mock.stop('../src/languages/func/importHandler');
   });
 
   it('combines imported code before parsing', async () => {

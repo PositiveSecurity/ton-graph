@@ -10,7 +10,8 @@ import {
     determineFunctionType,
     analyzeFunctionCalls,
     TolkFunctionInfo
-} from '../src/parser/tolkParser';
+} from '../src/languages/func/tolkParser';
+
 
 describe('Tolk parser helper functions', () => {
     const code = fs.readFileSync(path.join(__dirname, 'tolk_sample.tolk'), 'utf-8');

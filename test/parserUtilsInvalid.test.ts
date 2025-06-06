@@ -5,14 +5,14 @@ mock('vscode', { window: { createOutputChannel: () => ({ appendLine: () => {} })
 
 describe('parserUtils invalid inputs', () => {
   afterEach(() => {
-    mock.stop('../src/parser/funcParser');
+    mock.stop('../src/languages/func/funcParser');
     delete require.cache[require.resolve('../src/parser/parserUtils')];
   });
 
   it('falls back to FunC parser for unknown language', async () => {
     delete require.cache[require.resolve('../src/parser/parserUtils')];
     let called = false;
-    mock('../src/parser/funcParser', { parseContractCode: async () => { called = true; return { nodes: [], edges: [] }; } });
+    mock('../src/languages/func/funcParser', { parseContractCode: async () => { called = true; return { nodes: [], edges: [] }; } });
     const parserUtils = require('../src/parser/parserUtils');
     const res = await parserUtils.parseContractByLanguage('code', 'weird' as any);
     expect(called).to.be.true;

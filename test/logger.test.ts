@@ -33,9 +33,15 @@ describe('Logger', () => {
 
   it('filters sensitive information', () => {
     logger.error('failed with api_key=SECRET', { api_key: 'SECRET', path: '/tmp/secret.txt' });
-    const last = outputChannel.messages[outputChannel.messages.length - 1];
-    expect(last).to.not.include('SECRET');
-    expect(last).to.not.include('/tmp/secret.txt');
+    logger.error('bad api-key:SECRET');
+    logger.error('bad apikey=SECRET');
+    logger.error('bad apikey?value=SECRET');
+    const lastFour = outputChannel.messages.slice(-4);
+    for (const msg of lastFour) {
+      expect(msg).to.not.include('SECRET');
+      expect(msg).to.include('[FILTERED]');
+    }
+    expect(lastFour[0]).to.not.include('/tmp/secret.txt');
   });
 
   it('redacts absolute paths with spaces and quotes', () => {

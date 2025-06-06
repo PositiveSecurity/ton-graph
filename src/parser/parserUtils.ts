@@ -6,6 +6,8 @@ import { parseTolkContract } from '../languages/func/tolkParser';
 import { processImports, isPathInsideWorkspace } from '../languages/func/importHandler';
 import { parseMoveContract } from './moveParser';
 import * as vscode from 'vscode';
+import * as toml from 'toml';
+import logger from '../logging/logger';
 
 const parseCache = new Map<string, ContractGraph>();
 
@@ -108,21 +110,19 @@ export async function parseContractWithImports(
             const tomlPath = path.join(root, 'Move.toml');
             try {
                 const text = fs.readFileSync(tomlPath, 'utf8');
-                const depSection = text.split(/\[dependencies\]/i)[1];
-                if (depSection) {
-                    for (const line of depSection.split(/\n/)) {
-                        const m = line.match(/local\s*=\s*"([^"]+)"/);
-                        if (m) {
-                            const depDir = path.resolve(root, m[1]);
-                            if (isPathInsideWorkspace(depDir)) {
-                                collect(depDir);
-                            }
+                const parsed = toml.parse(text);
+                const deps = parsed.dependencies || {};
+                for (const key of Object.keys(deps)) {
+                    const dep = deps[key];
+                    if (dep && typeof dep === 'object' && dep.local) {
+                        const depDir = path.resolve(root, dep.local);
+                        if (isPathInsideWorkspace(depDir)) {
+                            collect(depDir);
                         }
-                        if (line.startsWith('[')) break;
                     }
                 }
-            } catch {
-                /* ignore */
+            } catch (err) {
+                logger.error(`Invalid Move.toml at ${tomlPath}`, err);
             }
         } else {
             moveFiles.push(filePath);

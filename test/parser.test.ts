@@ -175,4 +175,39 @@ describe('Parser', () => {
         const ids = graph.nodes.map((n: any) => n.id);
         expect(ids).to.deep.equal(['A::a']);
     });
+
+    it('parses Move.toml with multiple dependencies and comments', async () => {
+        const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'movemulti-'));
+        fs.mkdirSync(path.join(tmp, 'dep1'), { recursive: true });
+        fs.mkdirSync(path.join(tmp, 'dep2'), { recursive: true });
+        fs.writeFileSync(
+            path.join(tmp, 'Move.toml'),
+            `[package]\nname="Test"\n\n[dependencies]\n` +
+            `dep1 = { local = "./dep1" } # first\n` +
+            `# middle comment\n` +
+            `dep2 = { local = "./dep2" }\n`
+        );
+        fs.writeFileSync(path.join(tmp, 'A.move'), 'module A { use D; use E; public fun a() { D::d(); E::e(); } }');
+        fs.writeFileSync(path.join(tmp, 'dep1', 'D.move'), 'module D { public fun d() {} }');
+        fs.writeFileSync(path.join(tmp, 'dep2', 'E.move'), 'module E { public fun e() {} }');
+        const code = fs.readFileSync(path.join(tmp, 'A.move'), 'utf8');
+        mock('vscode', { window: { createOutputChannel: () => ({ appendLine: () => {} }) }, workspace: { workspaceFolders: [{ uri: { fsPath: tmp } }] } });
+        mock('toml', { parse: (str: string) => {
+            const deps: any = {};
+            const section = /\[dependencies\]([\s\S]*?)(?:\n\[|$)/i.exec(str);
+            if (section) {
+                for (const line of section[1].split(/\n/)) {
+                    const m = line.match(/^(\w+)\s*=\s*{[^}]*local\s*=\s*"([^"]+)"/);
+                    if (m) deps[m[1]] = { local: m[2] };
+                }
+            }
+            return { dependencies: deps };
+        }});
+        delete require.cache[require.resolve('../src/parser/parserUtils')];
+        const { parseContractWithImports: parseWithImports } = require('../src/parser/parserUtils');
+        const graph = await parseWithImports(code, path.join(tmp, 'A.move'), 'move');
+        const ids = graph.nodes.map((n: any) => n.id);
+        expect(ids).to.include.members(['A::a', 'D::d', 'E::e']);
+        mock.stop('toml');
+    });
 });

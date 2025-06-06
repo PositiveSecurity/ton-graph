@@ -3,7 +3,10 @@ import logger from '../logging/logger';
 // generateErrorHtml remains useful for displaying initialization errors
 export function generateErrorHtml(message: string, mermaidScriptUri?: string): string {
     // Use error styles from "Copy"
-    const escapedMessage = message.replace(/</g, "<").replace(/>/g, ">");
+    const escapedMessage = message
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
     return `
     <!DOCTYPE html>
     <html lang="en">

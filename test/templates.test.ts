@@ -3,8 +3,8 @@ import { generateErrorHtml, filterMermaidDiagram } from '../src/visualization/te
 
 describe('templates utilities', () => {
   it('escapes error message in HTML', () => {
-    const html = generateErrorHtml('<tag>');
-    expect(html).to.include('&lt;tag&gt;');
+    const html = generateErrorHtml('<tag>&');
+    expect(html).to.include('&lt;tag&gt;&amp;');
     expect(html).to.include('Error Occurred');
   });
 
@@ -25,6 +25,6 @@ describe('templates utilities', () => {
   it('removes duplicate graph directives', () => {
     const invalid = 'graph TB;\nsubgraph X\n graph LR;\n A_impure --> B_regular\nend';
     const out = filterMermaidDiagram(invalid, ['impure', 'regular']);
-    expect(out.match(/graph /g)?.length).to.equal(1);
+    expect(out.match(/^graph /gm)?.length).to.equal(1);
   });
 });

@@ -37,4 +37,17 @@ describe('parseContractCode', () => {
         expect(foo?.parameters).to.deep.equal(['int a']);
         expect(main?.parameters).to.deep.equal(['int b']);
     });
+
+    it('uses cache for repeated parses', async () => {
+        let called = 0;
+        mock.stop('../src/languages/func/funcParser');
+        mock('../src/languages/func/funcParser', { parseContractCode: async () => { called++; return { nodes: [], edges: [] }; } });
+        delete require.cache[require.resolve('../src/parser/parserUtils')];
+        const { parseContractByLanguage } = require('../src/parser/parserUtils');
+        const uri = { toString() { return 'file:///cache.fc'; } } as any;
+        await parseContractByLanguage('code', 'func', uri);
+        await parseContractByLanguage('code', 'func', uri);
+        expect(called).to.equal(1);
+        mock.stop('../src/languages/func/funcParser');
+    });
 });

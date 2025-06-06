@@ -1,16 +1,32 @@
 import * as vscode from 'vscode';
 import { LanguageAdapter, AST } from './types';
 
+const parseCache = new WeakMap<vscode.Uri, { version: number; ast: AST }>();
+
+if (vscode.workspace && typeof vscode.workspace.onDidChangeTextDocument === 'function') {
+  vscode.workspace.onDidChangeTextDocument((e) => {
+    parseCache.delete(e.document.uri);
+  });
+}
+
 export class GraphProvider implements vscode.DocumentSymbolProvider {
   constructor(private adapter: LanguageAdapter) {}
 
   provideDocumentSymbols(document: vscode.TextDocument): vscode.ProviderResult<vscode.DocumentSymbol[]> {
-    const ast = this.adapter.parse(document.getText()) as any;
-    if (!('functions' in ast)) {
+    let cached = parseCache.get(document.uri);
+    let ast: AST;
+    if (cached && cached.version === document.version) {
+      ast = cached.ast;
+    } else {
+      ast = this.adapter.parse(document.getText());
+      parseCache.set(document.uri, { version: document.version, ast });
+    }
+    const anyAst: any = ast;
+    if (!('functions' in anyAst)) {
       return [];
     }
     const symbols: vscode.DocumentSymbol[] = [];
-    (ast as any).functions.forEach((fn: any) => {
+    anyAst.functions.forEach((fn: any) => {
       const symbol = new vscode.DocumentSymbol(
         fn.name,
         '',

@@ -25,4 +25,17 @@ describe('parseMoveContract', () => {
             { from: 'transfer', to: 'credit', label: '' }
         ]);
     });
+
+    it('uses cache for repeated parses', async () => {
+        let called = 0;
+        mock.stop('../src/languages/move/moveParser');
+        mock('../src/languages/move/moveParser', { parseMoveContract: async () => { called++; return { nodes: [], edges: [] }; } });
+        delete require.cache[require.resolve('../src/parser/parserUtils')];
+        const { parseContractByLanguage } = require('../src/parser/parserUtils');
+        const uri = { toString() { return 'file:///cache.move'; } } as any;
+        await parseContractByLanguage('code', 'move', uri);
+        await parseContractByLanguage('code', 'move', uri);
+        expect(called).to.equal(1);
+        mock.stop('../src/languages/move/moveParser');
+    });
 });

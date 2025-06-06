@@ -50,6 +50,6 @@ describe('visualizer missing graph handling', () => {
     }
     const errMsg = messages.find(m => m.command === 'filterError');
     expect(errMsg).to.exist;
-    expect(errMsg.error).to.match(/Original graph not found/);
+    expect(errMsg.error).to.equal('Original graph not found for this panel.');
   });
 });

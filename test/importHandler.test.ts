@@ -194,4 +194,57 @@ describe('ImportHandler', () => {
             expect(err.message).to.match(/symlink loop/i);
         }
     });
+    it('rejects Tact imports outside workspace', async () => {
+        const code = 'import "../../etc/passwd"';
+        const result = await processTactImports(code, path.join(testRoot, 'dummy.tact'));
+        expect(result.importedFilePaths.length).to.equal(0);
+    });
+
+    it('rejects Tolk imports outside workspace', async () => {
+        const code = 'import "../../etc/passwd"';
+        const result = await processTolkImports(code, path.join(testRoot, 'dummy.tolk'));
+        expect(result.importedFilePaths.length).to.equal(0);
+    });
+
+    it('rejects Tact imports when no workspace is open', async () => {
+        mock('vscode', {
+            window: { createOutputChannel: () => ({ appendLine: () => {} }) },
+            workspace: {}
+        });
+        const { processTactImports: proc } = require('../src/parser/importHandler');
+        const res = await proc('import "./lib.tact";', path.join(testRoot, 'dummy.tact'));
+        expect(res.importedFilePaths.length).to.equal(0);
+    });
+
+    it('rejects Tolk imports when no workspace is open', async () => {
+        mock('vscode', {
+            window: { createOutputChannel: () => ({ appendLine: () => {} }) },
+            workspace: {}
+        });
+        const { processTolkImports: proc } = require('../src/parser/importHandler');
+        const res = await proc('import "./lib.tolk";', path.join(testRoot, 'dummy.tolk'));
+        expect(res.importedFilePaths.length).to.equal(0);
+    });
+
+    it('detects symlink loops in Tolk imports', async () => {
+        const tolkLoop = path.join(testRoot, 'tolkLoop');
+        fs.rmSync(tolkLoop, { recursive: true, force: true });
+        fs.mkdirSync(tolkLoop, { recursive: true });
+        const main = path.join(tolkLoop, 'main.tolk');
+        fs.writeFileSync(main, 'import "lib";');
+        const lib = path.join(tolkLoop, 'lib.tolk');
+        fs.symlinkSync(main, lib);
+
+        mock('vscode', {
+            window: { createOutputChannel: () => ({ appendLine: () => {} }) },
+            workspace: { workspaceFolders: [{ uri: { fsPath: tolkLoop } }] }
+        });
+        const { processTolkImports: proc } = require('../src/parser/importHandler');
+        try {
+            await proc(fs.readFileSync(main, 'utf8'), main);
+            expect.fail('should throw due to symlink loop');
+        } catch (err: any) {
+            expect(err.message).to.match(/symlink loop/i);
+        }
+    });
 });

@@ -15,6 +15,11 @@ const sample = `module M {
     fun credit() {}
 }`;
 
+const modifierSample = `module M {
+    public entry fun main() {}
+    public(script) fun run() {}
+}`;
+
 describe('parseMoveContract', () => {
     it('parses functions and edges', async () => {
         const graph = await parseMoveContract(sample);
@@ -37,5 +42,13 @@ describe('parseMoveContract', () => {
         await parseContractByLanguage('code', 'move', uri);
         expect(called).to.equal(1);
         mock.stop('../src/parser/moveParser');
+    });
+
+    it('detects entry and script functions', async () => {
+        const graph = await parseMoveContract(modifierSample);
+        const entry = graph.nodes.find(n => n.id === 'M::main');
+        const script = graph.nodes.find(n => n.id === 'M::run');
+        expect(entry?.functionType).to.equal('entry');
+        expect(script?.functionType).to.equal('script');
     });
 });

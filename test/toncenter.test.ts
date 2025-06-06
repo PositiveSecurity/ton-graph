@@ -78,4 +78,21 @@ describe('callToncenter', () => {
             expect(elapsed).to.be.greaterThan(290);
         }
     });
+
+    it('caches successful responses', async () => {
+        let calls = 0;
+        server.use(
+            rest.get('https://toncenter.com/api/v2/', (_req, res, ctx) => {
+                calls++;
+                return res(ctx.json({ ok: true }));
+            })
+        );
+        const context = { workspaceState: new TestMemento(), secrets: new TestSecrets() } as any;
+        const result1 = await callToncenter(context, 'test', { q: 1 });
+        expect(result1).to.deep.equal({ ok: true });
+        expect(calls).to.equal(1);
+        const result2 = await callToncenter(context, 'test', { q: 1 });
+        expect(result2).to.deep.equal({ ok: true });
+        expect(calls).to.equal(1);
+    });
 });

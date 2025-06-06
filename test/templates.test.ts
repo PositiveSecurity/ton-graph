@@ -39,4 +39,33 @@ describe('templates utilities', () => {
     const out = filterMermaidDiagram(invalid, ['impure', 'regular']);
     expect(out.match(/^(graph|flowchart)/gm)?.length).to.equal(1);
   });
+
+  it('defaults to all types when none are selected', () => {
+    const diagram = 'graph TB;\nA_impure["A"]\nB_regular["B"];';
+    const out = filterMermaidDiagram(diagram, [] as any);
+    expect(out).to.include('A_impure');
+    expect(out).to.include('B_regular');
+  });
+
+  it('filters by name and drops unconnected nodes', () => {
+    const diagram =
+      'graph TB;\nA_regular["A"]\nB_impure["B"]\nC_regular["C"]\nD_impure["D"]\nA_regular --> B_impure\nC_regular --> D_impure';
+    const out = filterMermaidDiagram(diagram, ['impure', 'regular'], 'B');
+    expect(out).to.include('A_regular');
+    expect(out).to.include('B_impure');
+    expect(out).not.to.include('C_regular');
+    expect(out).not.to.include('D_impure');
+  });
+
+  it('adds a graph directive when missing', () => {
+    const diagram = 'A_impure --> B_regular';
+    const out = filterMermaidDiagram(diagram, ['impure', 'regular']);
+    expect(out.trim().startsWith('graph TB;')).to.be.true;
+  });
+
+  it('handles subgraph directives with extra whitespace', () => {
+    const invalid = 'graph TB;\nsubgraph    Z  \n  graph   LR \n  A_impure --> B_regular\nend';
+    const out = filterMermaidDiagram(invalid, ['impure', 'regular']);
+    expect(out.match(/^(graph|flowchart)/gm)?.length).to.equal(1);
+  });
 });

@@ -166,4 +166,309 @@ describe('exportHandler', () => {
         const result = messages.find(m => m.command === 'saveResult');
         expect(result.success).to.be.false;
     });
+
+    it('rejects PNG export when SVG is invalid', async () => {
+        const tmp = path.join(os.tmpdir(), 'out.png');
+        let written: Buffer | undefined;
+        const messages: any[] = [];
+        mock('vscode', {
+            window: {
+                activeTextEditor: undefined,
+                showSaveDialog: async () => ({ fsPath: tmp }),
+                showInformationMessage: () => {},
+                showErrorMessage: () => {},
+                createOutputChannel: () => ({ appendLine: () => {} })
+            },
+            workspace: {
+                fs: {
+                    writeFile: async (_uri: any, data: any) => {
+                        written = Buffer.from(data);
+                    }
+                }
+            },
+            Uri: { file: (p: string) => ({ fsPath: p, toString() { return p; } }) }
+        });
+        handleExport = require('../src/export/exportHandler').handleExport;
+        const panel = createPanel({ pngData: { command: 'pngData', content: 'data:image/png;base64,' + Buffer.from('png').toString('base64') } }, messages);
+        await handleExport(panel, { command: 'savePng', content: 'not-svg' }, { extensionPath: '.' });
+        expect(written).to.be.undefined;
+        const result = messages.find(m => m.command === 'saveResult');
+        expect(result.success).to.be.false;
+    });
+
+    it('rejects PNG export when no data received', async () => {
+        const tmp = path.join(os.tmpdir(), 'out.png');
+        let written: Buffer | undefined;
+        const messages: any[] = [];
+        mock('vscode', {
+            window: {
+                activeTextEditor: undefined,
+                showSaveDialog: async () => ({ fsPath: tmp }),
+                showInformationMessage: () => {},
+                showErrorMessage: () => {},
+                createOutputChannel: () => ({ appendLine: () => {} })
+            },
+            workspace: {
+                fs: {
+                    writeFile: async (_uri: any, data: any) => {
+                        written = Buffer.from(data);
+                    }
+                }
+            },
+            Uri: { file: (p: string) => ({ fsPath: p, toString() { return p; } }) }
+        });
+        handleExport = require('../src/export/exportHandler').handleExport;
+        const panel = createPanel({ pngData: { command: 'pngData', content: undefined } }, messages);
+        await handleExport(panel, { command: 'savePng', content: '<svg></svg>' }, { extensionPath: '.' });
+        expect(written).to.be.undefined;
+        const result = messages.find(m => m.command === 'saveResult');
+        expect(result.success).to.be.false;
+    });
+
+    it('saves Mermaid file when webview returns data', async () => {
+        const tmp = path.join(os.tmpdir(), 'out.mmd');
+        let written: Buffer | undefined;
+        const messages: any[] = [];
+        mock('vscode', {
+            window: {
+                activeTextEditor: undefined,
+                showSaveDialog: async () => ({ fsPath: tmp }),
+                showInformationMessage: () => {},
+                showErrorMessage: () => {},
+                createOutputChannel: () => ({ appendLine: () => {} })
+            },
+            workspace: {
+                fs: {
+                    writeFile: async (_uri: any, data: any) => {
+                        written = Buffer.from(data);
+                    }
+                }
+            },
+            Uri: { file: (p: string) => ({ fsPath: p, toString() { return p; } }) }
+        });
+        handleExport = require('../src/export/exportHandler').handleExport;
+        const panel = createPanel({
+            getMermaidContent: { command: 'mermaidContent', content: 'graph TB;' }
+        }, messages);
+        await handleExport(panel, { command: 'saveMermaid' }, { extensionPath: '.' });
+        expect(written?.toString()).to.equal('graph TB;');
+        const result = messages.find(m => m.command === 'saveResult');
+        expect(result.success).to.be.true;
+        expect(result.type).to.equal('mermaid');
+    });
+
+    it('fails to save Mermaid when no content is returned', async () => {
+        const tmp = path.join(os.tmpdir(), 'out.mmd');
+        let written: Buffer | undefined;
+        const messages: any[] = [];
+        mock('vscode', {
+            window: {
+                activeTextEditor: undefined,
+                showSaveDialog: async () => ({ fsPath: tmp }),
+                showInformationMessage: () => {},
+                showErrorMessage: () => {},
+                createOutputChannel: () => ({ appendLine: () => {} })
+            },
+            workspace: {
+                fs: {
+                    writeFile: async (_uri: any, data: any) => {
+                        written = Buffer.from(data);
+                    }
+                }
+            },
+            Uri: { file: (p: string) => ({ fsPath: p, toString() { return p; } }) }
+        });
+        handleExport = require('../src/export/exportHandler').handleExport;
+        const panel = createPanel({
+            getMermaidContent: { command: 'mermaidContent', content: undefined }
+        }, messages);
+        await handleExport(panel, { command: 'saveMermaid' }, { extensionPath: '.' });
+        expect(written).to.be.undefined;
+        const result = messages.find(m => m.command === 'saveResult');
+        expect(result.success).to.be.false;
+    });
+
+    it('saves JPG when data URL is valid', async () => {
+        const tmp = path.join(os.tmpdir(), 'out.jpg');
+        let written: Buffer | undefined;
+        const messages: any[] = [];
+        const jpgData = 'data:image/jpeg;base64,' + Buffer.from('jpg').toString('base64');
+        mock('vscode', {
+            window: {
+                activeTextEditor: undefined,
+                showSaveDialog: async () => ({ fsPath: tmp }),
+                showInformationMessage: () => {},
+                showErrorMessage: () => {},
+                createOutputChannel: () => ({ appendLine: () => {} })
+            },
+            workspace: {
+                fs: {
+                    writeFile: async (_uri: any, data: any) => {
+                        written = Buffer.from(data);
+                    }
+                }
+            },
+            Uri: { file: (p: string) => ({ fsPath: p, toString() { return p; } }) }
+        });
+        handleExport = require('../src/export/exportHandler').handleExport;
+        const panel = createPanel({
+            convertToJpg: undefined,
+            jpgData: { command: 'jpgData', content: jpgData }
+        }, messages);
+        await handleExport(panel, { command: 'saveJpg', content: '<svg></svg>' }, { extensionPath: '.' });
+        expect(written).to.exist;
+        const result = messages.find(m => m.command === 'saveResult');
+        expect(result.success).to.be.true;
+        expect(result.type).to.equal('jpg');
+    });
+
+    it('rejects invalid JPG data url', async () => {
+        const tmp = path.join(os.tmpdir(), 'out.jpg');
+        let written: Buffer | undefined;
+        const messages: any[] = [];
+        mock('vscode', {
+            window: {
+                activeTextEditor: undefined,
+                showSaveDialog: async () => ({ fsPath: tmp }),
+                showInformationMessage: () => {},
+                showErrorMessage: () => {},
+                createOutputChannel: () => ({ appendLine: () => {} })
+            },
+            workspace: {
+                fs: {
+                    writeFile: async (_uri: any, data: any) => {
+                        written = Buffer.from(data);
+                    }
+                }
+            },
+            Uri: { file: (p: string) => ({ fsPath: p, toString() { return p; } }) }
+        });
+        handleExport = require('../src/export/exportHandler').handleExport;
+        const panel = createPanel({
+            convertToJpg: undefined,
+            jpgData: { command: 'jpgData', content: 'data:image/jpeg;base64,notbase64' }
+        }, messages);
+        await handleExport(panel, { command: 'saveJpg', content: '<svg></svg>' }, { extensionPath: '.' });
+        expect(written).to.be.undefined;
+        const result = messages.find(m => m.command === 'saveResult');
+        expect(result.success).to.be.false;
+    });
+
+    it('rejects JPG export when SVG is invalid', async () => {
+        const tmp = path.join(os.tmpdir(), 'out.jpg');
+        let written: Buffer | undefined;
+        const messages: any[] = [];
+        mock('vscode', {
+            window: {
+                activeTextEditor: undefined,
+                showSaveDialog: async () => ({ fsPath: tmp }),
+                showInformationMessage: () => {},
+                showErrorMessage: () => {},
+                createOutputChannel: () => ({ appendLine: () => {} })
+            },
+            workspace: {
+                fs: {
+                    writeFile: async (_uri: any, data: any) => {
+                        written = Buffer.from(data);
+                    }
+                }
+            },
+            Uri: { file: (p: string) => ({ fsPath: p, toString() { return p; } }) }
+        });
+        handleExport = require('../src/export/exportHandler').handleExport;
+        const panel = createPanel({ jpgData: { command: 'jpgData', content: 'data:image/jpeg;base64,' + Buffer.from('jpg').toString('base64') } }, messages);
+        await handleExport(panel, { command: 'saveJpg', content: 'not-svg' }, { extensionPath: '.' });
+        expect(written).to.be.undefined;
+        const result = messages.find(m => m.command === 'saveResult');
+        expect(result.success).to.be.false;
+    });
+
+    it('rejects JPG export when no data received', async () => {
+        const tmp = path.join(os.tmpdir(), 'out.jpg');
+        let written: Buffer | undefined;
+        const messages: any[] = [];
+        mock('vscode', {
+            window: {
+                activeTextEditor: undefined,
+                showSaveDialog: async () => ({ fsPath: tmp }),
+                showInformationMessage: () => {},
+                showErrorMessage: () => {},
+                createOutputChannel: () => ({ appendLine: () => {} })
+            },
+            workspace: {
+                fs: {
+                    writeFile: async (_uri: any, data: any) => {
+                        written = Buffer.from(data);
+                    }
+                }
+            },
+            Uri: { file: (p: string) => ({ fsPath: p, toString() { return p; } }) }
+        });
+        handleExport = require('../src/export/exportHandler').handleExport;
+        const panel = createPanel({ jpgData: { command: 'jpgData', content: undefined } }, messages);
+        await handleExport(panel, { command: 'saveJpg', content: '<svg></svg>' }, { extensionPath: '.' });
+        expect(written).to.be.undefined;
+        const result = messages.find(m => m.command === 'saveResult');
+        expect(result.success).to.be.false;
+    });
+
+    it('updates webview html when filters are applied', async () => {
+        const messages: any[] = [];
+        let html = '';
+        mock('../src/visualization/templates', {
+            filterMermaidDiagram: () => 'filtered',
+            generateVisualizationHtml: () => 'filtered-html'
+        });
+        mock('vscode', {
+            window: {
+                activeTextEditor: undefined,
+                showSaveDialog: async () => undefined,
+                showInformationMessage: () => {},
+                showErrorMessage: () => {},
+                createOutputChannel: () => ({ appendLine: () => {} })
+            },
+            workspace: { fs: { writeFile: async () => {} } },
+            Uri: { file: (p: string) => ({ fsPath: p, toString() { return p; } }) }
+        });
+
+        handleExport = require('../src/export/exportHandler').handleExport;
+        const panel = createPanel({
+            getMermaidContent: { command: 'mermaidContent', content: 'orig' }
+        }, messages);
+        panel.webview.html = html;
+        await handleExport(panel, { command: 'applyFilters', selectedTypes: ['regular'], nameFilter: 'foo' }, { extensionPath: '.' });
+        html = panel.webview.html;
+        expect(html).to.equal('filtered-html');
+        const result = messages.find(m => m.command === 'filtersApplied');
+        expect(result.success).to.be.true;
+        expect(result.selectedTypes).to.deep.equal(['regular']);
+        expect(result.nameFilter).to.equal('foo');
+    });
+
+    it('fails to apply filters when no graph is returned', async () => {
+        const messages: any[] = [];
+        mock('../src/visualization/templates', {
+            filterMermaidDiagram: () => 'filtered',
+            generateVisualizationHtml: () => 'filtered-html'
+        });
+        mock('vscode', {
+            window: {
+                activeTextEditor: undefined,
+                showSaveDialog: async () => undefined,
+                showInformationMessage: () => {},
+                showErrorMessage: () => {},
+                createOutputChannel: () => ({ appendLine: () => {} })
+            },
+            workspace: { fs: { writeFile: async () => {} } },
+            Uri: { file: (p: string) => ({ fsPath: p, toString() { return p; } }) }
+        });
+
+        handleExport = require('../src/export/exportHandler').handleExport;
+        const panel = createPanel({
+            getMermaidContent: { command: 'mermaidContent', content: '' }
+        }, messages);
+        await handleExport(panel, { command: 'applyFilters', selectedTypes: ['regular'], nameFilter: '' }, { extensionPath: '.' });
+        const result = messages.find(m => m.command === 'filtersApplied');
+        expect(result.success).to.be.false;
+    });
 });

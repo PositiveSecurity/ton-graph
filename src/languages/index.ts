@@ -19,6 +19,7 @@ import bambooAdapter from './bamboo';
 import sophiaAdapter from './sophia';
 import flintAdapter from './flint';
 import feAdapter from './fe';
+import liquidityAdapter from './liquidity';
 
 const adapters = [
   ...adaptersFunc,
@@ -41,7 +42,8 @@ const adapters = [
   bambooAdapter,
   sophiaAdapter,
   flintAdapter,
-  feAdapter
+  feAdapter,
+  liquidityAdapter
 ];
 
 export default adapters;
@@ -65,5 +67,6 @@ export {
   bambooAdapter,
   sophiaAdapter,
   flintAdapter,
-  feAdapter
+  feAdapter,
+  liquidityAdapter
 };

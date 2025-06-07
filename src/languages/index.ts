@@ -10,6 +10,7 @@ import scillaAdapter from './scilla';
 import pactAdapter from './pact';
 import scryptoAdapter from './scrypto';
 import ligoAdapter from './ligo';
+import aikenAdapter from './aiken';
 
 const adapters = [
   ...adaptersFunc,
@@ -23,7 +24,8 @@ const adapters = [
   scillaAdapter,
   pactAdapter,
   scryptoAdapter,
-  ligoAdapter
+  ligoAdapter,
+  aikenAdapter
 ];
 
 export default adapters;
@@ -38,5 +40,6 @@ export {
   scillaAdapter,
   pactAdapter,
   scryptoAdapter,
-  ligoAdapter
+  ligoAdapter,
+  aikenAdapter
 };

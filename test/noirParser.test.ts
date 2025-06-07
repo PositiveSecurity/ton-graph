@@ -105,6 +105,27 @@ describe('parseNoirContract', () => {
     const fs = require('fs');
     const code = fs.readFileSync('examples/noir/module_call.nr', 'utf8');
     const graph = parseNoirContract(code);
+    const ids = graph.nodes.map(n => n.id);
+    expect(ids).to.include.members(['Dummy::helper', 'Dummy::call']);
     expect(graph.edges).to.deep.include({ from: 'use_utils', to: 'utils::inc', label: '' });
+    expect(graph.edges).to.deep.include({ from: 'Dummy::call', to: 'Dummy::helper', label: '' });
+  });
+
+  it('follows mod statements across files', async () => {
+    const fs = require('fs');
+    const code = fs.readFileSync('examples/noir/import_main.nr', 'utf8');
+    const parserUtils = require('../src/parser/parserUtils');
+    const graph = await parserUtils.parseContractWithImports(code, 'examples/noir/import_main.nr', 'noir');
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::math::double', label: '' });
+  });
+
+  it('handles impl methods in external modules', async () => {
+    const fs = require('fs');
+    const code = fs.readFileSync('examples/noir/impl_main.nr', 'utf8');
+    const parserUtils = require('../src/parser/parserUtils');
+    const graph = await parserUtils.parseContractWithImports(code, 'examples/noir/impl_main.nr', 'noir');
+    const ids = graph.nodes.map((n: any) => n.id);
+    expect(ids).to.include.members(['Dummy::helper', 'Dummy::call', 'main']);
+    expect(graph.edges).to.deep.include({ from: 'Dummy::call', to: 'Dummy::helper', label: '' });
   });
 });

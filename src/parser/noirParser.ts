@@ -10,8 +10,15 @@ export interface NoirFunction {
   endPosition: Parser.Point;
 }
 
+export interface NoirModule {
+  name: string;
+  body?: Parser.SyntaxNode;
+  filePath?: string;
+}
+
 export interface NoirAST {
   functions: NoirFunction[];
+  modules: NoirModule[];
 }
 
 let parser: Parser | null = null;
@@ -47,20 +54,43 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
     tree = p.parse("");
   }
   const functions: NoirFunction[] = [];
+  const modules: NoirModule[] = [];
   const fnNodes = walk(tree.rootNode, "function_definition");
   for (const fn of fnNodes) {
     const idNode = fn.namedChildren.find((c) => c.type === "identifier");
     const bodyNode = fn.namedChildren.find((c) => c.type === "body");
     if (idNode) {
+      let prefix = "";
+      let parent: Parser.SyntaxNode | null = fn.parent;
+      while (parent) {
+        if (parent.type === "struct_method") {
+          const structId = parent.namedChildren.find((c) => c.type === "identifier");
+          if (structId) {
+            prefix = `${structId.text}::`;
+            break;
+          }
+        }
+        parent = parent.parent;
+      }
       functions.push({
-        name: idNode.text,
+        name: prefix + idNode.text,
         body: bodyNode,
         startPosition: fn.startPosition,
         endPosition: fn.endPosition,
       });
     }
   }
-  return { ast: { functions }, tree };
+
+  const moduleNodes = walk(tree.rootNode, "module");
+  for (const m of moduleNodes) {
+    const idNode = m.namedChildren.find((c) => c.type === "identifier");
+    const bodyNode = m.namedChildren.find((c) => c.type === "body");
+    if (idNode) {
+      modules.push({ name: idNode.text, body: bodyNode });
+    }
+  }
+
+  return { ast: { functions, modules }, tree };
 }
 
 export function noirAstToGraph(ast: NoirAST): ContractGraph {

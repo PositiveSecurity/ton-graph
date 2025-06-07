@@ -21,6 +21,7 @@ import flintAdapter from './flint';
 import feAdapter from './fe';
 import liquidityAdapter from './liquidity';
 import reachAdapter from './reach';
+import rellAdapter from './rell';
 import rholangAdapter from './rholang';
 
 const adapters = [
@@ -47,6 +48,7 @@ const adapters = [
   feAdapter,
   liquidityAdapter,
   reachAdapter,
+  rellAdapter,
   rholangAdapter
 ];
 
@@ -74,5 +76,6 @@ export {
   feAdapter,
   liquidityAdapter,
   reachAdapter,
+  rellAdapter,
   rholangAdapter
 };

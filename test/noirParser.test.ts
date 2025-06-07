@@ -106,7 +106,9 @@ describe('parseNoirContract', () => {
     const code = fs.readFileSync('examples/noir/module_call.nr', 'utf8');
     const graph = parseNoirContract(code);
     const ids = graph.nodes.map(n => n.id);
-    expect(ids).to.include.members(['Dummy::helper', 'Dummy::call']);
+    expect(ids).to.include.members(['Dummy::helper', 'Dummy::call', 'utils::inc']);
+    const incNode = graph.nodes.find(n => n.id === 'utils::inc');
+    expect(incNode?.contractName).to.equal('utils');
     expect(graph.edges).to.deep.include({ from: 'use_utils', to: 'utils::inc', label: '' });
     expect(graph.edges).to.deep.include({ from: 'Dummy::call', to: 'Dummy::helper', label: '' });
   });
@@ -127,6 +129,10 @@ describe('parseNoirContract', () => {
       '}',
     ].join('\n');
     const graph = parseNoirContract(code);
+    const ids = graph.nodes.map(n => n.id);
+    expect(ids).to.include('utils::inc');
+    const incNode = graph.nodes.find(n => n.id === 'utils::inc');
+    expect(incNode?.contractName).to.equal('utils');
     expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::inc', label: '' });
     expect(graph.edges).to.deep.include({ from: 'main', to: 'Dummy::call', label: '' });
   });

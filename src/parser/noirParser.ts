@@ -5,6 +5,7 @@ import { GraphNodeKind } from "../types/graphNodeKind";
 
 export interface NoirFunction {
   name: string;
+  moduleName?: string;
   body?: Parser.SyntaxNode;
   startPosition: Parser.Point;
   endPosition: Parser.Point;
@@ -60,20 +61,29 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
     const idNode = fn.namedChildren.find((c) => c.type === "identifier");
     const bodyNode = fn.namedChildren.find((c) => c.type === "body");
     if (idNode) {
-      let prefix = "";
+      const modules: string[] = [];
+      let structName: string | null = null;
       let parent: Parser.SyntaxNode | null = fn.parent;
       while (parent) {
-        if (parent.type === "struct_method") {
+        if (parent.type === "struct_method" && !structName) {
           const structId = parent.namedChildren.find((c) => c.type === "identifier");
           if (structId) {
-            prefix = `${structId.text}::`;
-            break;
+            structName = structId.text;
+          }
+        } else if (parent.type === "module") {
+          const modId = parent.namedChildren.find((c) => c.type === "identifier");
+          if (modId) {
+            modules.unshift(modId.text);
           }
         }
         parent = parent.parent;
       }
+      const parts = [...modules];
+      if (structName) parts.push(structName);
+      const prefix = parts.length ? parts.join("::") + "::" : "";
       functions.push({
         name: prefix + idNode.text,
+        moduleName: modules.join("::") || undefined,
         body: bodyNode,
         startPosition: fn.startPosition,
         endPosition: fn.endPosition,
@@ -103,7 +113,7 @@ export function noirAstToGraph(ast: NoirAST): ContractGraph {
       id: f.name,
       label: `${f.name}()`,
       type: GraphNodeKind.Function,
-      contractName: "Contract",
+      contractName: f.moduleName || "Contract",
       parameters: [],
       functionType: "regular",
     };

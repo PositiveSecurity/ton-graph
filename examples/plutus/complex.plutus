@@ -1,0 +1,31 @@
+{-# INLINABLE mkValidator #-}
+mkValidator :: BuiltinData -> BuiltinData -> BuiltinData -> ()
+mkValidator datum redeemer _ =
+    if datum == redeemer then () else traceError "mismatch"
+
+{-# INLINABLE wrappedValidator #-}
+wrappedValidator :: BuiltinData -> BuiltinData -> BuiltinData -> ()
+wrappedValidator d r p = mkValidator d r p
+
+validator :: Validator
+validator = mkValidatorScript $$(compile [|| wrappedValidator ||])
+
+valHash :: Ledger.ValidatorHash
+valHash = Scripts.validatorHash validator
+
+scrAddress :: Ledger.Address
+scrAddress = scriptAddress validator
+
+{-# INLINABLE pay #-}
+pay :: BuiltinData -> BuiltinData -> ScriptContext -> Bool
+pay datum _ ctx =
+    traceIfFalse "insufficient funds" check
+  where
+    info :: TxInfo
+    info = scriptContextTxInfo ctx
+
+    check :: Bool
+    check = valuePaidTo info (scriptHashAddress valHash) `geq` fromBuiltinData datum
+
+policy :: MintingPolicy
+policy = mkMintingPolicyScript $$(compile [|| \_ -> True ||])

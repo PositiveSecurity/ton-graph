@@ -93,13 +93,39 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
     }
   }
 
-  const useNodes = walk(tree.rootNode, "use_declaration");
+  const useNodes = [
+    ...walk(tree.rootNode, "use_declaration"),
+    ...walk(tree.rootNode, "import"),
+  ];
   for (const u of useNodes) {
     const text = u.text.replace(/\s+/g, " ");
-    const match = text.match(/^use\s+([^;]+?)(?:\s+as\s+(\w+))?;/);
-    if (match) {
-      const path = match[1].trim();
-      const alias = match[2] || path.split("::").pop()!;
+    const match = text.match(/^use\s+([^;]+);/);
+    if (!match) continue;
+    const body = match[1].trim();
+    if (/\{.*\}/.test(body)) {
+      const g = body.match(/^(.*)::\{([^}]*)\}$/);
+      if (g) {
+        const base = g[1].trim();
+        const items = g[2]
+          .split(',')
+          .map(s => s.trim())
+          .filter(Boolean);
+        for (const it of items) {
+          if (it === '*') {
+            uses.push({ alias: '*', path: `${base}::*` });
+          } else {
+            const [name, al] = it.split(/\s+as\s+/);
+            const alias = al ? al.trim() : name.trim();
+            uses.push({ alias, path: `${base}::${name.trim()}` });
+          }
+        }
+      }
+    } else if (body.endsWith('::*')) {
+      uses.push({ alias: '*', path: body });
+    } else {
+      const parts = body.split(/\s+as\s+/);
+      const path = parts[0].trim();
+      const alias = parts[1] ? parts[1].trim() : path.split("::").pop()!;
       uses.push({ alias, path });
     }
   }
@@ -112,7 +138,14 @@ export function noirAstToGraph(ast: NoirAST): ContractGraph {
   const funcMap = new Map<string, ContractNode>();
   const edgeSet = new Set<string>();
   const useMap = new Map<string, string>();
-  ast.uses?.forEach(u => useMap.set(u.alias, u.path));
+  const wildcard: string[] = [];
+  ast.uses?.forEach(u => {
+    if (u.alias === '*' && u.path.endsWith('::*')) {
+      wildcard.push(u.path.slice(0, -3));
+    } else {
+      useMap.set(u.alias, u.path);
+    }
+  });
 
   for (const f of ast.functions) {
     const node: ContractNode = {
@@ -156,6 +189,14 @@ export function noirAstToGraph(ast: NoirAST): ContractGraph {
       }
       if (useMap.has(to)) {
         to = useMap.get(to)!;
+      } else {
+        for (const w of wildcard) {
+          const cand = `${w}::${to}`;
+          if (funcMap.has(cand)) {
+            to = cand;
+            break;
+          }
+        }
       }
       const key = `${from}->${to}`;
       if (!edgeSet.has(key)) {

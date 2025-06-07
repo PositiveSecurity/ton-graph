@@ -46,8 +46,8 @@ if (vscode.workspace && typeof vscode.workspace.onDidChangeTextDocument === 'fun
 }
 
 function collectNoirImports(code: string): string[] {
-    const { tree } = parseNoir(code);
-    const result: string[] = [];
+    const { ast, tree } = parseNoir(code);
+    const result: Set<string> = new Set();
     const stack = [tree.rootNode];
     while (stack.length) {
         const node = stack.pop();
@@ -56,17 +56,21 @@ function collectNoirImports(code: string): string[] {
             const body = node.namedChildren.find(c => c.type === 'body');
             if (!body) {
                 const id = node.namedChildren.find(c => c.type === 'identifier');
-                if (id) result.push(id.text);
-            }
-        } else if (node.type === 'use_declaration') {
-            const pathNode = node.namedChildren.find(c => c.type === 'path') || node.namedChildren.find(c => c.type === 'scoped_identifier');
-            if (pathNode) {
-                result.push(pathNode.text);
+                if (id) result.add(id.text);
             }
         }
         stack.push(...node.namedChildren);
     }
-    return result;
+    for (const u of ast.uses) {
+        if (u.path.endsWith('::*')) {
+            result.add(u.path.slice(0, -3));
+        } else {
+            const parts = u.path.split('::');
+            parts.pop();
+            if (parts.length) result.add(parts.join('::'));
+        }
+    }
+    return Array.from(result);
 }
 
 export type ContractLanguage =

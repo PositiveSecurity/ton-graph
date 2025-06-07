@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/PositiveSecurity/ton-graph/branch/work/graph/badge.svg)](https://codecov.io/gh/PositiveSecurity/ton-graph)
 [![move](https://github.com/PositiveSecurity/ton-graph/actions/workflows/move.yml/badge.svg)](https://github.com/PositiveSecurity/ton-graph/actions/workflows/move.yml)
 
-A Visual Studio Code extension for visualizing function call graphs in smart contracts written in FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Soroban, Marlowe, TEAL, LIGO, Liquidity, Aiken, Leo, Glow, Bamboo, Sophia, Flint, Fe, Reach, Rell and Rholang.
+A Visual Studio Code extension for visualizing function call graphs in smart contracts written in FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Soroban, Marlowe, TEAL, LIGO, Liquidity, Aiken, Leo, Glow, Huff, Bamboo, Sophia, Flint, Fe, Reach, Rell and Rholang.
 
 Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 
@@ -38,6 +38,7 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
   - Aiken (\*.ak, \*.aiken)
   - Leo (\*.leo)
   - Glow (\*.glow)
+  - Huff (\*.huff)
   - Bamboo (\*.bamboo)
   - Sophia (\*.aes)
   - Flint (\*.flint)
@@ -73,7 +74,7 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 
 ## Usage
 
-1. Open a contract file (\*.fc, \*.func, \*.tact, \*.tolk, \*.move, \*.cairo, \*.plutus, \*.cdc, \*.tz, \*.clar, \*.ink, \*.scilla, \*.pact, \*.ligo, \*\*.leo, \*.bamboo or \*.ak)
+1. Open a contract file (\*.fc, \*.func, \*.tact, \*.tolk, \*.move, \*.cairo, \*.plutus, \*.cdc, \*.tz, \*.clar, \*.ink, \*.scilla, \*.pact, \*.ligo, \*\*.leo, \*.glow, \*.huff, \*.bamboo or \*.ak)
    Note: Move contracts are parsed via `move-analyzer`.
 2. You can visualize a contract in multiple ways:
    - Press F1 or Ctrl+Shift+P to open the command palette and type "TON Graph: Visualize Contract"
@@ -85,7 +86,7 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 
 You can also visualize an entire contract including all imports:
 
-1. Open a main contract file (\*.fc, \*.func, \*.tact, \*.tolk, \*.move, \*.cairo, \*.plutus, \*.cdc, \*.tz, \*.clar, \*.ink, \*.scilla, \*.pact, \*.ligo, \*\*.leo, \*.bamboo or \*.ak)
+1. Open a main contract file (\*.fc, \*.func, \*.tact, \*.tolk, \*.move, \*.cairo, \*.plutus, \*.cdc, \*.tz, \*.clar, \*.ink, \*.scilla, \*.pact, \*.ligo, \*\*.leo, \*.glow, \*.huff, \*.bamboo or \*.ak)
 2. Visualize the project in one of these ways:
    - Press F1 or Ctrl+Shift+P and type "TON Graph: Visualize Contract with Imports"
    - Right-click on contract code in the editor → TON Graph: Visualize Contract with Imports
@@ -129,7 +130,7 @@ The extension analyzes your contract code to:
 4. Generate a visual representation using [Mermaid](https://mermaid.js.org/) diagrams
 5. Group related functions into clusters for better readability
 6. Multiple contracts support (for Tact)
-7. Language adapters parse FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Soroban, Marlowe, TEAL, LIGO, Liquidity, Aiken, Leo, Glow, Bamboo, Sophia, Flint, Fe, Reach, Rell and Rholang
+7. Language adapters parse FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Soroban, Marlowe, TEAL, LIGO, Liquidity, Aiken, Leo, Glow, Huff, Bamboo, Sophia, Flint, Fe, Reach, Rell and Rholang
 
 <a href="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr04.jpg" target="_blank">
   <img src="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr04.jpg" width="400" alt="Multiple contracts support">

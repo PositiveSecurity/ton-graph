@@ -21,6 +21,7 @@ import flintAdapter from './flint';
 import feAdapter from './fe';
 import liquidityAdapter from './liquidity';
 import reachAdapter from './reach';
+import rholangAdapter from './rholang';
 
 const adapters = [
   ...adaptersFunc,
@@ -45,7 +46,8 @@ const adapters = [
   flintAdapter,
   feAdapter,
   liquidityAdapter,
-  reachAdapter
+  reachAdapter,
+  rholangAdapter
 ];
 
 export default adapters;
@@ -71,5 +73,6 @@ export {
   flintAdapter,
   feAdapter,
   liquidityAdapter,
-  reachAdapter
+  reachAdapter,
+  rholangAdapter
 };

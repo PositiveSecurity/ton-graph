@@ -113,6 +113,8 @@ describe('Parser', () => {
         expect(detectLanguage('a.fc')).to.equal('func');
         expect(detectLanguage('Move.toml')).to.equal('move');
         expect(detectLanguage('a.simp')).to.equal('simplicity');
+        // case-insensitive detection
+        expect(detectLanguage('b.TACT')).to.equal('tact');
     });
 
     it('provides function type filters per language', () => {

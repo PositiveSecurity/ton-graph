@@ -25,6 +25,7 @@ import { parseBambooContract } from '../languages/bamboo';
 import { parseSophiaContract } from '../languages/sophia';
 import { parseFlintContract } from '../languages/flint';
 import { parseFeContract } from '../languages/fe';
+import { parseSimplicityContract } from '../languages/simplicity';
 import { parseLiquidityContract } from '../languages/liquidity';
 import { parseReachContract } from '../languages/reach';
 import { parseRellContract } from '../languages/rell';
@@ -69,6 +70,7 @@ export type ContractLanguage =
   | 'flint'
   | 'liquidity'
   | 'fe'
+  | 'simplicity'
   | 'reach'
   | 'rell'
   | 'rholang'
@@ -124,6 +126,8 @@ export function detectLanguage(filePath: string): ContractLanguage {
       return 'bamboo';
   } else if (extension === '.fe') {
       return 'fe';
+  } else if (extension === '.simp') {
+      return 'simplicity';
   } else if (extension === '.flint') {
       return 'flint';
   } else if (extension === '.rell') {
@@ -215,6 +219,9 @@ export async function parseContractByLanguage(code: string, language: ContractLa
             break;
         case 'fe':
             graph = parseFeContract(code);
+            break;
+        case 'simplicity':
+            graph = parseSimplicityContract(code);
             break;
         case 'flint':
             graph = parseFlintContract(code);
@@ -376,6 +383,7 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
         case 'rell':
         case 'liquidity':
         case 'fe':
+        case 'simplicity':
         case 'rholang':
         case 'sophia':
         case 'marlowe':

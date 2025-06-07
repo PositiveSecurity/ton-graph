@@ -23,6 +23,7 @@ import liquidityAdapter from './liquidity';
 import reachAdapter from './reach';
 import rellAdapter from './rell';
 import rholangAdapter from './rholang';
+import marloweAdapter from './marlowe';
 
 const adapters = [
   ...adaptersFunc,
@@ -49,7 +50,8 @@ const adapters = [
   liquidityAdapter,
   reachAdapter,
   rellAdapter,
-  rholangAdapter
+  rholangAdapter,
+  marloweAdapter
 ];
 
 export default adapters;
@@ -77,5 +79,6 @@ export {
   liquidityAdapter,
   reachAdapter,
   rellAdapter,
-  rholangAdapter
+  rholangAdapter,
+  marloweAdapter
 };

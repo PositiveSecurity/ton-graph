@@ -28,6 +28,7 @@ import { parseLiquidityContract } from '../languages/liquidity';
 import { parseReachContract } from '../languages/reach';
 import { parseRellContract } from '../languages/rell';
 import { parseRholangContract } from '../languages/rholang';
+import { parseMarloweContract } from '../languages/marlowe';
 import * as vscode from 'vscode';
 import * as toml from 'toml';
 import logger from '../logging/logger';
@@ -67,7 +68,8 @@ export type ContractLanguage =
   | 'fe'
   | 'reach'
   | 'rell'
-  | 'rholang';
+  | 'rholang'
+  | 'marlowe';
 
 /**
  * Detects the language based on file extension
@@ -128,6 +130,8 @@ export function detectLanguage(filePath: string): ContractLanguage {
       return 'liquidity';
   } else if (extension === '.aes') {
       return 'sophia';
+  } else if (extension === '.marlowe') {
+      return 'marlowe';
   }
 
     // Default to FunC
@@ -221,6 +225,9 @@ export async function parseContractByLanguage(code: string, language: ContractLa
             break;
         case 'bamboo':
             graph = parseBambooContract(code);
+            break;
+        case 'marlowe':
+            graph = parseMarloweContract(code);
             break;
         case 'func':
         default:
@@ -356,6 +363,7 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
         case 'fe':
         case 'rholang':
         case 'sophia':
+        case 'marlowe':
             return [
                 { value: 'regular', label: 'Regular' }
             ];

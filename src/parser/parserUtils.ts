@@ -9,6 +9,9 @@ import { parseCairoContract } from '../languages/cairo';
 import { parsePlutusContract } from '../languages/plutus';
 import { parseCadenceContract } from '../languages/cadence';
 import { parseMichelsonContract } from '../languages/michelson';
+import { parseClarContract } from '../languages/clar';
+import { parseInkContract } from '../languages/ink';
+import { parseScillaContract } from '../languages/scilla';
 import * as vscode from 'vscode';
 import * as toml from 'toml';
 import logger from '../logging/logger';
@@ -29,7 +32,10 @@ export type ContractLanguage =
   | 'cairo'
   | 'plutus'
   | 'cadence'
-  | 'michelson';
+  | 'michelson'
+  | 'clar'
+  | 'ink'
+  | 'scilla';
 
 /**
  * Detects the language based on file extension
@@ -52,6 +58,12 @@ export function detectLanguage(filePath: string): ContractLanguage {
         return 'cadence';
     } else if (extension === '.tz') {
         return 'michelson';
+    } else if (extension === '.clar') {
+        return 'clar';
+    } else if (extension === '.ink') {
+        return 'ink';
+    } else if (extension === '.scilla') {
+        return 'scilla';
     }
 
     // Default to FunC
@@ -88,6 +100,15 @@ export async function parseContractByLanguage(code: string, language: ContractLa
             break;
         case 'michelson':
             graph = parseMichelsonContract(code);
+            break;
+        case 'clar':
+            graph = parseClarContract(code);
+            break;
+        case 'ink':
+            graph = parseInkContract(code);
+            break;
+        case 'scilla':
+            graph = parseScillaContract(code);
             break;
         case 'func':
         default:
@@ -204,6 +225,9 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
         case 'plutus':
         case 'cadence':
         case 'michelson':
+        case 'clar':
+        case 'ink':
+        case 'scilla':
             return [
                 { value: 'regular', label: 'Regular' }
             ];

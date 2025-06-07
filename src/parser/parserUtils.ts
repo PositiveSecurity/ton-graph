@@ -14,6 +14,7 @@ import { parseInkContract } from '../languages/ink';
 import { parseScillaContract } from '../languages/scilla';
 import { parsePactContract } from '../languages/pact';
 import { parseScryptoContract } from '../languages/scrypto';
+import { parseSorobanContract } from '../languages/soroban';
 import { parseLigoContract } from '../languages/ligo';
 import { parseAikenContract } from '../languages/aiken';
 import { parseLeoContract } from '../languages/leo';
@@ -43,6 +44,7 @@ export type ContractLanguage =
   | 'scilla'
   | 'pact'
   | 'scrypto'
+  | 'soroban'
   | 'ligo'
   | 'aiken'
   | 'leo';
@@ -78,6 +80,8 @@ export function detectLanguage(filePath: string): ContractLanguage {
       return 'pact';
   } else if (extension === '.scrypto' || extension === '.rs') {
       return 'scrypto';
+  } else if (extension === '.soroban') {
+      return 'soroban';
   } else if (extension === '.ligo' || extension === '.mligo' || extension === '.religo' || extension === '.jsligo') {
       return 'ligo';
   } else if (extension === '.ak' || extension === '.aiken') {
@@ -129,6 +133,9 @@ export async function parseContractByLanguage(code: string, language: ContractLa
             break;
         case 'scrypto':
             graph = parseScryptoContract(code);
+            break;
+        case 'soroban':
+            graph = parseSorobanContract(code);
             break;
         case 'scilla':
             graph = parseScillaContract(code);
@@ -263,6 +270,7 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
         case 'clar':
         case 'ink':
         case 'scrypto':
+        case 'soroban':
         case 'scilla':
         case 'pact':
         case 'ligo':

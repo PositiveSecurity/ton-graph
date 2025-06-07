@@ -14,6 +14,7 @@ import { parseInkContract } from '../languages/ink';
 import { parseScillaContract } from '../languages/scilla';
 import { parsePactContract } from '../languages/pact';
 import { parseScryptoContract } from '../languages/scrypto';
+import { parseLigoContract } from '../languages/ligo';
 import * as vscode from 'vscode';
 import * as toml from 'toml';
 import logger from '../logging/logger';
@@ -39,7 +40,8 @@ export type ContractLanguage =
   | 'ink'
   | 'scilla'
   | 'pact'
-  | 'scrypto';
+  | 'scrypto'
+  | 'ligo';
 
 /**
  * Detects the language based on file extension
@@ -72,6 +74,8 @@ export function detectLanguage(filePath: string): ContractLanguage {
       return 'pact';
   } else if (extension === '.scrypto' || extension === '.rs') {
       return 'scrypto';
+  } else if (extension === '.ligo' || extension === '.mligo' || extension === '.religo' || extension === '.jsligo') {
+      return 'ligo';
   }
 
     // Default to FunC
@@ -123,6 +127,9 @@ export async function parseContractByLanguage(code: string, language: ContractLa
             break;
         case 'pact':
             graph = parsePactContract(code);
+            break;
+        case 'ligo':
+            graph = parseLigoContract(code);
             break;
         case 'func':
         default:
@@ -244,6 +251,7 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
         case 'scrypto':
         case 'scilla':
         case 'pact':
+        case 'ligo':
             return [
                 { value: 'regular', label: 'Regular' }
             ];

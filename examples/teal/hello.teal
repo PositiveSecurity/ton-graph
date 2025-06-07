@@ -1,0 +1,11 @@
+#pragma version 8
+
+sub bar() {
+  int 1
+  return
+}
+
+sub foo() {
+  bar();
+  return
+}

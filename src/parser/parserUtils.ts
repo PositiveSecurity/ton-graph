@@ -18,6 +18,7 @@ import { parseSorobanContract } from '../languages/soroban';
 import { parseLigoContract } from '../languages/ligo';
 import { parseAikenContract } from '../languages/aiken';
 import { parseLeoContract } from '../languages/leo';
+import { parseTealContract } from '../languages/teal';
 import * as vscode from 'vscode';
 import * as toml from 'toml';
 import logger from '../logging/logger';
@@ -47,7 +48,8 @@ export type ContractLanguage =
   | 'soroban'
   | 'ligo'
   | 'aiken'
-  | 'leo';
+  | 'leo'
+  | 'teal';
 
 /**
  * Detects the language based on file extension
@@ -82,6 +84,8 @@ export function detectLanguage(filePath: string): ContractLanguage {
       return 'scrypto';
   } else if (extension === '.soroban') {
       return 'soroban';
+  } else if (extension === '.teal') {
+      return 'teal';
   } else if (extension === '.ligo' || extension === '.mligo' || extension === '.religo' || extension === '.jsligo') {
       return 'ligo';
   } else if (extension === '.ak' || extension === '.aiken') {
@@ -139,6 +143,9 @@ export async function parseContractByLanguage(code: string, language: ContractLa
             break;
         case 'scilla':
             graph = parseScillaContract(code);
+            break;
+        case 'teal':
+            graph = parseTealContract(code);
             break;
         case 'pact':
             graph = parsePactContract(code);
@@ -273,6 +280,7 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
         case 'soroban':
         case 'scilla':
         case 'pact':
+        case 'teal':
         case 'ligo':
         case 'aiken':
         case 'leo':

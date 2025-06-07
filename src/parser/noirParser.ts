@@ -1,11 +1,13 @@
-import Parser from 'tree-sitter';
-import Noir from 'tree-sitter-noir';
-import { ContractGraph, ContractNode } from '../types/graph';
-import { GraphNodeKind } from '../types/graphNodeKind';
+import Parser from "tree-sitter";
+import Noir from "tree-sitter-noir";
+import { ContractGraph, ContractNode } from "../types/graph";
+import { GraphNodeKind } from "../types/graphNodeKind";
 
 export interface NoirFunction {
   name: string;
   body?: Parser.SyntaxNode;
+  startPosition: Parser.Point;
+  endPosition: Parser.Point;
 }
 
 export interface NoirAST {
@@ -21,7 +23,10 @@ function getParser(): Parser {
   return parser;
 }
 
-export function walk(node: Parser.SyntaxNode, type: string): Parser.SyntaxNode[] {
+export function walk(
+  node: Parser.SyntaxNode,
+  type: string,
+): Parser.SyntaxNode[] {
   const res: Parser.SyntaxNode[] = [];
   const stack = [node];
   while (stack.length) {
@@ -39,15 +44,20 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
   try {
     tree = p.parse(code);
   } catch {
-    tree = p.parse('');
+    tree = p.parse("");
   }
   const functions: NoirFunction[] = [];
-  const fnNodes = walk(tree.rootNode, 'function_definition');
+  const fnNodes = walk(tree.rootNode, "function_definition");
   for (const fn of fnNodes) {
-    const idNode = fn.namedChildren.find(c => c.type === 'identifier');
-    const bodyNode = fn.namedChildren.find(c => c.type === 'body');
+    const idNode = fn.namedChildren.find((c) => c.type === "identifier");
+    const bodyNode = fn.namedChildren.find((c) => c.type === "body");
     if (idNode) {
-      functions.push({ name: idNode.text, body: bodyNode });
+      functions.push({
+        name: idNode.text,
+        body: bodyNode,
+        startPosition: fn.startPosition,
+        endPosition: fn.endPosition,
+      });
     }
   }
   return { ast: { functions }, tree };
@@ -63,9 +73,9 @@ export function noirAstToGraph(ast: NoirAST): ContractGraph {
       id: f.name,
       label: `${f.name}()`,
       type: GraphNodeKind.Function,
-      contractName: 'Contract',
+      contractName: "Contract",
       parameters: [],
-      functionType: 'regular'
+      functionType: "regular",
     };
     graph.nodes.push(node);
     funcMap.set(f.name, node);
@@ -75,17 +85,17 @@ export function noirAstToGraph(ast: NoirAST): ContractGraph {
     if (!f.body) continue;
     const from = f.name;
     const calls = [
-      ...walk(f.body, 'function_call'),
-      ...walk(f.body, 'call_expression')
+      ...walk(f.body, "function_call"),
+      ...walk(f.body, "call_expression"),
     ];
     for (const call of calls) {
       const funcNode =
-        call.childForFieldName('function') ||
-        call.namedChildren.find(c => c.type !== 'arguments');
+        call.childForFieldName("function") ||
+        call.namedChildren.find((c) => c.type !== "arguments");
       if (!funcNode) continue;
       let to = funcNode.text;
-      to = to.replace(/^self\./, '');
-      to = to.replace(/<.*>/, '');
+      to = to.replace(/^self\./, "");
+      to = to.replace(/<.*>/, "");
       const key = `${from}->${to}`;
       if (!edgeSet.has(key)) {
         edgeSet.add(key);
@@ -94,11 +104,11 @@ export function noirAstToGraph(ast: NoirAST): ContractGraph {
             id: to,
             label: `${to}()`,
             type: GraphNodeKind.Function,
-            contractName: 'Contract'
+            contractName: "Contract",
           });
           funcMap.set(to, graph.nodes[graph.nodes.length - 1]);
         }
-        graph.edges.push({ from, to, label: '' });
+        graph.edges.push({ from, to, label: "" });
       }
     }
   }

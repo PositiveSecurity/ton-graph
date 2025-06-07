@@ -1,0 +1,6 @@
+entrypoint bar() {
+}
+
+entrypoint foo() {
+  bar();
+}

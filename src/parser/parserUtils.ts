@@ -21,6 +21,7 @@ import { parseLeoContract } from '../languages/leo';
 import { parseTealContract } from '../languages/teal';
 import { parseGlowContract } from '../languages/glow';
 import { parseBambooContract } from '../languages/bamboo';
+import { parseSophiaContract } from '../languages/sophia';
 import * as vscode from 'vscode';
 import * as toml from 'toml';
 import logger from '../logging/logger';
@@ -53,7 +54,8 @@ export type ContractLanguage =
   | 'leo'
   | 'teal'
   | 'glow'
-  | 'bamboo';
+  | 'bamboo'
+  | 'sophia';
 
 /**
  * Detects the language based on file extension
@@ -100,6 +102,8 @@ export function detectLanguage(filePath: string): ContractLanguage {
       return 'glow';
   } else if (extension === '.bamboo') {
       return 'bamboo';
+  } else if (extension === '.aes') {
+      return 'sophia';
   }
 
     // Default to FunC
@@ -169,6 +173,9 @@ export async function parseContractByLanguage(code: string, language: ContractLa
             break;
         case 'glow':
             graph = parseGlowContract(code);
+            break;
+        case 'sophia':
+            graph = parseSophiaContract(code);
             break;
         case 'bamboo':
             graph = parseBambooContract(code);
@@ -300,6 +307,7 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
         case 'leo':
         case 'glow':
         case 'bamboo':
+        case 'sophia':
             return [
                 { value: 'regular', label: 'Regular' }
             ];

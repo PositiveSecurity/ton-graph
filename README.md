@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/PositiveSecurity/ton-graph/branch/work/graph/badge.svg)](https://codecov.io/gh/PositiveSecurity/ton-graph)
 [![move](https://github.com/PositiveSecurity/ton-graph/actions/workflows/move.yml/badge.svg)](https://github.com/PositiveSecurity/ton-graph/actions/workflows/move.yml)
 
-A Visual Studio Code extension for visualizing function call graphs in smart contracts written in FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Soroban, TEAL, LIGO, Aiken, Leo, Glow and Bamboo.
+A Visual Studio Code extension for visualizing function call graphs in smart contracts written in FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Soroban, TEAL, LIGO, Aiken, Leo, Glow, Bamboo and Sophia.
 
 Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 
@@ -37,6 +37,7 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
   - Leo (\*.leo)
   - Glow (\*.glow)
   - Bamboo (\*.bamboo)
+  - Sophia (\*.aes)
 - Interactive diagram with cluster-based organization
 - Zoom functionality for better navigation
 - Filter functions by type (regular, impure, inline, method_id)
@@ -121,7 +122,7 @@ The extension analyzes your contract code to:
 4. Generate a visual representation using [Mermaid](https://mermaid.js.org/) diagrams
 5. Group related functions into clusters for better readability
 6. Multiple contracts support (for Tact)
-7. Language adapters parse FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Soroban, TEAL, LIGO, Aiken, Leo, Glow and Bamboo
+7. Language adapters parse FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Soroban, TEAL, LIGO, Aiken, Leo, Glow, Bamboo and Sophia
 
 <a href="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr04.jpg" target="_blank">
   <img src="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr04.jpg" width="400" alt="Multiple contracts support">

@@ -25,6 +25,7 @@ import reachAdapter from './reach';
 import rellAdapter from './rell';
 import rholangAdapter from './rholang';
 import marloweAdapter from './marlowe';
+import yulAdapter from './yul';
 
 const adapters = [
   ...adaptersFunc,
@@ -53,7 +54,8 @@ const adapters = [
   reachAdapter,
   rellAdapter,
   rholangAdapter,
-  marloweAdapter
+  marloweAdapter,
+  yulAdapter
 ];
 
 export default adapters;
@@ -83,5 +85,6 @@ export {
   reachAdapter,
   rellAdapter,
   rholangAdapter,
-  marloweAdapter
+  marloweAdapter,
+  yulAdapter
 };

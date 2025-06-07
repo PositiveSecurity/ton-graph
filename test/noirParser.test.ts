@@ -111,6 +111,26 @@ describe('parseNoirContract', () => {
     expect(graph.edges).to.deep.include({ from: 'Dummy::call', to: 'Dummy::helper', label: '' });
   });
 
+  it('resolves namespaced and method call paths', () => {
+    const code = [
+      'mod utils {',
+      '  pub fn inc<T>(x: T) -> T { x }',
+      '}',
+      'struct Dummy {}',
+      'impl Dummy {',
+      '  fn call(self) {}',
+      '}',
+      'fn main() {',
+      '  utils::inc::<Field>(5);',
+      '  let d = Dummy {};',
+      '  d.call();',
+      '}',
+    ].join('\n');
+    const graph = parseNoirContract(code);
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::inc', label: '' });
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'Dummy::call', label: '' });
+  });
+
   it('follows mod statements across files', async () => {
     const fs = require('fs');
     const code = fs.readFileSync('examples/noir/import_main.nr', 'utf8');

@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/PositiveSecurity/ton-graph/branch/work/graph/badge.svg)](https://codecov.io/gh/PositiveSecurity/ton-graph)
 [![move](https://github.com/PositiveSecurity/ton-graph/actions/workflows/move.yml/badge.svg)](https://github.com/PositiveSecurity/ton-graph/actions/workflows/move.yml)
 
-A Visual Studio Code extension for visualizing function call graphs in smart contracts written in FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Soroban, Marlowe, TEAL, LIGO, Liquidity, Aiken, Leo, Glow, Huff, Bamboo, Sophia, Flint, Fe, Noir, Reach, Rell, Rholang, Simplicity and Yul.
+A Visual Studio Code extension for visualizing function call graphs in smart contracts written in FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Soroban, Marlowe, TEAL, LIGO, Liquidity, Aiken, Leo, Glow, Huff, Bamboo, Sophia, Flint, Fe, Noir (import resolution and method parsing experimental), Reach, Rell, Rholang, Simplicity and Yul.
 
 Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 
@@ -43,13 +43,13 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
   - Sophia (\*.aes)
   - Flint (\*.flint)
   - Fe (\*.fe)
-  - Noir (\*.nr, \*.noir)
+  - Noir (\*.nr, \*.noir) — import resolution and method parsing are experimental
   - Reach (\*.reach)
   - Rell (\*.rell)
   - Rholang (\*.rho)
   - Simplicity (\*.simp)
   - Yul (\*.yul)
-  - Support for Noir is powered by [tree-sitter-noir](https://github.com/noir-lang/tree-sitter-noir). Example contracts are available in `examples/noir`.
+  - Support for Noir is powered by [tree-sitter-noir](https://github.com/noir-lang/tree-sitter-noir). Example contracts are available in `examples/noir`. Import resolution and method parsing are currently experimental.
 - Interactive diagram with cluster-based organization
 - Zoom functionality for better navigation
 - Filter functions by type (regular, impure, inline, method_id)
@@ -134,7 +134,7 @@ The extension analyzes your contract code to:
 4. Generate a visual representation using [Mermaid](https://mermaid.js.org/) diagrams
 5. Group related functions into clusters for better readability
 6. Multiple contracts support (for Tact)
-7. Language adapters parse FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Soroban, Marlowe, TEAL, LIGO, Liquidity, Aiken, Leo, Glow, Huff, Bamboo, Sophia, Flint, Fe, Noir, Reach, Rell, Rholang, Simplicity and Yul
+7. Language adapters parse FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Soroban, Marlowe, TEAL, LIGO, Liquidity, Aiken, Leo, Glow, Huff, Bamboo, Sophia, Flint, Fe, Noir (import resolution and method parsing experimental), Reach, Rell, Rholang, Simplicity and Yul
 
 <a href="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr04.jpg" target="_blank">
   <img src="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr04.jpg" width="400" alt="Multiple contracts support">
@@ -200,7 +200,11 @@ Install dependencies and run the test suite with coverage using:
 ```bash
 npm ci
 npm test
+# To run only the Noir parser tests with the example contracts
+npm test test/noirParser.test.ts
 ```
+
+Once Noir import resolution and method parsing are improved, the above command verifies parsing against the example files in `examples/noir`.
 
 The project enforces minimum coverage thresholds via `nyc`:
 

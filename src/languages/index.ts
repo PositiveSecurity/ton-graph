@@ -13,6 +13,7 @@ import sorobanAdapter from './soroban';
 import ligoAdapter from './ligo';
 import aikenAdapter from './aiken';
 import leoAdapter from './leo';
+import tealAdapter from './teal';
 
 const adapters = [
   ...adaptersFunc,
@@ -27,6 +28,7 @@ const adapters = [
   pactAdapter,
   scryptoAdapter,
   sorobanAdapter,
+  tealAdapter,
   ligoAdapter,
   aikenAdapter,
   leoAdapter
@@ -45,6 +47,7 @@ export {
   pactAdapter,
   scryptoAdapter,
   sorobanAdapter,
+  tealAdapter,
   ligoAdapter,
   aikenAdapter,
   leoAdapter

@@ -1,23 +1,23 @@
 import { AST, Edge, LanguageAdapter } from '../../types/core';
-import { parseSimpleFunctions, buildSimpleEdges, SimpleAST, simpleAstToGraph } from '../simple';
 import { ContractGraph } from '../../types/graph';
+import { parseNoir as parseNoirSource, NoirAST, noirAstToGraph, parseNoirContract as parseNoirContractParser } from '../../parser/noirParser';
 
-export function parseNoir(source: string): SimpleAST {
-  return parseSimpleFunctions(source, /(?:fn)/);
+export function parseNoir(source: string): NoirAST {
+  return parseNoirSource(source).ast;
 }
 
 export const noirAdapter: LanguageAdapter = {
   fileExtensions: ['.nr', '.noir'],
   parse(source: string): AST {
-    return parseNoir(source) as unknown as AST;
+    return parseNoirSource(source).ast as unknown as AST;
   },
   buildCallGraph(ast: AST): Edge[] {
-    return buildSimpleEdges(ast as unknown as SimpleAST);
+    const graph = noirAstToGraph(ast as unknown as NoirAST);
+    return graph.edges;
   }
 };
 export default noirAdapter;
 
 export function parseNoirContract(code: string): ContractGraph {
-  const ast = parseNoir(code);
-  return simpleAstToGraph(ast);
+  return parseNoirContractParser(code);
 }

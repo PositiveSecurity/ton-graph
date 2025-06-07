@@ -11,6 +11,7 @@ export interface MoveImport {
 export interface MoveFunction {
   name: string;
   isPublic: boolean;
+  isFriend: boolean;
   isEntry: boolean;
   isScript: boolean;
   body?: Parser.SyntaxNode;
@@ -90,24 +91,34 @@ export function parseMove(code: string): { ast: MoveAST; tree: Parser.Tree } {
           if (!nameNode) continue;
           const sig = child.child(0);
           let isPublic = false;
+          let isFriend = false;
           let isEntry = false;
           let isScript = false;
           if (sig) {
             for (const sc of sig.namedChildren) {
-              if (sc.type === 'modifier') {
-                if (sc.text.startsWith('public')) {
-                  isPublic = true;
-                  if (sc.text.includes('script')) {
+              if (sc.type !== 'modifier') continue;
+              const first = sc.child(0);
+              if (!first) continue;
+              if (first.text === 'public') {
+                isPublic = true;
+                for (let i = 0; i < sc.childCount; i++) {
+                  const ch = sc.child(i);
+                  const txt = ch.text;
+                  if (txt === 'friend') {
+                    isFriend = true;
+                  } else if (txt === 'script') {
                     isScript = true;
+                  } else if (txt === 'abstract') {
+                    // treat abstract as script for now
                   }
-                } else if (sc.text === 'entry') {
-                  isEntry = true;
                 }
+              } else if (first.text === 'entry') {
+                isEntry = true;
               }
             }
           }
           const bodyNode = child.childForFieldName('body');
-          functions.push({ name: nameNode.text, isPublic, isEntry, isScript, body: bodyNode || undefined });
+          functions.push({ name: nameNode.text, isPublic, isFriend, isEntry, isScript, body: bodyNode || undefined });
         }
       }
     }
@@ -142,6 +153,8 @@ export async function parseMoveContract(code: string): Promise<ContractGraph> {
         functionType = 'script';
       } else if (f.isEntry) {
         functionType = 'entry';
+      } else if (f.isFriend) {
+        functionType = 'friend';
       } else if (f.isPublic) {
         functionType = 'public';
       }

@@ -106,6 +106,7 @@ The extension analyzes your contract code to:
 4. Generate a visual representation using [Mermaid](https://mermaid.js.org/) diagrams
 5. Group related functions into clusters for better readability
 6. Multiple contracts support (for Tact)
+7. Language adapters parse FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence and Michelson
 
 <a href="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr04.jpg" target="_blank">
   <img src="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr04.jpg" width="400" alt="Multiple contracts support">
@@ -188,6 +189,7 @@ You can also view logs directly in VS Code under **Output** → **TON Graph**.
 ## Requirements
 
  - Visual Studio Code 1.75.0 or newer
+ - [`move-analyzer`](https://github.com/move-language/move/tree/main/language/move-analyzer) installed and available in your `PATH` for Move contract support
 
 ## Configuration
 

@@ -17,9 +17,15 @@ export interface NoirModule {
   filePath?: string;
 }
 
+export interface NoirUse {
+  alias: string;
+  path: string;
+}
+
 export interface NoirAST {
   functions: NoirFunction[];
   modules: NoirModule[];
+  uses: NoirUse[];
 }
 
 let parser: Parser | null = null;
@@ -56,6 +62,7 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
   }
   const functions: NoirFunction[] = [];
   const modules: NoirModule[] = [];
+  const uses: NoirUse[] = [];
   const fnNodes = walk(tree.rootNode, "function_definition");
   for (const fn of fnNodes) {
     const idNode = fn.namedChildren.find((c) => c.type === "identifier");
@@ -100,13 +107,26 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
     }
   }
 
-  return { ast: { functions, modules }, tree };
+  const useNodes = walk(tree.rootNode, "use_declaration");
+  for (const u of useNodes) {
+    const text = u.text.replace(/\s+/g, " ");
+    const match = text.match(/^use\s+([^;]+?)(?:\s+as\s+(\w+))?;/);
+    if (match) {
+      const path = match[1].trim();
+      const alias = match[2] || path.split("::").pop()!;
+      uses.push({ alias, path });
+    }
+  }
+
+  return { ast: { functions, modules, uses }, tree };
 }
 
 export function noirAstToGraph(ast: NoirAST): ContractGraph {
   const graph: ContractGraph = { nodes: [], edges: [] };
   const funcMap = new Map<string, ContractNode>();
   const edgeSet = new Set<string>();
+  const useMap = new Map<string, string>();
+  ast.uses?.forEach(u => useMap.set(u.alias, u.path));
 
   for (const f of ast.functions) {
     const node: ContractNode = {
@@ -147,6 +167,9 @@ export function noirAstToGraph(ast: NoirAST): ContractGraph {
             to = `${obj}::${method}`;
           }
         }
+      }
+      if (useMap.has(to)) {
+        to = useMap.get(to)!;
       }
       const key = `${from}->${to}`;
       if (!edgeSet.has(key)) {

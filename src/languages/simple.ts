@@ -8,7 +8,8 @@ export interface SimpleAST {
 }
 
 export function parseSimpleFunctions(code: string, keyword: string | RegExp = /(?:fun|function|func|def)/): SimpleAST {
-  const regex = new RegExp(`${keyword.source || keyword}\\s+([A-Za-z_][\\w]*)\\s*\\([^)]*\\)\\s*\\{([\\s\\S]*?)\\}`, 'g');
+  const keywordSource = typeof keyword === 'string' ? keyword : keyword.source;
+  const regex = new RegExp(`${keywordSource}\\s+([A-Za-z_][\\w]*)\\s*\\([^)]*\\)\\s*\\{([\\s\\S]*?)\\}`, 'g');
   const functions: SimpleFunction[] = [];
   let match: RegExpExecArray | null;
   while ((match = regex.exec(code)) !== null) {
@@ -19,6 +20,7 @@ export function parseSimpleFunctions(code: string, keyword: string | RegExp = /(
 
 export function buildSimpleEdges(ast: SimpleAST): { from: string; to: string }[] {
   const edges: { from: string; to: string }[] = [];
+  const edgeSet = new Set<string>();
   const names = ast.functions.map(f => f.name);
   if (names.length === 0) return edges;
   const callRegex = new RegExp(`\\b(${names.join('|')})\\s*\\(`, 'g');
@@ -26,7 +28,11 @@ export function buildSimpleEdges(ast: SimpleAST): { from: string; to: string }[]
     let m: RegExpExecArray | null;
     while ((m = callRegex.exec(fn.body)) !== null) {
       const to = m[1];
-      if (to !== fn.name && names.includes(to)) edges.push({ from: fn.name, to });
+      const key = `${fn.name}->${to}`;
+      if (to !== fn.name && names.includes(to) && !edgeSet.has(key)) {
+        edges.push({ from: fn.name, to });
+        edgeSet.add(key);
+      }
     }
     callRegex.lastIndex = 0;
   }

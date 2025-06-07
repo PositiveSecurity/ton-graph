@@ -144,6 +144,7 @@ export async function parseMoveContract(code: string): Promise<ContractGraph> {
   const { ast } = parseMove(code);
   const graph: ContractGraph = { nodes: [], edges: [] };
   const funcMap = new Map<string, ContractNode>();
+  const edgeSet = new Set<string>();
 
   for (const m of ast.modules) {
     for (const f of m.functions) {
@@ -190,11 +191,20 @@ export async function parseMoveContract(code: string): Promise<ContractGraph> {
           path = useMap.get(path) || `${m.name}::${path}`;
         }
         const to = path;
-        if (!funcMap.has(to)) {
-          graph.nodes.push({ id: to, label: path, type: GraphNodeKind.Function, contractName: path.split('::')[path.split('::').length - 2] || path });
-          funcMap.set(to, graph.nodes[graph.nodes.length - 1]);
+        const key = `${from}->${to}`;
+        if (!edgeSet.has(key)) {
+          edgeSet.add(key);
+          if (!funcMap.has(to)) {
+            graph.nodes.push({
+              id: to,
+              label: path,
+              type: GraphNodeKind.Function,
+              contractName: path.split('::')[path.split('::').length - 2] || path
+            });
+            funcMap.set(to, graph.nodes[graph.nodes.length - 1]);
+          }
+          graph.edges.push({ from, to, label: '' });
         }
-        graph.edges.push({ from, to, label: '' });
       }
     }
   }

@@ -43,13 +43,13 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
   - Sophia (\*.aes)
   - Flint (\*.flint)
   - Fe (\*.fe)
-  - Noir (\*.nr, \*.noir) — import resolution and method parsing are experimental
+  - Noir (\*.nr, \*.noir) — full import resolution with nested modules and alias support
   - Reach (\*.reach)
   - Rell (\*.rell)
   - Rholang (\*.rho)
   - Simplicity (\*.simp)
   - Yul (\*.yul)
-  - Support for Noir is powered by [tree-sitter-noir](https://github.com/noir-lang/tree-sitter-noir). Example contracts are available in `examples/noir`. Import resolution and method parsing are currently experimental.
+  - Support for Noir is powered by [tree-sitter-noir](https://github.com/noir-lang/tree-sitter-noir). Example contracts are available in `examples/noir`. The parser now handles nested modules and aliases.
 - Interactive diagram with cluster-based organization
 - Zoom functionality for better navigation
 - Filter functions by type (regular, impure, inline, method_id)
@@ -204,7 +204,7 @@ npm test
 npm test test/noirParser.test.ts
 ```
 
-Once Noir import resolution and method parsing are improved, the above command verifies parsing against the example files in `examples/noir`.
+The above command verifies parsing against the example files in `examples/noir`, including nested modules and alias resolution.
 
 The project enforces minimum coverage thresholds via `nyc`:
 

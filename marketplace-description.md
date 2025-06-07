@@ -1,1 +1,1 @@
-Visualize function call graphs for FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Marlowe, LIGO, Aiken, Leo, Glow, Flint, Fe, Reach and Yul contracts. Move support requires the move-analyzer tool.
+Visualize function call graphs for FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Marlowe, LIGO, Aiken, Leo, Glow, Flint, Fe, Noir, Reach and Yul contracts. Move support requires the move-analyzer tool.

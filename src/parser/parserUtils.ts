@@ -308,6 +308,49 @@ export async function parseContractWithImports(
         const combined = moveFiles.map(f => fs.readFileSync(f, 'utf8')).join('\n\n');
         return parseMoveContract(combined);
     }
+    if (language === 'noir') {
+        const fs = await import('fs');
+        const visited = new Set<string>();
+
+        async function load(file: string): Promise<string> {
+            const resolved = path.resolve(file);
+            if (visited.has(resolved)) return '';
+            if (!fs.existsSync(resolved)) return '';
+            visited.add(resolved);
+            let text = '';
+            try { text = fs.readFileSync(resolved, 'utf8'); } catch { return ''; }
+            const dir = path.dirname(resolved);
+            const modRegex = /(?:pub\s+)?mod\s+(\w+)\s*;/g;
+            const useRegex = /use\s+([A-Za-z0-9_]+)::/g;
+            let out = '';
+            let m;
+            while ((m = modRegex.exec(text)) !== null) {
+                const name = m[1];
+                const cand1 = path.join(dir, `${name}.nr`);
+                const cand2 = path.join(dir, name, 'mod.nr');
+                if (fs.existsSync(cand1) && isPathInsideWorkspace(cand1)) {
+                    out += await load(cand1);
+                } else if (fs.existsSync(cand2) && isPathInsideWorkspace(cand2)) {
+                    out += await load(cand2);
+                }
+            }
+            while ((m = useRegex.exec(text)) !== null) {
+                const name = m[1];
+                const cand1 = path.join(dir, `${name}.nr`);
+                const cand2 = path.join(dir, name, 'mod.nr');
+                if (fs.existsSync(cand1) && isPathInsideWorkspace(cand1)) {
+                    out += await load(cand1);
+                } else if (fs.existsSync(cand2) && isPathInsideWorkspace(cand2)) {
+                    out += await load(cand2);
+                }
+            }
+            out += `\n\n${text}`;
+            return out;
+        }
+
+        const combined = await load(filePath);
+        return parseNoirContract(combined);
+    }
     // Process imports first
     const { importedCode } = await processImports(code, filePath, language);
 

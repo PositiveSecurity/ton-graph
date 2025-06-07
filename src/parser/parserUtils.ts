@@ -30,6 +30,7 @@ import { parseReachContract } from '../languages/reach';
 import { parseRellContract } from '../languages/rell';
 import { parseRholangContract } from '../languages/rholang';
 import { parseMarloweContract } from '../languages/marlowe';
+import { parseYulContract } from '../languages/yul';
 import * as vscode from 'vscode';
 import * as toml from 'toml';
 import logger from '../logging/logger';
@@ -71,7 +72,8 @@ export type ContractLanguage =
   | 'reach'
   | 'rell'
   | 'rholang'
-  | 'marlowe';
+  | 'marlowe'
+  | 'yul';
 
 /**
  * Detects the language based on file extension
@@ -136,6 +138,8 @@ export function detectLanguage(filePath: string): ContractLanguage {
       return 'sophia';
   } else if (extension === '.marlowe') {
       return 'marlowe';
+  } else if (extension === '.yul') {
+      return 'yul';
   }
 
     // Default to FunC
@@ -235,6 +239,9 @@ export async function parseContractByLanguage(code: string, language: ContractLa
             break;
         case 'marlowe':
             graph = parseMarloweContract(code);
+            break;
+        case 'yul':
+            graph = parseYulContract(code);
             break;
         case 'func':
         default:
@@ -372,6 +379,7 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
         case 'rholang':
         case 'sophia':
         case 'marlowe':
+        case 'yul':
             return [
                 { value: 'regular', label: 'Regular' }
             ];

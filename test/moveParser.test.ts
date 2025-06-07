@@ -21,6 +21,18 @@ const modifierSample = `module M {
     public(script) fun run() {}
 }`;
 
+const genericSample = `module M {
+    fun init() {
+        transfer<u8>();
+    }
+
+    fun transfer<T>() {
+        credit<T>();
+    }
+
+    fun credit<T>() {}
+}`;
+
 describe('parseMoveContract', () => {
     it('parses functions and edges', async () => {
         const graph = await parseMoveContract(sample);
@@ -61,6 +73,16 @@ describe('parseMoveContract', () => {
             { alias: 'Self', path: 'std::option::Self' },
             { alias: 'Opt', path: 'std::option::Option' },
             { alias: 'Baz', path: '0x1::foo::Bar' }
+        ]);
+    });
+
+    it('resolves generic calls to function ids', async () => {
+        const graph = await parseMoveContract(genericSample);
+        const ids = graph.nodes.map(n => n.id);
+        expect(ids).to.have.members(['M::init', 'M::transfer', 'M::credit']);
+        expect(graph.edges).to.deep.include.members([
+            { from: 'M::init', to: 'M::transfer', label: '' },
+            { from: 'M::transfer', to: 'M::credit', label: '' }
         ]);
     });
 });

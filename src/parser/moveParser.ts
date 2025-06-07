@@ -166,9 +166,13 @@ export async function parseMoveContract(code: string): Promise<ContractGraph> {
       const from = `${m.name}::${f.name}`;
       const calls = walk(f.body, 'call_expression');
       for (const call of calls) {
-        const access = call.namedChildren[0]?.namedChildren?.find((c: any) => c.fieldName === 'access') || call.childForFieldName('access');
+        const access =
+          call.namedChildren[0]?.namedChildren?.find(
+            (c: any) => c.fieldName === 'access'
+          ) || call.childForFieldName('access');
         let path = access ? access.text : '';
         if (!path) continue;
+        path = path.replace(/<.*>$/, '');
         if (!path.includes('::')) {
           path = useMap.get(path) || `${m.name}::${path}`;
         }

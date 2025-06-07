@@ -49,6 +49,7 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
   - Rholang (\*.rho)
   - Simplicity (\*.simp)
   - Yul (\*.yul)
+  - Support for Noir is powered by [tree-sitter-noir](https://github.com/noir-lang/tree-sitter-noir). Example contracts are available in `examples/noir`.
 - Interactive diagram with cluster-based organization
 - Zoom functionality for better navigation
 - Filter functions by type (regular, impure, inline, method_id)

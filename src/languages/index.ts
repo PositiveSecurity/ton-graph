@@ -15,6 +15,7 @@ import aikenAdapter from './aiken';
 import leoAdapter from './leo';
 import tealAdapter from './teal';
 import glowAdapter from './glow';
+import bambooAdapter from './bamboo';
 
 const adapters = [
   ...adaptersFunc,
@@ -33,7 +34,8 @@ const adapters = [
   ligoAdapter,
   aikenAdapter,
   leoAdapter,
-  glowAdapter
+  glowAdapter,
+  bambooAdapter
 ];
 
 export default adapters;
@@ -53,5 +55,6 @@ export {
   ligoAdapter,
   aikenAdapter,
   leoAdapter,
-  glowAdapter
+  glowAdapter,
+  bambooAdapter
 };

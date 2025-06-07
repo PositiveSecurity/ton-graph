@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/PositiveSecurity/ton-graph/branch/work/graph/badge.svg)](https://codecov.io/gh/PositiveSecurity/ton-graph)
 [![move](https://github.com/PositiveSecurity/ton-graph/actions/workflows/move.yml/badge.svg)](https://github.com/PositiveSecurity/ton-graph/actions/workflows/move.yml)
 
-A Visual Studio Code extension for visualizing function call graphs in smart contracts written in FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, LIGO and Aiken.
+A Visual Studio Code extension for visualizing function call graphs in smart contracts written in FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, LIGO, Aiken and Leo.
 
 Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 
@@ -32,6 +32,7 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
   - Scrypto (\*.rs, \*.scrypto)
   - LIGO (\*.ligo, \*.mligo, \*.jsligo, \*.religo)
   - Aiken (\*.ak, \*.aiken)
+  - Leo (\*.leo)
 - Interactive diagram with cluster-based organization
 - Zoom functionality for better navigation
 - Filter functions by type (regular, impure, inline, method_id)
@@ -60,7 +61,7 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 
 ## Usage
 
-1. Open a contract file (\*.fc, \*.func, \*.tact, \*.tolk, \*.move, \*.cairo, \*.plutus, \*.cdc, \*.tz, \*.clar, \*.ink, \*.scilla, \*.pact, \*.ligo or \*.ak)
+1. Open a contract file (\*.fc, \*.func, \*.tact, \*.tolk, \*.move, \*.cairo, \*.plutus, \*.cdc, \*.tz, \*.clar, \*.ink, \*.scilla, \*.pact, \*.ligo, \*.leo or \*.ak)
    Note: Move contracts are parsed via `move-analyzer`.
 2. You can visualize a contract in multiple ways:
    - Press F1 or Ctrl+Shift+P to open the command palette and type "TON Graph: Visualize Contract"
@@ -72,7 +73,7 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 
 You can also visualize an entire contract including all imports:
 
-1. Open a main contract file (\*.fc, \*.func, \*.tact, \*.tolk, \*.move, \*.cairo, \*.plutus, \*.cdc, \*.tz, \*.clar, \*.ink, \*.scilla, \*.pact, \*.ligo or \*.ak)
+1. Open a main contract file (\*.fc, \*.func, \*.tact, \*.tolk, \*.move, \*.cairo, \*.plutus, \*.cdc, \*.tz, \*.clar, \*.ink, \*.scilla, \*.pact, \*.ligo, \*.leo or \*.ak)
 2. Visualize the project in one of these ways:
    - Press F1 or Ctrl+Shift+P and type "TON Graph: Visualize Contract with Imports"
    - Right-click on contract code in the editor → TON Graph: Visualize Contract with Imports

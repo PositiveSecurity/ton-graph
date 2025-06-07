@@ -137,6 +137,20 @@ describe('parseNoirContract', () => {
     expect(graph.edges).to.deep.include({ from: 'main', to: 'Dummy::call', label: '' });
   });
 
+  it('resolves simple alias imports', () => {
+    const code = [
+      'mod utils {',
+      '  pub fn inc(x: Field) -> Field { x }',
+      '}',
+      'use utils::inc as add_one;',
+      'fn main() {',
+      '  add_one(5);',
+      '}',
+    ].join('\n');
+    const graph = parseNoirContract(code);
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::inc', label: '' });
+  });
+
   it('follows mod statements across files', async () => {
     const fs = require('fs');
     const code = fs.readFileSync('examples/noir/import_main.nr', 'utf8');

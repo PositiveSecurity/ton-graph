@@ -19,6 +19,7 @@ import { parseLigoContract } from '../languages/ligo';
 import { parseAikenContract } from '../languages/aiken';
 import { parseLeoContract } from '../languages/leo';
 import { parseTealContract } from '../languages/teal';
+import { parseGlowContract } from '../languages/glow';
 import * as vscode from 'vscode';
 import * as toml from 'toml';
 import logger from '../logging/logger';
@@ -49,7 +50,8 @@ export type ContractLanguage =
   | 'ligo'
   | 'aiken'
   | 'leo'
-  | 'teal';
+  | 'teal'
+  | 'glow';
 
 /**
  * Detects the language based on file extension
@@ -92,6 +94,8 @@ export function detectLanguage(filePath: string): ContractLanguage {
       return 'aiken';
   } else if (extension === '.leo') {
       return 'leo';
+  } else if (extension === '.glow') {
+      return 'glow';
   }
 
     // Default to FunC
@@ -158,6 +162,9 @@ export async function parseContractByLanguage(code: string, language: ContractLa
             break;
         case 'leo':
             graph = parseLeoContract(code);
+            break;
+        case 'glow':
+            graph = parseGlowContract(code);
             break;
         case 'func':
         default:
@@ -284,6 +291,7 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
         case 'ligo':
         case 'aiken':
         case 'leo':
+        case 'glow':
             return [
                 { value: 'regular', label: 'Regular' }
             ];

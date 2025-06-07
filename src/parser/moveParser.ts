@@ -2,6 +2,7 @@ import Parser from 'tree-sitter';
 import Move from 'tree-sitter-move';
 import { ContractGraph, ContractNode } from '../types/graph';
 import { GraphNodeKind } from '../types/graphNodeKind';
+import logger from '../logging/logger';
 
 export interface MoveImport {
   alias: string;
@@ -50,7 +51,14 @@ function findNodes(node: Parser.SyntaxNode, type: string): Parser.SyntaxNode[] {
 
 export function parseMove(code: string): { ast: MoveAST; tree: Parser.Tree } {
   const p = getParser();
-  const tree = p.parse(code);
+  let tree: Parser.Tree;
+  try {
+    tree = p.parse(code);
+  } catch (err) {
+    logger.error('Error parsing Move code', err);
+    tree = p.parse('');
+    return { ast: { modules: [] }, tree };
+  }
   const modules: MoveModule[] = [];
   for (const moduleNode of findNodes(tree.rootNode, 'module_definition')) {
     const idNode = moduleNode.childForFieldName('module_identity');

@@ -20,6 +20,7 @@ import bambooAdapter from './bamboo';
 import sophiaAdapter from './sophia';
 import flintAdapter from './flint';
 import feAdapter from './fe';
+import simplicityAdapter from './simplicity';
 import liquidityAdapter from './liquidity';
 import reachAdapter from './reach';
 import rellAdapter from './rell';
@@ -50,6 +51,7 @@ const adapters = [
   sophiaAdapter,
   flintAdapter,
   feAdapter,
+  simplicityAdapter,
   liquidityAdapter,
   reachAdapter,
   rellAdapter,
@@ -81,6 +83,7 @@ export {
   sophiaAdapter,
   flintAdapter,
   feAdapter,
+  simplicityAdapter,
   liquidityAdapter,
   reachAdapter,
   rellAdapter,

@@ -20,6 +20,7 @@ import { parseAikenContract } from '../languages/aiken';
 import { parseLeoContract } from '../languages/leo';
 import { parseTealContract } from '../languages/teal';
 import { parseGlowContract } from '../languages/glow';
+import { parseHuffContract } from '../languages/huff';
 import { parseBambooContract } from '../languages/bamboo';
 import { parseSophiaContract } from '../languages/sophia';
 import { parseFlintContract } from '../languages/flint';
@@ -61,6 +62,7 @@ export type ContractLanguage =
   | 'leo'
   | 'teal'
   | 'glow'
+  | 'huff'
   | 'bamboo'
   | 'sophia'
   | 'flint'
@@ -114,6 +116,8 @@ export function detectLanguage(filePath: string): ContractLanguage {
       return 'leo';
   } else if (extension === '.glow') {
       return 'glow';
+  } else if (extension === '.huff') {
+      return 'huff';
   } else if (extension === '.bamboo') {
       return 'bamboo';
   } else if (extension === '.fe') {
@@ -201,6 +205,9 @@ export async function parseContractByLanguage(code: string, language: ContractLa
             break;
         case 'glow':
             graph = parseGlowContract(code);
+            break;
+        case 'huff':
+            graph = parseHuffContract(code);
             break;
         case 'fe':
             graph = parseFeContract(code);
@@ -355,6 +362,7 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
         case 'aiken':
         case 'leo':
         case 'glow':
+        case 'huff':
         case 'bamboo':
         case 'flint':
         case 'reach':

@@ -1,0 +1,7 @@
+#define macro BAR() = takes(0) returns(0) {
+    0x00
+}
+
+#define macro FOO() = takes(0) returns(0) {
+    BAR()
+}

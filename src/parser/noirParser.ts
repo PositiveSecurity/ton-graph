@@ -2,6 +2,7 @@ import Parser from "tree-sitter";
 import Noir from "tree-sitter-noir";
 import { ContractGraph, ContractNode } from "../types/graph";
 import { GraphNodeKind } from "../types/graphNodeKind";
+import { walk } from "./sharedWalk";
 
 export interface NoirFunction {
   name: string;
@@ -35,21 +36,6 @@ function getParser(): Parser {
     parser.setLanguage(Noir as any);
   }
   return parser;
-}
-
-export function walk(
-  node: Parser.SyntaxNode,
-  type: string,
-): Parser.SyntaxNode[] {
-  const res: Parser.SyntaxNode[] = [];
-  const stack = [node];
-  while (stack.length) {
-    const n = stack.pop();
-    if (!n) continue;
-    if (n.type === type) res.push(n);
-    stack.push(...n.namedChildren);
-  }
-  return res;
 }
 
 export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {

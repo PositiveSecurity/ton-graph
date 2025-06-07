@@ -3,6 +3,7 @@ import Move from "tree-sitter-move";
 import { ContractGraph, ContractNode } from "../types/graph";
 import { GraphNodeKind } from "../types/graphNodeKind";
 import logger from "../logging/logger";
+import { walk } from "./sharedWalk";
 
 export interface MoveImport {
   alias: string;
@@ -150,21 +151,6 @@ export function parseMove(code: string): { ast: MoveAST; tree: Parser.Tree } {
     modules.push({ name: moduleName, address, uses, functions });
   }
   return { ast: { modules }, tree };
-}
-
-export function walk(
-  node: Parser.SyntaxNode,
-  type: string,
-): Parser.SyntaxNode[] {
-  const res: Parser.SyntaxNode[] = [];
-  const stack = [node];
-  while (stack.length) {
-    const n = stack.pop();
-    if (!n) continue;
-    if (n.type === type) res.push(n);
-    stack.push(...n.namedChildren);
-  }
-  return res;
 }
 
 export async function parseMoveContract(code: string): Promise<ContractGraph> {

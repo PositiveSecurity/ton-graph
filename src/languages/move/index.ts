@@ -1,5 +1,6 @@
 import { parseMove, MoveAST } from '@parser/move';
 import { AST, Edge, LanguageAdapter } from '../../types/core';
+import { walk } from '../../parser/sharedWalk';
 
 export const movelangAdapter: LanguageAdapter = {
   fileExtensions: ['.move'],
@@ -16,18 +17,6 @@ export const movelangAdapter: LanguageAdapter = {
         funcs.set(`${m.name}::${f.name}`, { module: m.name, name: f.name, body: f.body });
       }
     }
-
-    const walk = (node: any, type: string): any[] => {
-      const res: any[] = [];
-      const stack = [node];
-      while (stack.length) {
-        const n = stack.pop();
-        if (!n) continue;
-        if (n.type === type) res.push(n);
-        stack.push(...n.namedChildren);
-      }
-      return res;
-    };
 
     for (const m of a.modules) {
       const useMap = new Map<string, string>();

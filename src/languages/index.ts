@@ -20,6 +20,7 @@ import sophiaAdapter from './sophia';
 import flintAdapter from './flint';
 import feAdapter from './fe';
 import liquidityAdapter from './liquidity';
+import reachAdapter from './reach';
 
 const adapters = [
   ...adaptersFunc,
@@ -43,7 +44,8 @@ const adapters = [
   sophiaAdapter,
   flintAdapter,
   feAdapter,
-  liquidityAdapter
+  liquidityAdapter,
+  reachAdapter
 ];
 
 export default adapters;
@@ -68,5 +70,6 @@ export {
   sophiaAdapter,
   flintAdapter,
   feAdapter,
-  liquidityAdapter
+  liquidityAdapter,
+  reachAdapter
 };

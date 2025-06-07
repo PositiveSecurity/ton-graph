@@ -21,6 +21,7 @@ mock('vscode', {
 });
 
 import { generateMermaidDiagram, clusterNodes, createVisualizationPanel } from '../src/visualization/visualizer';
+import { parseNoirContract } from '../src/languages/noir';
 import { ContractGraph } from '../src/types/graph';
 import { GraphNodeKind } from '../src/types/graphNodeKind';
 
@@ -111,6 +112,20 @@ describe('Visualizer', () => {
             expect(diagram).to.include('bar_regular[["bar"]]');
             expect(diagram).to.include('start_regular --> foo_regular');
             expect(diagram).to.include('foo_regular --> bar_regular');
+        });
+
+        it('labels clusters using module names for Noir graphs', () => {
+            const code = [
+                'mod utils {',
+                '  pub fn inc(x: Field) -> Field { x }',
+                '}',
+                'fn main() {',
+                '  utils::inc(5);',
+                '}',
+            ].join('\n');
+            const graph = parseNoirContract(code);
+            const diagram = generateMermaidDiagram(graph);
+            expect(diagram).to.include('subgraph Cluster_0["utils"]');
         });
 
         it('filters parameter comments in edge labels', () => {

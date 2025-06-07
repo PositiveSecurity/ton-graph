@@ -33,6 +33,15 @@ const genericSample = `module M {
     fun credit<T>() {}
 }`;
 
+const duplicateSample = `module M {
+    fun init() {
+        transfer();
+        transfer();
+    }
+
+    fun transfer() {}
+}`;
+
 describe('parseMoveContract', () => {
     it('parses functions and edges', async () => {
         const graph = await parseMoveContract(sample);
@@ -83,6 +92,13 @@ describe('parseMoveContract', () => {
         expect(graph.edges).to.deep.include.members([
             { from: 'M::init', to: 'M::transfer', label: '' },
             { from: 'M::transfer', to: 'M::credit', label: '' }
+        ]);
+    });
+
+    it('does not create duplicate edges', async () => {
+        const graph = await parseMoveContract(duplicateSample);
+        expect(graph.edges).to.deep.equal([
+            { from: 'M::init', to: 'M::transfer', label: '' }
         ]);
     });
 });

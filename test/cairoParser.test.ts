@@ -16,4 +16,16 @@ describe('parseCairoContract', () => {
     expect(ids).to.have.members(['bar', 'foo']);
     expect(graph.edges).to.deep.equal([{ from: 'foo', to: 'bar', label: '' }]);
   });
+
+  it('ignores duplicate calls', () => {
+    const code = [
+      'func bar() {}',
+      'func foo() {',
+      '  bar();',
+      '  bar();',
+      '}'
+    ].join('\n');
+    const graph = parseCairoContract(code);
+    expect(graph.edges).to.deep.equal([{ from: 'foo', to: 'bar', label: '' }]);
+  });
 });

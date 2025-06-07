@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/PositiveSecurity/ton-graph/branch/work/graph/badge.svg)](https://codecov.io/gh/PositiveSecurity/ton-graph)
 [![move](https://github.com/PositiveSecurity/ton-graph/actions/workflows/move.yml/badge.svg)](https://github.com/PositiveSecurity/ton-graph/actions/workflows/move.yml)
 
-A Visual Studio Code extension for visualizing function call graphs in smart contracts written in FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence and Michelson.
+A Visual Studio Code extension for visualizing function call graphs in smart contracts written in FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink and Scilla.
 
 Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 
@@ -17,20 +17,23 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 ## Features
 
 - Parse and visualize function call relationships in multiple contract types:
-  - FunC (*.fc, *.func)
-  - Tact (*.tact)
-  - Tolk (*.tolk)
-  - Move (*.move) - requires `move-analyzer`
-  - Cairo (*.cairo)
-  - Plutus (*.plutus)
-  - Cadence (*.cdc)
-  - Michelson (*.tz)
+  - FunC (_.fc, _.func)
+  - Tact (\*.tact)
+  - Tolk (\*.tolk)
+  - Move (\*.move) - requires `move-analyzer`
+  - Cairo (\*.cairo)
+  - Plutus (\*.plutus)
+  - Cadence (\*.cdc)
+  - Michelson (\*.tz)
+  - Clarity (\*.clar)
+  - Ink (\*.ink)
+  - Scilla (\*.scilla)
 - Interactive diagram with cluster-based organization
 - Zoom functionality for better navigation
 - Filter functions by type (regular, impure, inline, method_id)
 - Filter functions by name
 - Export diagrams in multiple formats:
-  - Mermaid (*.mmd)
+  - Mermaid (\*.mmd)
   - SVG
   - PNG
   - JPG
@@ -53,8 +56,8 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 
 ## Usage
 
-1. Open a contract file (*.fc, *.func, *.tact, *.tolk, or *.move)
-Note: Move contracts are parsed via `move-analyzer`.
+1. Open a contract file (_.fc, _.func, _.tact, _.tolk, or \*.move)
+   Note: Move contracts are parsed via `move-analyzer`.
 2. You can visualize a contract in multiple ways:
    - Press F1 or Ctrl+Shift+P to open the command palette and type "TON Graph: Visualize Contract"
    - Right-click on contract code in the editor → TON Graph: Visualize Contract
@@ -65,7 +68,7 @@ Note: Move contracts are parsed via `move-analyzer`.
 
 You can also visualize an entire contract including all imports:
 
-1. Open a main contract file (*.fc, *.func, *.tact, *.tolk, or *.move)
+1. Open a main contract file (_.fc, _.func, _.tact, _.tolk, or \*.move)
 2. Visualize the project in one of these ways:
    - Press F1 or Ctrl+Shift+P and type "TON Graph: Visualize Contract with Imports"
    - Right-click on contract code in the editor → TON Graph: Visualize Contract with Imports
@@ -75,6 +78,7 @@ You can also visualize an entire contract including all imports:
 ### Interactive Features
 
 The visualization provides several interactive features:
+
 - Zoom in/out for better detail view
 - Pan and navigate through the diagram
 - Filter functions by type
@@ -84,7 +88,7 @@ The visualization provides several interactive features:
 </a>
 
 - Filter functions by name using the search bar
- 
+
 <a href="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr02.jpg" target="_blank">
   <img src="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr02.jpg" width="400" alt="Filter functions by name">
 </a>
@@ -92,7 +96,8 @@ The visualization provides several interactive features:
 ### Exporting
 
 You can export the diagram in multiple formats:
-- Mermaid: Save as a Mermaid markdown file (*.mmd)
+
+- Mermaid: Save as a Mermaid markdown file (\*.mmd)
 - SVG: Vector graphics format for high-quality scaling
 - PNG: Raster image format for general use
 - JPG: Compressed image format for sharing
@@ -100,13 +105,14 @@ You can export the diagram in multiple formats:
 ## How It Works
 
 The extension analyzes your contract code to:
+
 1. Identify all function declarations and their types
 2. Detect function calls between these functions
 3. Create a directed graph of function relationships
 4. Generate a visual representation using [Mermaid](https://mermaid.js.org/) diagrams
 5. Group related functions into clusters for better readability
 6. Multiple contracts support (for Tact)
-7. Language adapters parse FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence and Michelson
+7. Language adapters parse FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink and Scilla
 
 <a href="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr04.jpg" target="_blank">
   <img src="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr04.jpg" width="400" alt="Multiple contracts support">
@@ -188,8 +194,8 @@ You can also view logs directly in VS Code under **Output** → **TON Graph**.
 
 ## Requirements
 
- - Visual Studio Code 1.75.0 or newer
- - [`move-analyzer`](https://github.com/move-language/move/tree/main/language/move-analyzer) installed and available in your `PATH` for Move contract support
+- Visual Studio Code 1.75.0 or newer
+- [`move-analyzer`](https://github.com/move-language/move/tree/main/language/move-analyzer) installed and available in your `PATH` for Move contract support
 
 ## Configuration
 

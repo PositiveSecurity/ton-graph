@@ -123,9 +123,21 @@ export function noirAstToGraph(ast: NoirAST): ContractGraph {
         call.childForFieldName("function") ||
         call.namedChildren.find((c) => c.type !== "arguments");
       if (!funcNode) continue;
-      let to = funcNode.text;
+      let to = funcNode.text.trim();
       to = to.replace(/^self\./, "");
-      to = to.replace(/<.*>/, "");
+      to = to.replace(/<[^>]*>/g, "");
+      if (to.endsWith("::")) to = to.slice(0, -2);
+      if (to.includes(".")) {
+        const parts = to.split(".");
+        if (parts.length === 2) {
+          const [obj, method] = parts;
+          if (/^[A-Z]/.test(obj)) {
+            to = `${obj}::${method}`;
+          } else {
+            to = `${obj}::${method}`;
+          }
+        }
+      }
       const key = `${from}->${to}`;
       if (!edgeSet.has(key)) {
         edgeSet.add(key);

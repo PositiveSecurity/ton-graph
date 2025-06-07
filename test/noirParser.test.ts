@@ -169,6 +169,25 @@ describe('parseNoirContract', () => {
     expect(graph.edges).to.deep.include({ from: 'Dummy::call', to: 'Dummy::helper', label: '' });
   });
 
+  it('parses generic methods in impl blocks', () => {
+    const fs = require('fs');
+    const code = fs.readFileSync('examples/noir/generic_impl.nr', 'utf8');
+    const graph = parseNoirContract(code);
+    const ids = graph.nodes.map(n => n.id);
+    expect(ids).to.include.members(['Box::new', 'Box::get', 'main']);
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'Box::new', label: '' });
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'Box::get', label: '' });
+  });
+
+  it('parses trait method implementations', () => {
+    const fs = require('fs');
+    const code = fs.readFileSync('examples/noir/trait_impl.nr', 'utf8');
+    const graph = parseNoirContract(code);
+    const ids = graph.nodes.map(n => n.id);
+    expect(ids).to.include.members(['Adder::sum', 'main']);
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'Adder::sum', label: '' });
+  });
+
   it('handles alias imports with nested paths', async () => {
     const fs = require('fs');
     const path = require('path');

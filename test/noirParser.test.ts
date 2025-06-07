@@ -17,6 +17,17 @@ describe('parseNoirContract', () => {
     expect(graph.edges).to.deep.equal([{ from: 'foo', to: 'bar', label: '' }]);
   });
 
+  it('parses function parameters', () => {
+    const code = [
+      'fn add(x: Field, y: Field) -> Field {',
+      '  x + y',
+      '}',
+    ].join('\n');
+    const graph = parseNoirContract(code);
+    const addNode = graph.nodes.find(n => n.id === 'add');
+    expect(addNode?.parameters).to.deep.equal(['x', 'y']);
+  });
+
   it('parses generic functions with nested control flow', () => {
     const code = [
       'fn inner<T>(x: T) {}',

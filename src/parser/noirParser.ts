@@ -10,6 +10,7 @@ export interface NoirFunction {
   body?: Parser.SyntaxNode;
   startPosition: Parser.Point;
   endPosition: Parser.Point;
+  params: string[];
 }
 
 export interface NoirModule {
@@ -53,6 +54,7 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
   for (const fn of fnNodes) {
     const idNode = fn.namedChildren.find((c) => c.type === "identifier");
     const bodyNode = fn.namedChildren.find((c) => c.type === "body");
+    const paramNode = fn.namedChildren.find((c) => c.type === "parameter");
     if (idNode) {
       const modules: string[] = [];
       let structName: string | null = null;
@@ -74,12 +76,29 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
       const parts = [...modules];
       if (structName) parts.push(structName);
       const prefix = parts.length ? parts.join("::") + "::" : "";
+      const params: string[] = [];
+      if (paramNode) {
+        for (const p of paramNode.namedChildren) {
+          if (p.type === "typed_identifier") {
+            const varNode = p.childForFieldName("var");
+            if (varNode) params.push(varNode.text);
+          } else if (p.type === "identifier") {
+            params.push(p.text);
+          } else if (p.type === "self_method") {
+            params.push("self");
+          } else if (p.type === "as_identifier") {
+            const id = p.namedChildren.find(c => c.type === "identifier");
+            if (id) params.push(id.text);
+          }
+        }
+      }
       functions.push({
         name: prefix + idNode.text,
         moduleName: modules.join("::") || undefined,
         body: bodyNode,
         startPosition: fn.startPosition,
         endPosition: fn.endPosition,
+        params,
       });
     }
   }
@@ -120,7 +139,7 @@ export function noirAstToGraph(ast: NoirAST): ContractGraph {
       label: `${f.name}()`,
       type: GraphNodeKind.Function,
       contractName: f.moduleName || "Contract",
-      parameters: [],
+      parameters: f.params || [],
       functionType: "regular",
     };
     graph.nodes.push(node);

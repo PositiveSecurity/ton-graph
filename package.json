@@ -41,7 +41,8 @@
     "onLanguage:michelson",
     "onLanguage:clar",
     "onLanguage:ink",
-    "onLanguage:scilla"
+    "onLanguage:scilla",
+    "onLanguage:pact"
   ],
   "contributes": {
     "languages": [
@@ -144,6 +145,15 @@
         "aliases": [
           "Scilla"
         ]
+      },
+      {
+        "id": "pact",
+        "extensions": [
+          ".pact"
+        ],
+        "aliases": [
+          "Pact"
+        ]
       }
     ],
     "commands": [
@@ -184,24 +194,24 @@
       "editor/context": [
         {
           "command": "ton-graph.visualize",
-          "when": "resourceLangId == func || resourceLangId == tact || resourceLangId == tolk || resourceLangId == move || resourceLangId == cairo || resourceLangId == plutus || resourceLangId == cadence || resourceLangId == michelson || resourceLangId == clar || resourceLangId == ink || resourceLangId == scilla",
+          "when": "resourceLangId == func || resourceLangId == tact || resourceLangId == tolk || resourceLangId == move || resourceLangId == cairo || resourceLangId == plutus || resourceLangId == cadence || resourceLangId == michelson || resourceLangId == clar || resourceLangId == ink || resourceLangId == scilla || resourceLangId == pact",
           "group": "navigation"
         },
         {
           "command": "ton-graph.visualizeProject",
-          "when": "resourceLangId == func || resourceLangId == tact || resourceLangId == tolk || resourceLangId == move || resourceLangId == cairo || resourceLangId == plutus || resourceLangId == cadence || resourceLangId == michelson || resourceLangId == clar || resourceLangId == ink || resourceLangId == scilla",
+          "when": "resourceLangId == func || resourceLangId == tact || resourceLangId == tolk || resourceLangId == move || resourceLangId == cairo || resourceLangId == plutus || resourceLangId == cadence || resourceLangId == michelson || resourceLangId == clar || resourceLangId == ink || resourceLangId == scilla || resourceLangId == pact",
           "group": "navigation"
         }
       ],
       "explorer/context": [
         {
           "command": "ton-graph.visualize",
-          "when": "resourceExtname == .fc || resourceExtname == .func || resourceExtname == .tact || resourceExtname == .tolk || resourceExtname == .move || resourceExtname == .cairo || resourceExtname == .plutus || resourceExtname == .cdc || resourceExtname == .tz || resourceExtname == .clar || resourceExtname == .ink || resourceExtname == .scilla",
+          "when": "resourceExtname == .fc || resourceExtname == .func || resourceExtname == .tact || resourceExtname == .tolk || resourceExtname == .move || resourceExtname == .cairo || resourceExtname == .plutus || resourceExtname == .cdc || resourceExtname == .tz || resourceExtname == .clar || resourceExtname == .ink || resourceExtname == .scilla || resourceExtname == .pact",
           "group": "navigation"
         },
         {
           "command": "ton-graph.visualizeProject",
-          "when": "resourceExtname == .fc || resourceExtname == .func || resourceExtname == .tact || resourceExtname == .tolk || resourceExtname == .move || resourceExtname == .cairo || resourceExtname == .plutus || resourceExtname == .cdc || resourceExtname == .tz || resourceExtname == .clar || resourceExtname == .ink || resourceExtname == .scilla",
+          "when": "resourceExtname == .fc || resourceExtname == .func || resourceExtname == .tact || resourceExtname == .tolk || resourceExtname == .move || resourceExtname == .cairo || resourceExtname == .plutus || resourceExtname == .cdc || resourceExtname == .tz || resourceExtname == .clar || resourceExtname == .ink || resourceExtname == .scilla || resourceExtname == .pact",
           "group": "navigation"
         }
       ]

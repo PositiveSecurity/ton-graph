@@ -12,6 +12,7 @@ import { parseMichelsonContract } from '../languages/michelson';
 import { parseClarContract } from '../languages/clar';
 import { parseInkContract } from '../languages/ink';
 import { parseScillaContract } from '../languages/scilla';
+import { parsePactContract } from '../languages/pact';
 import * as vscode from 'vscode';
 import * as toml from 'toml';
 import logger from '../logging/logger';
@@ -35,7 +36,8 @@ export type ContractLanguage =
   | 'michelson'
   | 'clar'
   | 'ink'
-  | 'scilla';
+  | 'scilla'
+  | 'pact';
 
 /**
  * Detects the language based on file extension
@@ -64,6 +66,8 @@ export function detectLanguage(filePath: string): ContractLanguage {
         return 'ink';
     } else if (extension === '.scilla') {
         return 'scilla';
+    } else if (extension === '.pact') {
+        return 'pact';
     }
 
     // Default to FunC
@@ -109,6 +113,9 @@ export async function parseContractByLanguage(code: string, language: ContractLa
             break;
         case 'scilla':
             graph = parseScillaContract(code);
+            break;
+        case 'pact':
+            graph = parsePactContract(code);
             break;
         case 'func':
         default:
@@ -228,6 +235,7 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
         case 'clar':
         case 'ink':
         case 'scilla':
+        case 'pact':
             return [
                 { value: 'regular', label: 'Regular' }
             ];

@@ -7,6 +7,7 @@ import michelsonAdapter from './michelson';
 import clarAdapter from './clar';
 import inkAdapter from './ink';
 import scillaAdapter from './scilla';
+import pactAdapter from './pact';
 
 const adapters = [
   ...adaptersFunc,
@@ -17,7 +18,8 @@ const adapters = [
   michelsonAdapter,
   clarAdapter,
   inkAdapter,
-  scillaAdapter
+  scillaAdapter,
+  pactAdapter
 ];
 
 export default adapters;
@@ -29,5 +31,6 @@ export {
   movelangAdapter,
   clarAdapter,
   inkAdapter,
-  scillaAdapter
+  scillaAdapter,
+  pactAdapter
 };

@@ -4,6 +4,9 @@ import cairoAdapter from './cairo';
 import plutusAdapter from './plutus';
 import cadenceAdapter from './cadence';
 import michelsonAdapter from './michelson';
+import clarAdapter from './clar';
+import inkAdapter from './ink';
+import scillaAdapter from './scilla';
 
 const adapters = [
   ...adaptersFunc,
@@ -11,8 +14,20 @@ const adapters = [
   cairoAdapter,
   plutusAdapter,
   cadenceAdapter,
-  michelsonAdapter
+  michelsonAdapter,
+  clarAdapter,
+  inkAdapter,
+  scillaAdapter
 ];
 
 export default adapters;
-export { cairoAdapter, plutusAdapter, cadenceAdapter, michelsonAdapter, movelangAdapter };
+export {
+  cairoAdapter,
+  plutusAdapter,
+  cadenceAdapter,
+  michelsonAdapter,
+  movelangAdapter,
+  clarAdapter,
+  inkAdapter,
+  scillaAdapter
+};

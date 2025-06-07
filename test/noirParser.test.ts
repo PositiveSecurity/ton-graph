@@ -154,4 +154,22 @@ describe('parseNoirContract', () => {
     expect(ids).to.include.members(['Dummy::helper', 'Dummy::call', 'main']);
     expect(graph.edges).to.deep.include({ from: 'Dummy::call', to: 'Dummy::helper', label: '' });
   });
+
+  it('handles alias imports with nested paths', async () => {
+    const fs = require('fs');
+    const path = require('path');
+    const parserUtils = require('../src/parser/parserUtils');
+    const tmp = path.join('examples/noir', 'tmp_alias_main.nr');
+    fs.writeFileSync(tmp, [
+      'mod utils;',
+      'use utils::math::double as dub;',
+      'fn main() {',
+      '  dub(2);',
+      '}',
+    ].join('\n'));
+    const code = fs.readFileSync(tmp, 'utf8');
+    const graph = await parserUtils.parseContractWithImports(code, tmp, 'noir');
+    fs.unlinkSync(tmp);
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::math::double', label: '' });
+  });
 });

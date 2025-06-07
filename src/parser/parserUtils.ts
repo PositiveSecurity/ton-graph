@@ -25,7 +25,7 @@ import { parseBambooContract } from '../languages/bamboo';
 import { parseSophiaContract } from '../languages/sophia';
 import { parseFlintContract } from '../languages/flint';
 import { parseFeContract } from '../languages/fe';
-import { parseNoirContract } from './noirParser';
+import { parseNoirContract, parseNoir } from './noirParser';
 import { parseSimplicityContract } from '../languages/simplicity';
 import { parseLiquidityContract } from '../languages/liquidity';
 import { parseReachContract } from '../languages/reach';
@@ -43,6 +43,30 @@ if (vscode.workspace && typeof vscode.workspace.onDidChangeTextDocument === 'fun
     vscode.workspace.onDidChangeTextDocument(e => {
         parseCache.delete(`${e.document.uri.toString()}-${detectLanguage(e.document.fileName)}`);
     });
+}
+
+function collectNoirImports(code: string): string[] {
+    const { tree } = parseNoir(code);
+    const result: string[] = [];
+    const stack = [tree.rootNode];
+    while (stack.length) {
+        const node = stack.pop();
+        if (!node) continue;
+        if (node.type === 'module') {
+            const body = node.namedChildren.find(c => c.type === 'body');
+            if (!body) {
+                const id = node.namedChildren.find(c => c.type === 'identifier');
+                if (id) result.push(id.text);
+            }
+        } else if (node.type === 'use_declaration') {
+            const pathNode = node.namedChildren.find(c => c.type === 'path') || node.namedChildren.find(c => c.type === 'scoped_identifier');
+            if (pathNode) {
+                result.push(pathNode.text);
+            }
+        }
+        stack.push(...node.namedChildren);
+    }
+    return result;
 }
 
 export type ContractLanguage =
@@ -320,24 +344,11 @@ export async function parseContractWithImports(
             let text = '';
             try { text = fs.readFileSync(resolved, 'utf8'); } catch { return ''; }
             const dir = path.dirname(resolved);
-            const modRegex = /(?:pub\s+)?mod\s+(\w+)\s*;/g;
-            const useRegex = /use\s+([A-Za-z0-9_]+)::/g;
             let out = '';
-            let m;
-            while ((m = modRegex.exec(text)) !== null) {
-                const name = m[1];
-                const cand1 = path.join(dir, `${name}.nr`);
-                const cand2 = path.join(dir, name, 'mod.nr');
-                if (fs.existsSync(cand1) && isPathInsideWorkspace(cand1)) {
-                    out += await load(cand1);
-                } else if (fs.existsSync(cand2) && isPathInsideWorkspace(cand2)) {
-                    out += await load(cand2);
-                }
-            }
-            while ((m = useRegex.exec(text)) !== null) {
-                const name = m[1];
-                const cand1 = path.join(dir, `${name}.nr`);
-                const cand2 = path.join(dir, name, 'mod.nr');
+            for (const imp of collectNoirImports(text)) {
+                const parts = imp.split('::');
+                const cand1 = path.join(dir, ...parts) + '.nr';
+                const cand2 = path.join(dir, ...parts, 'mod.nr');
                 if (fs.existsSync(cand1) && isPathInsideWorkspace(cand1)) {
                     out += await load(cand1);
                 } else if (fs.existsSync(cand2) && isPathInsideWorkspace(cand2)) {

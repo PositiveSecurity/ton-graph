@@ -23,7 +23,8 @@ export function buildSimpleEdges(ast: SimpleAST): { from: string; to: string }[]
   const edgeSet = new Set<string>();
   const names = ast.functions.map(f => f.name);
   if (names.length === 0) return edges;
-  const callRegex = new RegExp(`\\b(${names.join('|')})\\s*\\(`, 'g');
+  const escapedNames = names.map(n => n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+  const callRegex = new RegExp(`\\b(${escapedNames.join('|')})\\s*\\(`, 'g');
   for (const fn of ast.functions) {
     let m: RegExpExecArray | null;
     while ((m = callRegex.exec(fn.body)) !== null) {

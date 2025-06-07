@@ -13,6 +13,7 @@ import { parseClarContract } from '../languages/clar';
 import { parseInkContract } from '../languages/ink';
 import { parseScillaContract } from '../languages/scilla';
 import { parsePactContract } from '../languages/pact';
+import { parseScryptoContract } from '../languages/scrypto';
 import * as vscode from 'vscode';
 import * as toml from 'toml';
 import logger from '../logging/logger';
@@ -37,7 +38,8 @@ export type ContractLanguage =
   | 'clar'
   | 'ink'
   | 'scilla'
-  | 'pact';
+  | 'pact'
+  | 'scrypto';
 
 /**
  * Detects the language based on file extension
@@ -64,11 +66,13 @@ export function detectLanguage(filePath: string): ContractLanguage {
         return 'clar';
     } else if (extension === '.ink') {
         return 'ink';
-    } else if (extension === '.scilla') {
-        return 'scilla';
-    } else if (extension === '.pact') {
-        return 'pact';
-    }
+  } else if (extension === '.scilla') {
+      return 'scilla';
+  } else if (extension === '.pact') {
+      return 'pact';
+  } else if (extension === '.scrypto' || extension === '.rs') {
+      return 'scrypto';
+  }
 
     // Default to FunC
     return 'func';
@@ -110,6 +114,9 @@ export async function parseContractByLanguage(code: string, language: ContractLa
             break;
         case 'ink':
             graph = parseInkContract(code);
+            break;
+        case 'scrypto':
+            graph = parseScryptoContract(code);
             break;
         case 'scilla':
             graph = parseScillaContract(code);
@@ -234,6 +241,7 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
         case 'michelson':
         case 'clar':
         case 'ink':
+        case 'scrypto':
         case 'scilla':
         case 'pact':
             return [

@@ -1,0 +1,6 @@
+contract bar(@Nil) {
+}
+
+contract foo(@Nil) {
+  bar(*Nil)
+}

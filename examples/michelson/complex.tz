@@ -1,0 +1,41 @@
+parameter
+  (or
+     (pair %transfer (address %from) (pair %to address (nat %amount)))
+     (or
+        (pair %mint (address %recipient) (nat %amount))
+        (pair %burn (address %from) (nat %amount))
+     )
+  );
+
+storage (pair (big_map %balances address nat) (nat %total_supply));
+
+code {
+  DUP;
+  CAR;
+  IF_LEFT
+    { # transfer
+      UNPAIR 2;                  # stack: from to amount balances total
+      DIG 2; GET; IF_NONE { PUSH nat 0 } {}; SWAP;
+      DIG 2; GET; IF_NONE { PUSH nat 0 } {}; SWAP;
+      DIG 2; SUB;                # subtract amount from sender
+      DUP; DIP { SWAP ; UPDATE };
+      DIG 2; ADD;                # add amount to receiver
+      DIG 2; UPDATE;             # update balances
+      NIL operation; PAIR
+    }
+    { IF_LEFT
+        { # mint
+          UNPAIR 2;              # recipient amount balances total
+          DIG 2; GET; IF_NONE { PUSH nat 0 } {}; ADD; SWAP; UPDATE;
+          ADD;                   # increase total supply
+          NIL operation; PAIR
+        }
+        { # burn
+          UNPAIR 2;              # from amount balances total
+          DIG 2; GET; IF_NONE { PUSH nat 0 } {}; SWAP; SUB;
+          DUP; DIP { SWAP ; UPDATE };
+          SWAP; SUB;             # decrease total supply
+          NIL operation; PAIR
+        }
+    }
+};

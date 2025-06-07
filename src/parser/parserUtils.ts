@@ -196,7 +196,9 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
             return [
                 { value: 'regular', label: 'Regular' },
                 { value: 'entry', label: 'Entry' },
-                { value: 'script', label: 'Script' }
+                { value: 'script', label: 'Script' },
+                { value: 'public', label: 'Public' },
+                { value: 'friend', label: 'Friend' }
             ];
         case 'cairo':
         case 'plutus':

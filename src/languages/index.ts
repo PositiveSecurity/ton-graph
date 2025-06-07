@@ -8,6 +8,7 @@ import clarAdapter from './clar';
 import inkAdapter from './ink';
 import scillaAdapter from './scilla';
 import pactAdapter from './pact';
+import scryptoAdapter from './scrypto';
 
 const adapters = [
   ...adaptersFunc,
@@ -19,7 +20,8 @@ const adapters = [
   clarAdapter,
   inkAdapter,
   scillaAdapter,
-  pactAdapter
+  pactAdapter,
+  scryptoAdapter
 ];
 
 export default adapters;
@@ -32,5 +34,6 @@ export {
   clarAdapter,
   inkAdapter,
   scillaAdapter,
-  pactAdapter
+  pactAdapter,
+  scryptoAdapter
 };

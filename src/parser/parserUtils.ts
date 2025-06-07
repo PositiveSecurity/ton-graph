@@ -25,7 +25,7 @@ import { parseBambooContract } from '../languages/bamboo';
 import { parseSophiaContract } from '../languages/sophia';
 import { parseFlintContract } from '../languages/flint';
 import { parseFeContract } from '../languages/fe';
-import { parseNoirContract } from '../languages/noir';
+import { parseNoirContract } from './noirParser';
 import { parseSimplicityContract } from '../languages/simplicity';
 import { parseLiquidityContract } from '../languages/liquidity';
 import { parseReachContract } from '../languages/reach';

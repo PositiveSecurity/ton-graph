@@ -26,6 +26,7 @@ import { parseFlintContract } from '../languages/flint';
 import { parseFeContract } from '../languages/fe';
 import { parseLiquidityContract } from '../languages/liquidity';
 import { parseReachContract } from '../languages/reach';
+import { parseRellContract } from '../languages/rell';
 import { parseRholangContract } from '../languages/rholang';
 import * as vscode from 'vscode';
 import * as toml from 'toml';
@@ -65,6 +66,7 @@ export type ContractLanguage =
   | 'liquidity'
   | 'fe'
   | 'reach'
+  | 'rell'
   | 'rholang';
 
 /**
@@ -116,6 +118,8 @@ export function detectLanguage(filePath: string): ContractLanguage {
       return 'fe';
   } else if (extension === '.flint') {
       return 'flint';
+  } else if (extension === '.rell') {
+      return 'rell';
   } else if (extension === '.reach') {
       return 'reach';
   } else if (extension === '.rho') {
@@ -202,6 +206,9 @@ export async function parseContractByLanguage(code: string, language: ContractLa
             break;
         case 'reach':
             graph = parseReachContract(code);
+            break;
+        case 'rell':
+            graph = parseRellContract(code);
             break;
         case 'rholang':
             graph = parseRholangContract(code);
@@ -344,6 +351,7 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
         case 'bamboo':
         case 'flint':
         case 'reach':
+        case 'rell':
         case 'liquidity':
         case 'fe':
         case 'rholang':

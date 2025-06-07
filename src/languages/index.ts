@@ -18,6 +18,7 @@ import glowAdapter from './glow';
 import bambooAdapter from './bamboo';
 import sophiaAdapter from './sophia';
 import flintAdapter from './flint';
+import feAdapter from './fe';
 
 const adapters = [
   ...adaptersFunc,
@@ -39,7 +40,8 @@ const adapters = [
   glowAdapter,
   bambooAdapter,
   sophiaAdapter,
-  flintAdapter
+  flintAdapter,
+  feAdapter
 ];
 
 export default adapters;
@@ -62,5 +64,6 @@ export {
   glowAdapter,
   bambooAdapter,
   sophiaAdapter,
-  flintAdapter
+  flintAdapter,
+  feAdapter
 };

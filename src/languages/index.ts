@@ -17,6 +17,7 @@ import tealAdapter from './teal';
 import glowAdapter from './glow';
 import bambooAdapter from './bamboo';
 import sophiaAdapter from './sophia';
+import flintAdapter from './flint';
 
 const adapters = [
   ...adaptersFunc,
@@ -37,7 +38,8 @@ const adapters = [
   leoAdapter,
   glowAdapter,
   bambooAdapter,
-  sophiaAdapter
+  sophiaAdapter,
+  flintAdapter
 ];
 
 export default adapters;
@@ -59,5 +61,6 @@ export {
   leoAdapter,
   glowAdapter,
   bambooAdapter,
-  sophiaAdapter
+  sophiaAdapter,
+  flintAdapter
 };

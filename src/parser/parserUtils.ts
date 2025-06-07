@@ -82,76 +82,53 @@ export type ContractLanguage =
 /**
  * Detects the language based on file extension
  */
+const extensionLanguageMap = new Map<string, ContractLanguage>([
+    ['.move', 'move'],
+    ['.tact', 'tact'],
+    ['.tolk', 'tolk'],
+    ['.cairo', 'cairo'],
+    ['.plutus', 'plutus'],
+    ['.cdc', 'cadence'],
+    ['.tz', 'michelson'],
+    ['.clar', 'clar'],
+    ['.ink', 'ink'],
+    ['.scilla', 'scilla'],
+    ['.pact', 'pact'],
+    ['.scrypto', 'scrypto'],
+    ['.rs', 'scrypto'],
+    ['.soroban', 'soroban'],
+    ['.teal', 'teal'],
+    ['.ligo', 'ligo'],
+    ['.mligo', 'ligo'],
+    ['.religo', 'ligo'],
+    ['.jsligo', 'ligo'],
+    ['.ak', 'aiken'],
+    ['.aiken', 'aiken'],
+    ['.leo', 'leo'],
+    ['.glow', 'glow'],
+    ['.huff', 'huff'],
+    ['.bamboo', 'bamboo'],
+    ['.fe', 'fe'],
+    ['.nr', 'noir'],
+    ['.noir', 'noir'],
+    ['.simp', 'simplicity'],
+    ['.flint', 'flint'],
+    ['.rell', 'rell'],
+    ['.reach', 'reach'],
+    ['.rho', 'rholang'],
+    ['.liq', 'liquidity'],
+    ['.aes', 'sophia'],
+    ['.marlowe', 'marlowe'],
+    ['.yul', 'yul']
+]);
+
 export function detectLanguage(filePath: string): ContractLanguage {
     const extension = path.extname(filePath).toLowerCase();
     const base = path.basename(filePath).toLowerCase();
-
-    if (extension === '.move' || base === 'move.toml') {
+    if (base === 'move.toml') {
         return 'move';
-    } else if (extension === '.tact') {
-        return 'tact';
-    } else if (extension === '.tolk') {
-        return 'tolk';
-    } else if (extension === '.cairo') {
-        return 'cairo';
-    } else if (extension === '.plutus') {
-        return 'plutus';
-    } else if (extension === '.cdc') {
-        return 'cadence';
-    } else if (extension === '.tz') {
-        return 'michelson';
-    } else if (extension === '.clar') {
-        return 'clar';
-    } else if (extension === '.ink') {
-        return 'ink';
-  } else if (extension === '.scilla') {
-      return 'scilla';
-  } else if (extension === '.pact') {
-      return 'pact';
-  } else if (extension === '.scrypto' || extension === '.rs') {
-      return 'scrypto';
-  } else if (extension === '.soroban') {
-      return 'soroban';
-  } else if (extension === '.teal') {
-      return 'teal';
-  } else if (extension === '.ligo' || extension === '.mligo' || extension === '.religo' || extension === '.jsligo') {
-      return 'ligo';
-  } else if (extension === '.ak' || extension === '.aiken') {
-      return 'aiken';
-  } else if (extension === '.leo') {
-      return 'leo';
-  } else if (extension === '.glow') {
-      return 'glow';
-  } else if (extension === '.huff') {
-      return 'huff';
-  } else if (extension === '.bamboo') {
-      return 'bamboo';
-  } else if (extension === '.fe') {
-      return 'fe';
-  } else if (extension === '.nr' || extension === '.noir') {
-      return 'noir';
-  } else if (extension === '.simp') {
-      return 'simplicity';
-  } else if (extension === '.flint') {
-      return 'flint';
-  } else if (extension === '.rell') {
-      return 'rell';
-  } else if (extension === '.reach') {
-      return 'reach';
-  } else if (extension === '.rho') {
-      return 'rholang';
-  } else if (extension === '.liq') {
-      return 'liquidity';
-  } else if (extension === '.aes') {
-      return 'sophia';
-  } else if (extension === '.marlowe') {
-      return 'marlowe';
-  } else if (extension === '.yul') {
-      return 'yul';
-  }
-
-    // Default to FunC
-    return 'func';
+    }
+    return extensionLanguageMap.get(extension) || 'func';
 }
 
 /**

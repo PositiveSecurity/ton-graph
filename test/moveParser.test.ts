@@ -101,4 +101,10 @@ describe('parseMoveContract', () => {
             { from: 'M::init', to: 'M::transfer', label: '' }
         ]);
     });
+
+    it('returns empty graph on malformed code', async () => {
+        const graph = await parseMoveContract('module {');
+        expect(graph.nodes).to.be.empty;
+        expect(graph.edges).to.be.empty;
+    });
 });

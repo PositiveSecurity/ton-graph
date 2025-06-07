@@ -74,11 +74,18 @@ export function noirAstToGraph(ast: NoirAST): ContractGraph {
   for (const f of ast.functions) {
     if (!f.body) continue;
     const from = f.name;
-    const calls = walk(f.body, 'function_call');
+    const calls = [
+      ...walk(f.body, 'function_call'),
+      ...walk(f.body, 'call_expression')
+    ];
     for (const call of calls) {
-      const idNode = call.namedChildren.find(c => c.type === 'identifier');
-      if (!idNode) continue;
-      const to = idNode.text;
+      const funcNode =
+        call.childForFieldName('function') ||
+        call.namedChildren.find(c => c.type !== 'arguments');
+      if (!funcNode) continue;
+      let to = funcNode.text;
+      to = to.replace(/^self\./, '');
+      to = to.replace(/<.*>/, '');
       const key = `${from}->${to}`;
       if (!edgeSet.has(key)) {
         edgeSet.add(key);

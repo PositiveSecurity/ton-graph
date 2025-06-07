@@ -100,4 +100,11 @@ describe('parseNoirContract', () => {
       { from: 'main', to: 'has_majority', label: '' }
     ]);
   });
+
+  it('parses the module_call.nr example file', () => {
+    const fs = require('fs');
+    const code = fs.readFileSync('examples/noir/module_call.nr', 'utf8');
+    const graph = parseNoirContract(code);
+    expect(graph.edges).to.deep.include({ from: 'use_utils', to: 'utils::inc', label: '' });
+  });
 });

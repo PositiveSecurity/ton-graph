@@ -38,6 +38,7 @@ import * as toml from 'toml';
 import logger from '../logging/logger';
 
 const parseCache = new Map<string, ContractGraph>();
+const noirFileCache = new Map<string, string>();
 
 if (vscode.workspace && typeof vscode.workspace.onDidChangeTextDocument === 'function') {
     vscode.workspace.onDidChangeTextDocument(e => {
@@ -400,8 +401,11 @@ export async function parseContractWithImports(
         async function load(file: string): Promise<string> {
             const resolved = path.resolve(file);
             if (visited.has(resolved)) return '';
-            if (!(await exists(resolved))) return '';
             visited.add(resolved);
+            if (noirFileCache.has(resolved)) {
+                return noirFileCache.get(resolved)!;
+            }
+            if (!(await exists(resolved))) return '';
             let text = '';
             try {
                 text = await fsp.readFile(resolved, 'utf8');
@@ -432,6 +436,7 @@ export async function parseContractWithImports(
                 }
             }
             out += `\n\n${text}`;
+            noirFileCache.set(resolved, out);
             return out;
         }
 

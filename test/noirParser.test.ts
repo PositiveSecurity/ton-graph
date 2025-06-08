@@ -225,6 +225,16 @@ describe('parseNoirContract', () => {
     expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::math::double', label: '' });
   });
 
+  it('loads alias_module.nr via parseContractWithImports', async () => {
+    const fs = require('fs');
+    const parserUtils = require('../src/parser/parserUtils');
+    const code = fs.readFileSync('examples/noir/alias_module.nr', 'utf8');
+    const graph = await parserUtils.parseContractWithImports(code, 'examples/noir/alias_module.nr', 'noir');
+    const ids = graph.nodes.map(n => n.id);
+    expect(ids).to.include('utils::math::double');
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::math::double', label: '' });
+  });
+
   it('parses grouped imports', () => {
     const fs = require('fs');
     const code = fs.readFileSync('examples/noir/group_import.nr', 'utf8');
@@ -281,6 +291,16 @@ describe('parseNoirContract', () => {
     const parserUtils = require('../src/parser/parserUtils');
     const code = fs.readFileSync('examples/noir/crate_use.nr', 'utf8');
     const graph = await parserUtils.parseContractWithImports(code, 'examples/noir/crate_use.nr', 'noir');
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::math::double', label: '' });
+  });
+
+  it('loads crate_use.nr via parseContractWithImports', async () => {
+    const fs = require('fs');
+    const parserUtils = require('../src/parser/parserUtils');
+    const code = fs.readFileSync('examples/noir/crate_use.nr', 'utf8');
+    const graph = await parserUtils.parseContractWithImports(code, 'examples/noir/crate_use.nr', 'noir');
+    const ids = graph.nodes.map(n => n.id);
+    expect(ids).to.include('utils::math::double');
     expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::math::double', label: '' });
   });
 

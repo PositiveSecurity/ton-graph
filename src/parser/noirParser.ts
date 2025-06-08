@@ -209,11 +209,17 @@ export function noirAstToGraph(ast: NoirAST): ContractGraph {
       if (useMap.has(to)) {
         to = useMap.get(to)!;
       } else {
-        for (const w of wildcard) {
-          const cand = `${w}::${to}`;
-          if (funcMap.has(cand)) {
-            to = cand;
-            break;
+        const segs = to.split("::");
+        if (segs.length > 1 && useMap.has(segs[0])) {
+          to = [useMap.get(segs[0])!, ...segs.slice(1)].join("::");
+        }
+        if (!funcMap.has(to)) {
+          for (const w of wildcard) {
+            const cand = `${w}::${to}`;
+            if (funcMap.has(cand)) {
+              to = cand;
+              break;
+            }
           }
         }
       }

@@ -217,6 +217,14 @@ describe('parseNoirContract', () => {
     expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::math::double', label: '' });
   });
 
+  it('resolves calls through a module alias', async () => {
+    const fs = require('fs');
+    const parserUtils = require('../src/parser/parserUtils');
+    const code = fs.readFileSync('examples/noir/alias_module.nr', 'utf8');
+    const graph = await parserUtils.parseContractWithImports(code, 'examples/noir/alias_module.nr', 'noir');
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::math::double', label: '' });
+  });
+
   it('parses grouped imports', () => {
     const fs = require('fs');
     const code = fs.readFileSync('examples/noir/group_import.nr', 'utf8');

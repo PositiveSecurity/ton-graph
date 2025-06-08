@@ -1,0 +1,5 @@
+[package]
+name = "Example"
+
+[dependencies]
+dep = { path = "./dep" }

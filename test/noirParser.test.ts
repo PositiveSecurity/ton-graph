@@ -232,4 +232,39 @@ describe('parseNoirContract', () => {
     expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::inc', label: '' });
     expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::dec', label: '' });
   });
+
+  it('extracts parameters from methods and functions', () => {
+    const fs = require('fs');
+    const code = fs.readFileSync('examples/noir/params_example.nr', 'utf8');
+    const graph = parseNoirContract(code);
+    const act = graph.nodes.find(n => n.id === 'Dummy::act');
+    const compute = graph.nodes.find(n => n.id === 'compute');
+    expect(act?.parameters).to.deep.equal(['self', 'x', 'y']);
+    expect(compute?.parameters).to.deep.equal(['a', 'b', 'c']);
+  });
+
+  it('handles grouped and wildcard use imports together', () => {
+    const fs = require('fs');
+    const code = fs.readFileSync('examples/noir/group_wildcard_import.nr', 'utf8');
+    const graph = parseNoirContract(code);
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::inc', label: '' });
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::dec', label: '' });
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::dbl', label: '' });
+  });
+
+  it('resolves modules from a Nargo project', async () => {
+    const fs = require('fs');
+    const path = require('path');
+    const proj = path.resolve('examples/noir/nargo_example');
+    mock('vscode', { window: { createOutputChannel: () => ({ appendLine: () => {} }) }, workspace: { workspaceFolders: [{ uri: { fsPath: proj } }] } });
+    delete require.cache[require.resolve('../src/parser/parserUtils')];
+    const parserUtils = require('../src/parser/parserUtils');
+    const code = fs.readFileSync(path.join(proj, 'src', 'main.nr'), 'utf8');
+    const graph = await parserUtils.parseContractWithImports(code, path.join(proj, 'src', 'main.nr'), 'noir');
+    const ids = graph.nodes.map((n: any) => n.id);
+    expect(ids).to.include.members(['utils::inc', 'helper::run', 'main']);
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::inc', label: '' });
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'helper::run', label: '' });
+    mock.stop('vscode');
+  });
 });

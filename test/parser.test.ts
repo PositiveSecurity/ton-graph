@@ -213,4 +213,36 @@ describe('Parser', () => {
         expect(ids).to.include.members(['A::a', 'D::d', 'E::e']);
         mock.stop('toml');
     });
+
+    it('parses Noir project with Nargo.toml', async () => {
+        const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'nargoproj-'));
+        fs.mkdirSync(path.join(tmp, 'src'), { recursive: true });
+        fs.writeFileSync(
+            path.join(tmp, 'Nargo.toml'),
+            '[package]\nname="Test"\n\n[dependencies]\ndep = { path = "./dep" }'
+        );
+        fs.writeFileSync(
+            path.join(tmp, 'src', 'main.nr'),
+            ['mod utils;', 'use dep::helper::run;', 'fn main() {', '    utils::inc(1);', '    run();', '}'].join('\n')
+        );
+        fs.writeFileSync(
+            path.join(tmp, 'src', 'utils.nr'),
+            ['pub fn inc(x: Field) -> Field { x }'].join('\n')
+        );
+        fs.mkdirSync(path.join(tmp, 'dep', 'src'), { recursive: true });
+        fs.writeFileSync(
+            path.join(tmp, 'dep', 'src', 'helper.nr'),
+            ['pub fn run() {}'].join('\n')
+        );
+        fs.writeFileSync(path.join(tmp, 'dep', 'Nargo.toml'), '[package]\nname="dep"');
+        const code = fs.readFileSync(path.join(tmp, 'src', 'main.nr'), 'utf8');
+        mock('vscode', { window: { createOutputChannel: () => ({ appendLine: () => {} }) }, workspace: { workspaceFolders: [{ uri: { fsPath: tmp } }] } });
+        delete require.cache[require.resolve('../src/parser/parserUtils')];
+        const { parseContractWithImports: parseWithImports } = require('../src/parser/parserUtils');
+        const graph = await parseWithImports(code, path.join(tmp, 'src', 'main.nr'), 'noir');
+        const ids = graph.nodes.map((n: any) => n.id);
+        expect(ids).to.include.members(['utils::inc', 'helper::run', 'main']);
+        expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::inc', label: '' });
+        expect(graph.edges).to.deep.include({ from: 'main', to: 'helper::run', label: '' });
+    });
 });

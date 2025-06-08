@@ -43,13 +43,13 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
   - Sophia (\*.aes)
   - Flint (\*.flint)
   - Fe (\*.fe)
-  - Noir (\*.nr, \*.noir) — full import resolution with nested modules and alias support
+  - Noir (\*.nr, \*.noir) — full import resolution with nested modules and alias support. Nargo projects are detected automatically and modules are resolved relative to `<root>/src`, including local dependencies within the workspace.
   - Reach (\*.reach)
   - Rell (\*.rell)
   - Rholang (\*.rho)
   - Simplicity (\*.simp)
   - Yul (\*.yul)
-  - Support for Noir is powered by [tree-sitter-noir](https://github.com/noir-lang/tree-sitter-noir). Example contracts are available in `examples/noir`. The parser now handles nested modules and aliases.
+  - Support for Noir is powered by [tree-sitter-noir](https://github.com/noir-lang/tree-sitter-noir). Example contracts are available in `examples/noir`. The parser now handles nested modules, aliases and Nargo project layouts.
 - Interactive diagram with cluster-based organization
 - Zoom functionality for better navigation
 - Filter functions by type (regular, impure, inline, method_id)

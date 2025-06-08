@@ -340,6 +340,42 @@ export async function parseContractWithImports(
         const fs = await import('fs');
         const visited = new Set<string>();
 
+        function findRoot(start: string): string | null {
+            let cur = start;
+            while (true) {
+                const p = path.join(cur, 'Nargo.toml');
+                if (fs.existsSync(p)) return cur;
+                const parent = path.dirname(cur);
+                if (parent === cur) break;
+                cur = parent;
+            }
+            return null;
+        }
+
+        const root = findRoot(path.dirname(filePath));
+        const baseDirs: string[] = [];
+        if (root) {
+            baseDirs.push(path.join(root, 'src'));
+            const tomlPath = path.join(root, 'Nargo.toml');
+            try {
+                const text = fs.readFileSync(tomlPath, 'utf8');
+                const parsed = toml.parse(text);
+                const deps = parsed.dependencies || {};
+                for (const key of Object.keys(deps)) {
+                    const dep = deps[key];
+                    if (dep && typeof dep === 'object' && (dep.path || dep.local)) {
+                        const rel = dep.path || dep.local;
+                        const depDir = path.resolve(root, rel);
+                        if (isPathInsideWorkspace(depDir)) {
+                            baseDirs.push(path.join(depDir, 'src'));
+                        }
+                    }
+                }
+            } catch (err) {
+                logger.error(`Invalid Nargo.toml at ${tomlPath}`, err);
+            }
+        }
+
         async function load(file: string): Promise<string> {
             const resolved = path.resolve(file);
             if (visited.has(resolved)) return '';
@@ -351,12 +387,17 @@ export async function parseContractWithImports(
             let out = '';
             for (const imp of collectNoirImports(text)) {
                 const parts = imp.split('::');
-                const cand1 = path.join(dir, ...parts) + '.nr';
-                const cand2 = path.join(dir, ...parts, 'mod.nr');
-                if (fs.existsSync(cand1) && isPathInsideWorkspace(cand1)) {
-                    out += await load(cand1);
-                } else if (fs.existsSync(cand2) && isPathInsideWorkspace(cand2)) {
-                    out += await load(cand2);
+                const searchDirs = [dir, ...baseDirs];
+                for (const base of searchDirs) {
+                    const cand1 = path.join(base, ...parts) + '.nr';
+                    const cand2 = path.join(base, ...parts, 'mod.nr');
+                    if (fs.existsSync(cand1) && isPathInsideWorkspace(cand1)) {
+                        out += await load(cand1);
+                        break;
+                    } else if (fs.existsSync(cand2) && isPathInsideWorkspace(cand2)) {
+                        out += await load(cand2);
+                        break;
+                    }
                 }
             }
             out += `\n\n${text}`;

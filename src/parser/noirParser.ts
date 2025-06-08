@@ -54,7 +54,7 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
     const idNode = fn.namedChildren.find((c) => c.type === "identifier");
     const bodyNode = fn.namedChildren.find((c) => c.type === "body");
     if (idNode) {
-      const modules: string[] = [];
+      const modulePath: string[] = [];
       let structName: string | null = null;
       let parent: Parser.SyntaxNode | null = fn.parent;
       while (parent) {
@@ -66,17 +66,17 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
         } else if (parent.type === "module") {
           const modId = parent.namedChildren.find((c) => c.type === "identifier");
           if (modId) {
-            modules.unshift(modId.text);
+            modulePath.unshift(modId.text);
           }
         }
         parent = parent.parent;
       }
-      const parts = [...modules];
+      const parts = [...modulePath];
       if (structName) parts.push(structName);
       const prefix = parts.length ? parts.join("::") + "::" : "";
       functions.push({
         name: prefix + idNode.text,
-        moduleName: modules.join("::") || undefined,
+        moduleName: modulePath.join("::") || undefined,
         body: bodyNode,
         startPosition: fn.startPosition,
         endPosition: fn.endPosition,

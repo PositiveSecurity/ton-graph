@@ -199,11 +199,7 @@ export function noirAstToGraph(ast: NoirAST): ContractGraph {
         const parts = to.split(".");
         if (parts.length === 2) {
           const [obj, method] = parts;
-          if (/^[A-Z]/.test(obj)) {
-            to = `${obj}::${method}`;
-          } else {
-            to = `${obj}::${method}`;
-          }
+          to = `${obj}::${method}`;
         }
       }
       if (useMap.has(to)) {

@@ -275,4 +275,20 @@ describe('parseNoirContract', () => {
     expect(graph.edges).to.deep.include({ from: 'main', to: 'helper::run', label: '' });
     mock.stop('vscode');
   });
+
+  it('resolves crate-prefixed imports', async () => {
+    const fs = require('fs');
+    const parserUtils = require('../src/parser/parserUtils');
+    const code = fs.readFileSync('examples/noir/crate_use.nr', 'utf8');
+    const graph = await parserUtils.parseContractWithImports(code, 'examples/noir/crate_use.nr', 'noir');
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::math::double', label: '' });
+  });
+
+  it('handles nested module declarations', async () => {
+    const fs = require('fs');
+    const parserUtils = require('../src/parser/parserUtils');
+    const code = fs.readFileSync('examples/noir/nested_mod.nr', 'utf8');
+    const graph = await parserUtils.parseContractWithImports(code, 'examples/noir/nested_mod.nr', 'noir');
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::math::double', label: '' });
+  });
 });

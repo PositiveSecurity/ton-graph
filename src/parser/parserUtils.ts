@@ -48,6 +48,8 @@ if (vscode.workspace && typeof vscode.workspace.onDidChangeTextDocument === 'fun
 function collectNoirImports(code: string): string[] {
     const { ast, tree } = parseNoir(code);
     const result: Set<string> = new Set();
+
+    // Traverse the syntax tree for `mod foo;` declarations
     const stack = [tree.rootNode];
     while (stack.length) {
         const node = stack.pop();
@@ -61,6 +63,14 @@ function collectNoirImports(code: string): string[] {
         }
         stack.push(...node.namedChildren);
     }
+
+    // Also detect nested module declarations like `mod a::b;`
+    const modMatches = code.matchAll(/(?:^|\s)(?:pub\s+)?mod\s+([A-Za-z_][\w:]*)\s*;/gm);
+    for (const m of modMatches) {
+        result.add(m[1]);
+    }
+
+    // Collect paths from `use` statements
     for (const u of ast.uses) {
         if (u.path.endsWith('::*')) {
             result.add(u.path.slice(0, -3));
@@ -70,6 +80,7 @@ function collectNoirImports(code: string): string[] {
             if (parts.length) result.add(parts.join('::'));
         }
     }
+
     return Array.from(result);
 }
 
@@ -400,8 +411,14 @@ export async function parseContractWithImports(
             const dir = path.dirname(resolved);
             let out = '';
             for (const imp of collectNoirImports(text)) {
-                const parts = imp.split('::');
-                const searchDirs = [dir, ...baseDirs];
+                let parts = imp.split('::');
+                let searchDirs = [dir, ...baseDirs];
+                if (parts[0] === 'crate') {
+                    parts = parts.slice(1);
+                    if (root) {
+                        searchDirs = [path.join(root, 'src'), ...searchDirs];
+                    }
+                }
                 for (const base of searchDirs) {
                     const cand1 = path.join(base, ...parts) + '.nr';
                     const cand2 = path.join(base, ...parts, 'mod.nr');

@@ -3,7 +3,7 @@
 [![codecov](https://codecov.io/gh/PositiveSecurity/ton-graph/branch/work/graph/badge.svg)](https://codecov.io/gh/PositiveSecurity/ton-graph)
 [![move](https://github.com/PositiveSecurity/ton-graph/actions/workflows/move.yml/badge.svg)](https://github.com/PositiveSecurity/ton-graph/actions/workflows/move.yml)
 
-A Visual Studio Code extension for visualizing function call graphs in smart contracts written in FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Soroban, Marlowe, TEAL, LIGO, Liquidity, Aiken, Leo, Glow, Huff, Bamboo, Sophia, Flint, Fe, Noir (import resolution and method parsing experimental), Reach, Rell, Rholang, Simplicity and Yul.
+A Visual Studio Code extension for visualizing function call graphs in smart contracts written in FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Soroban, Marlowe, TEAL, LIGO, Liquidity, Aiken, Leo, Glow, Huff, Bamboo, Sophia, Flint, Fe, Noir (parameters, grouped/wildcard imports and Nargo resolution), Reach, Rell, Rholang, Simplicity and Yul.
 
 Developed by [PositiveWeb3](https://www.positive.com) security researchers.
 
@@ -43,13 +43,29 @@ Developed by [PositiveWeb3](https://www.positive.com) security researchers.
   - Sophia (\*.aes)
   - Flint (\*.flint)
   - Fe (\*.fe)
-  - Noir (\*.nr, \*.noir) — full import resolution with nested modules and alias support. Nargo projects are detected automatically and modules are resolved relative to `<root>/src`, including local dependencies within the workspace.
+  - Noir (\*.nr, \*.noir) — detects function parameters, supports grouped and wildcard imports, and resolves modules across Nargo project layouts with nested modules and alias support. Modules are loaded relative to `<root>/src`, including local dependencies in the workspace.
   - Reach (\*.reach)
   - Rell (\*.rell)
   - Rholang (\*.rho)
   - Simplicity (\*.simp)
   - Yul (\*.yul)
-  - Support for Noir is powered by [tree-sitter-noir](https://github.com/noir-lang/tree-sitter-noir). Example contracts are available in `examples/noir`. The parser now handles nested modules, aliases and Nargo project layouts.
+  - Support for Noir is powered by [tree-sitter-noir](https://github.com/noir-lang/tree-sitter-noir). Example contracts are available in `examples/noir`. The parser detects parameters, resolves grouped and wildcard imports, and understands Nargo-style project layouts with nested modules and aliases.
+
+```noir
+# src/utils.nr
+pub fn inc(x: Field) -> Field { x + 1 }
+pub fn dec(x: Field) -> Field { x - 1 }
+
+# src/main.nr
+mod utils;
+use utils::{inc};
+use utils::*;
+
+fn main(x: Field) -> Field {
+    let y = inc(x);
+    dec(y)
+}
+```
 - Interactive diagram with cluster-based organization
 - Zoom functionality for better navigation
 - Filter functions by type (regular, impure, inline, method_id)
@@ -134,7 +150,7 @@ The extension analyzes your contract code to:
 4. Generate a visual representation using [Mermaid](https://mermaid.js.org/) diagrams
 5. Group related functions into clusters for better readability
 6. Multiple contracts support (for Tact)
-7. Language adapters parse FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Soroban, Marlowe, TEAL, LIGO, Liquidity, Aiken, Leo, Glow, Huff, Bamboo, Sophia, Flint, Fe, Noir (import resolution and method parsing experimental), Reach, Rell, Rholang, Simplicity and Yul
+7. Language adapters parse FunC, Tact, Tolk, Move, Cairo, Plutus, Cadence, Michelson, Clarity, Ink, Scilla, Pact, Scrypto, Soroban, Marlowe, TEAL, LIGO, Liquidity, Aiken, Leo, Glow, Huff, Bamboo, Sophia, Flint, Fe, Noir (parameters and grouped/wildcard imports with Nargo project resolution), Reach, Rell, Rholang, Simplicity and Yul
 
 <a href="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr04.jpg" target="_blank">
   <img src="https://raw.githubusercontent.com/PositiveSecurity/ton-graph/main/screenshots/scr04.jpg" width="400" alt="Multiple contracts support">
@@ -204,7 +220,7 @@ npm test
 npm test test/noirParser.test.ts
 ```
 
-The above command verifies parsing against the example files in `examples/noir`, including nested modules and alias resolution.
+The above command verifies parsing against the example files in `examples/noir`, exercising parameter detection, grouped and wildcard imports, and Nargo project resolution.
 
 The project enforces minimum coverage thresholds via `nyc`:
 

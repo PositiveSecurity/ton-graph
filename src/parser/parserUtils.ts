@@ -338,13 +338,23 @@ export async function parseContractWithImports(
     }
     if (language === 'noir') {
         const fs = await import('fs');
+        const fsp = fs.promises;
         const visited = new Set<string>();
 
-        function findRoot(start: string): string | null {
+        async function exists(p: string): Promise<boolean> {
+            try {
+                await fsp.access(p);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        async function findRoot(start: string): Promise<string | null> {
             let cur = start;
             while (true) {
                 const p = path.join(cur, 'Nargo.toml');
-                if (fs.existsSync(p)) return cur;
+                if (await exists(p)) return cur;
                 const parent = path.dirname(cur);
                 if (parent === cur) break;
                 cur = parent;
@@ -352,13 +362,13 @@ export async function parseContractWithImports(
             return null;
         }
 
-        const root = findRoot(path.dirname(filePath));
+        const root = await findRoot(path.dirname(filePath));
         const baseDirs: string[] = [];
         if (root) {
             baseDirs.push(path.join(root, 'src'));
             const tomlPath = path.join(root, 'Nargo.toml');
             try {
-                const text = fs.readFileSync(tomlPath, 'utf8');
+                const text = await fsp.readFile(tomlPath, 'utf8');
                 const parsed = toml.parse(text);
                 const deps = parsed.dependencies || {};
                 for (const key of Object.keys(deps)) {
@@ -379,10 +389,14 @@ export async function parseContractWithImports(
         async function load(file: string): Promise<string> {
             const resolved = path.resolve(file);
             if (visited.has(resolved)) return '';
-            if (!fs.existsSync(resolved)) return '';
+            if (!(await exists(resolved))) return '';
             visited.add(resolved);
             let text = '';
-            try { text = fs.readFileSync(resolved, 'utf8'); } catch { return ''; }
+            try {
+                text = await fsp.readFile(resolved, 'utf8');
+            } catch {
+                return '';
+            }
             const dir = path.dirname(resolved);
             let out = '';
             for (const imp of collectNoirImports(text)) {
@@ -391,10 +405,10 @@ export async function parseContractWithImports(
                 for (const base of searchDirs) {
                     const cand1 = path.join(base, ...parts) + '.nr';
                     const cand2 = path.join(base, ...parts, 'mod.nr');
-                    if (fs.existsSync(cand1) && isPathInsideWorkspace(cand1)) {
+                    if (await exists(cand1) && isPathInsideWorkspace(cand1)) {
                         out += await load(cand1);
                         break;
-                    } else if (fs.existsSync(cand2) && isPathInsideWorkspace(cand2)) {
+                    } else if (await exists(cand2) && isPathInsideWorkspace(cand2)) {
                         out += await load(cand2);
                         break;
                     }

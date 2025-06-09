@@ -33,6 +33,7 @@ import { parseRellContract } from '../languages/rell';
 import { parseRholangContract } from '../languages/rholang';
 import { parseMarloweContract } from '../languages/marlowe';
 import { parseYulContract } from '../languages/yul';
+import Parser from 'tree-sitter';
 import * as vscode from 'vscode';
 import * as toml from 'toml';
 import logger from '../logging/logger';

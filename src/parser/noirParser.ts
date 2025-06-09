@@ -171,9 +171,10 @@ export function noirAstToGraph(ast: NoirAST): ContractGraph {
   });
 
   for (const f of ast.functions) {
+    const funcParts = f.name.split("::");
     const node: ContractNode = {
       id: f.name,
-      label: `${f.name}()`,
+      label: `${funcParts[funcParts.length - 1]}()`,
       type: GraphNodeKind.Function,
       contractName: f.moduleName || "Contract",
       parameters: f.params || [],
@@ -227,11 +228,13 @@ export function noirAstToGraph(ast: NoirAST): ContractGraph {
       if (!edgeSet.has(key)) {
         edgeSet.add(key);
         if (!funcMap.has(to)) {
+          const parts = to.split("::");
+          const funcName = parts.pop() || to;
           graph.nodes.push({
             id: to,
-            label: `${to}()`,
+            label: `${funcName}()`,
             type: GraphNodeKind.Function,
-            contractName: "Contract",
+            contractName: parts.join("::") || "Contract",
           });
           funcMap.set(to, graph.nodes[graph.nodes.length - 1]);
         }

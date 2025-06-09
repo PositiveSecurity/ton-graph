@@ -79,11 +79,11 @@ export function parseMove(code: string): { ast: MoveAST; tree: Parser.Tree } {
     if (body) {
       for (const child of body.namedChildren) {
         if (child.type === "use_declaration") {
-          const pathNode = child.namedChildren.find((c) => c.type === "path");
+          const pathNode = child.namedChildren.find((c: Parser.SyntaxNode) => c.type === "path");
           if (!pathNode) continue;
-          const aliasNode = child.namedChildren.find((c) => c.type === "alias");
+          const aliasNode = child.namedChildren.find((c: Parser.SyntaxNode) => c.type === "alias");
           const items = child.namedChildren.filter(
-            (c) => c.type === "use_item",
+            (c: Parser.SyntaxNode) => c.type === "use_item",
           );
           if (items.length === 0) {
             const path = pathNode.text;
@@ -92,9 +92,9 @@ export function parseMove(code: string): { ast: MoveAST; tree: Parser.Tree } {
           } else {
             for (const it of items) {
               const itemAlias = it.namedChildren.find(
-                (c) => c.type === "alias",
+                (c: Parser.SyntaxNode) => c.type === "alias",
               );
-              const itemPath = it.namedChildren.find((c) => c.type === "path");
+              const itemPath = it.namedChildren.find((c: Parser.SyntaxNode) => c.type === "path");
               const name = itemPath ? itemPath.text : it.text;
               const alias = itemAlias
                 ? itemAlias.text
@@ -195,7 +195,7 @@ export async function parseMoveContract(code: string): Promise<ContractGraph> {
       for (const call of calls) {
         const access =
           call.namedChildren[0]?.namedChildren?.find(
-            (c: any) => c.fieldName === "access",
+            (c: Parser.SyntaxNode) => c.fieldName === "access",
           ) || call.childForFieldName("access");
         let path = access ? access.text : "";
         if (!path) continue;

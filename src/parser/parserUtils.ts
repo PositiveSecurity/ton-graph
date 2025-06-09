@@ -68,9 +68,9 @@ function collectNoirImports(code: string): string[] {
         const node = stack.pop();
         if (!node) continue;
         if (node.type === 'module') {
-            const body = node.namedChildren.find(c => c.type === 'body');
+            const body = node.namedChildren.find((c: Parser.SyntaxNode) => c.type === 'body');
             if (!body) {
-                const id = node.namedChildren.find(c => c.type === 'identifier');
+                const id = node.namedChildren.find((c: Parser.SyntaxNode) => c.type === 'identifier');
                 if (id) result.add(id.text);
             }
         }

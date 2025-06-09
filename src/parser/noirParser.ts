@@ -52,21 +52,21 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
   const uses: NoirUse[] = [];
   const fnNodes = walk(tree.rootNode, "function_definition");
   for (const fn of fnNodes) {
-    const idNode = fn.namedChildren.find((c) => c.type === "identifier");
-    const bodyNode = fn.namedChildren.find((c) => c.type === "body");
-    const paramNode = fn.namedChildren.find((c) => c.type === "parameter");
+    const idNode = fn.namedChildren.find((c: Parser.SyntaxNode) => c.type === "identifier");
+    const bodyNode = fn.namedChildren.find((c: Parser.SyntaxNode) => c.type === "body");
+    const paramNode = fn.namedChildren.find((c: Parser.SyntaxNode) => c.type === "parameter");
     if (idNode) {
       const modulePath: string[] = [];
       let structName: string | null = null;
       let parent: Parser.SyntaxNode | null = fn.parent;
       while (parent) {
         if (parent.type === "struct_method" && !structName) {
-          const structId = parent.namedChildren.find((c) => c.type === "identifier");
+          const structId = parent.namedChildren.find((c: Parser.SyntaxNode) => c.type === "identifier");
           if (structId) {
             structName = structId.text;
           }
         } else if (parent.type === "module") {
-          const modId = parent.namedChildren.find((c) => c.type === "identifier");
+          const modId = parent.namedChildren.find((c: Parser.SyntaxNode) => c.type === "identifier");
           if (modId) {
             modulePath.unshift(modId.text);
           }
@@ -87,7 +87,7 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
           } else if (p.type === "self_method") {
             params.push("self");
           } else if (p.type === "as_identifier") {
-            const id = p.namedChildren.find(c => c.type === "identifier");
+            const id = p.namedChildren.find((c: Parser.SyntaxNode) => c.type === "identifier");
             if (id) params.push(id.text);
           }
         }
@@ -105,8 +105,8 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
 
   const moduleNodes = walk(tree.rootNode, "module");
   for (const m of moduleNodes) {
-    const idNode = m.namedChildren.find((c) => c.type === "identifier");
-    const bodyNode = m.namedChildren.find((c) => c.type === "body");
+    const idNode = m.namedChildren.find((c: Parser.SyntaxNode) => c.type === "identifier");
+    const bodyNode = m.namedChildren.find((c: Parser.SyntaxNode) => c.type === "body");
     if (idNode) {
       modules.push({ name: idNode.text, body: bodyNode });
     }
@@ -127,7 +127,7 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
         const base = g[1].trim();
         const items = g[2]
           .split(',')
-          .map(s => s.trim())
+          .map((s: string) => s.trim())
           .filter(Boolean);
         for (const it of items) {
           if (it === '*') {
@@ -189,7 +189,7 @@ export function noirAstToGraph(ast: NoirAST): ContractGraph {
     for (const call of calls) {
       const funcNode =
         call.childForFieldName("function") ||
-        call.namedChildren.find((c) => c.type !== "arguments");
+        call.namedChildren.find((c: Parser.SyntaxNode) => c.type !== "arguments");
       if (!funcNode) continue;
       let to = funcNode.text.trim();
       to = to.replace(/^self\./, "");

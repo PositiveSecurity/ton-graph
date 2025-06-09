@@ -3,39 +3,34 @@ import { createVisualizationPanel, generateMermaidDiagram } from './visualizatio
 import { handleExport } from './export/exportHandler';
 import { ContractGraph } from './types/graph';
 import { detectLanguage, parseContractByLanguage, getFunctionTypeFilters, parseContractWithImports } from './parser/parserUtils';
-import { logger } from './logger';
 
 export function activate(context: vscode.ExtensionContext) {
-    logger.info('TON Graph extension is now active');
+    console.log('TON Graph extension is now active');
 
     // Create the cached directory for storing the Mermaid library
     const cachedDir = vscode.Uri.joinPath(context.extensionUri, 'cached');
     try {
         vscode.workspace.fs.createDirectory(cachedDir);
-        logger.info('Cached directory created/verified');
+        console.log('Cached directory created/verified');
     } catch (err) {
         // Directory might already exist, that's fine
-        logger.info('Note: Cached directory may already exist');
+        console.log('Note: Cached directory may already exist');
     }
 
     let disposable = vscode.commands.registerCommand('ton-graph.visualize', async (fileUri?: vscode.Uri) => {
         let document: vscode.TextDocument;
         let code: string;
-        const source = fileUri ? 'explorer' : 'editor';
-        logger.info(`Command visualize triggered from ${source}`);
 
         // If invoked from explorer context menu, fileUri will be provided
         if (fileUri) {
             try {
-                logger.info(`Reading file ${fileUri.fsPath}`);
+                // Read the file contents
                 const fileData = await vscode.workspace.fs.readFile(fileUri);
                 code = Buffer.from(fileData).toString('utf8');
 
                 // Open the document to get the language mode correctly set
                 document = await vscode.workspace.openTextDocument(fileUri);
-                logger.info(`Opened document ${document.uri.fsPath}`);
             } catch (error: any) {
-                logger.error(`Could not read file: ${error.message || String(error)}`, fileUri);
                 vscode.window.showErrorMessage(`Could not read file: ${error.message || String(error)}`);
                 return;
             }
@@ -43,34 +38,29 @@ export function activate(context: vscode.ExtensionContext) {
             // Invoked from editor context menu
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
-                logger.error('No active editor found');
                 vscode.window.showErrorMessage('No active editor found');
                 return;
             }
             document = editor.document;
-            logger.info(`Using active editor document ${document.uri.fsPath}`);
             code = document.getText();
         }
 
         let originalGraph: ContractGraph | null = null; // Store the original graph
-        
+
         try {
             // Detect language and use appropriate parser
             const language = detectLanguage(document.fileName);
-            logger.info(`Detected language ${language} for ${document.fileName}`);
             originalGraph = await parseContractByLanguage(code, language);
-            logger.info('Contract parsed successfully');
 
             // Create and show the webview with language-specific function type filters
             const panel = createVisualizationPanel(context, originalGraph, getFunctionTypeFilters(language));
-            logger.info('Visualization panel created');
 
             // Handle messages from the webview
             panel.webview.onDidReceiveMessage(
                 async (message) => {
                     if (message.command === 'applyFilters') {
                         if (!originalGraph) {
-                            logger.error('Original graph data not available for filtering.', document.uri);
+                            console.error('Original graph data not available for filtering.');
                             vscode.window.showErrorMessage('Cannot apply filters: original graph data is missing.');
                             return;
                         }
@@ -148,7 +138,7 @@ export function activate(context: vscode.ExtensionContext) {
                             });
 
                         } catch (filterError: any) {
-                            logger.error(`Error applying filters: ${filterError.message || String(filterError)}`, document.uri);
+                            console.error('Error applying filters:', filterError);
                             vscode.window.showErrorMessage(`Error applying filters: ${filterError.message || String(filterError)}`);
                             // Send error message back to WebView
                             panel.webview.postMessage({
@@ -168,7 +158,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             panel.reveal(vscode.ViewColumn.Beside);
         } catch (error: any) {
-            logger.error(`Error visualizing contract: ${error.message || String(error)}`, document.uri);
+            console.error('Error visualizing contract:', error);
             vscode.window.showErrorMessage(`Error visualizing contract: ${error.message || String(error)}`);
             originalGraph = null; // Reset on error
         }
@@ -181,21 +171,18 @@ export function activate(context: vscode.ExtensionContext) {
         let document: vscode.TextDocument;
         let code: string;
         let filePath: string;
-        const source = fileUri ? 'explorer' : 'editor';
-        logger.info(`Command visualizeProject triggered from ${source}`);
 
         // If invoked from explorer context menu, fileUri will be provided
         if (fileUri) {
             try {
-                logger.info(`Reading file ${fileUri.fsPath}`);
+                // Read the file contents
                 const fileData = await vscode.workspace.fs.readFile(fileUri);
                 code = Buffer.from(fileData).toString('utf8');
                 filePath = fileUri.fsPath;
 
+                // Open the document to get the language mode correctly set
                 document = await vscode.workspace.openTextDocument(fileUri);
-                logger.info(`Opened document ${document.uri.fsPath}`);
             } catch (error: any) {
-                logger.error(`Could not read file: ${error.message || String(error)}`, fileUri);
                 vscode.window.showErrorMessage(`Could not read file: ${error.message || String(error)}`);
                 return;
             }
@@ -203,12 +190,10 @@ export function activate(context: vscode.ExtensionContext) {
             // Invoked from editor context menu
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
-                logger.error('No active editor found');
                 vscode.window.showErrorMessage('No active editor found');
                 return;
             }
             document = editor.document;
-            logger.info(`Using active editor document ${document.uri.fsPath}`);
             code = document.getText();
             filePath = document.uri.fsPath;
         }
@@ -224,21 +209,16 @@ export function activate(context: vscode.ExtensionContext) {
 
                 // Detect language
                 const language = detectLanguage(filePath);
-                logger.info(`Detected language ${language} for ${filePath}`);
 
                 progress.report({ increment: 30, message: "Processing imports..." });
-                logger.info('Processing imports');
 
                 // Parse contract with imports
                 let originalGraph = await parseContractWithImports(code, filePath, language);
-                logger.info('Contract with imports parsed');
 
                 progress.report({ increment: 30, message: "Generating visualization..." });
-                logger.info('Generating visualization');
 
                 // Create and show the webview
                 const panel = createVisualizationPanel(context, originalGraph, getFunctionTypeFilters(language), "Contract Project Visualization");
-                logger.info('Visualization panel created for project');
 
                 // Handle messages from the webview (same as in visualize command)
                 panel.webview.onDidReceiveMessage(
@@ -318,7 +298,7 @@ export function activate(context: vscode.ExtensionContext) {
                                 });
 
                             } catch (filterError: any) {
-                                logger.error(`Error applying filters: ${filterError.message || String(filterError)}`, document.uri);
+                                console.error('Error applying filters:', filterError);
                                 vscode.window.showErrorMessage(`Error applying filters: ${filterError.message || String(filterError)}`);
                                 panel.webview.postMessage({
                                     command: 'filterError',
@@ -338,7 +318,7 @@ export function activate(context: vscode.ExtensionContext) {
                 panel.reveal(vscode.ViewColumn.Beside);
             });
         } catch (error: any) {
-            logger.error(`Error visualizing contract project: ${error.message || String(error)}`, document.uri);
+            console.error('Error visualizing contract project:', error);
             vscode.window.showErrorMessage(`Error visualizing contract project: ${error.message || String(error)}`);
         }
     });
@@ -346,7 +326,4 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(projectDisposable);
 }
 
-export function deactivate() {
-    logger.info('TON Graph extension deactivated');
-    logger.clear();
-}
+export function deactivate() { }

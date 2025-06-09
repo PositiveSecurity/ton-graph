@@ -120,6 +120,7 @@ export function parseMove(code: string): { ast: MoveAST; tree: Parser.Tree } {
                 isPublic = true;
                 for (let i = 0; i < sc.childCount; i++) {
                   const ch = sc.child(i);
+                  if (!ch) continue;
                   const txt = ch.text;
                   if (txt === "friend") {
                     isFriend = true;
@@ -195,7 +196,7 @@ export async function parseMoveContract(code: string): Promise<ContractGraph> {
       for (const call of calls) {
         const access =
           call.namedChildren[0]?.namedChildren?.find(
-            (c: Parser.SyntaxNode) => c.fieldName === "access",
+            (c: any) => c.fieldName === "access",
           ) || call.childForFieldName("access");
         let path = access ? access.text : "";
         if (!path) continue;

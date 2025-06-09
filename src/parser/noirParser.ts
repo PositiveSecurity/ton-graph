@@ -11,6 +11,7 @@ export interface NoirFunction {
   startPosition: Parser.Point;
   endPosition: Parser.Point;
   params: string[];
+  isPublic?: boolean;
 }
 
 export interface NoirModule {
@@ -92,6 +93,8 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
           }
         }
       }
+      const pre = code.slice(Math.max(0, fn.startIndex - 4), fn.startIndex);
+      const isPublic = /\bpub\s*$/.test(pre);
       functions.push({
         name: prefix + idNode.text,
         moduleName: modulePath.join("::") || undefined,
@@ -99,6 +102,7 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
         startPosition: fn.startPosition,
         endPosition: fn.endPosition,
         params,
+        isPublic,
       });
     }
   }
@@ -173,7 +177,7 @@ export function noirAstToGraph(ast: NoirAST): ContractGraph {
       type: GraphNodeKind.Function,
       contractName: f.moduleName || "Contract",
       parameters: f.params || [],
-      functionType: "regular",
+      functionType: f.isPublic ? "public" : "regular",
     };
     graph.nodes.push(node);
     funcMap.set(f.name, node);

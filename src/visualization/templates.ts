@@ -1,3 +1,5 @@
+import { logger } from '../logger';
+
 export function generateVisualizationHtml(mermaidDiagram: string, mermaidScriptUri: string, functionTypeFilters: { value: string; label: string; }[]): string {
     // Create JSON string for filter set
     const filtersJson = JSON.stringify(functionTypeFilters);
@@ -1121,17 +1123,17 @@ function decodeHtmlEntities(text: string): string {
 // Function to filter the Mermaid diagram based on selected types
 export function filterMermaidDiagram(diagram: string, selectedTypes: string[], nameFilter?: string): string {
     // Log parameters for debugging
-    console.log("filterMermaidDiagram called with types:", selectedTypes);
-    console.log("nameFilter:", nameFilter);
+    logger.info(`filterMermaidDiagram called with types: ${selectedTypes.join(', ')}`);
+    logger.info(`nameFilter: ${nameFilter}`);
 
     // Extra guard for undefined parameters
     if (!selectedTypes || selectedTypes.length === 0) {
-        console.error("selectedTypes is empty or undefined, using default");
+        logger.error("selectedTypes is empty or undefined, using default");
         selectedTypes = ['impure', 'inline', 'method_id', 'regular'];
     }
 
     if (!diagram) {
-        console.error("diagram is empty or undefined");
+        logger.error("diagram is empty or undefined");
         return diagram || "";
     }
 
@@ -1148,12 +1150,12 @@ export function filterMermaidDiagram(diagram: string, selectedTypes: string[], n
         );
 
         if (graphDefLineIndex === -1) {
-            console.error("Could not find graph definition directive");
+            logger.error("Could not find graph definition directive");
             return diagram;
         }
 
         const graphDefinition = lines[graphDefLineIndex];
-        console.log(`Found graph definition: ${graphDefinition} `);
+        logger.info(`Found graph definition: ${graphDefinition} `);
 
         // If no name filter, just filter by type (simple filtering)
         if (!nameFilter || nameFilter.trim().length === 0) {
@@ -1173,7 +1175,7 @@ export function filterMermaidDiagram(diagram: string, selectedTypes: string[], n
                 // Skip any additional graph definition lines 
                 if (trimmedLine.startsWith('graph ') || trimmedLine.startsWith('flowchart ')) {
                     // Removing this console.log: 
-                    // console.log(`Skipping duplicate graph definition at line ${ i }: ${ trimmedLine } `);
+                    // logger.info(`Skipping duplicate graph definition at line ${ i }: ${ trimmedLine } `);
                     continue;
                 }
 
@@ -1236,7 +1238,7 @@ export function filterMermaidDiagram(diagram: string, selectedTypes: string[], n
 
             // Skip any duplicate graph definition lines
             if (trimmedLine.startsWith('graph ') || trimmedLine.startsWith('flowchart ')) {
-                console.log(`Skipping duplicate graph definition at line ${i}: ${trimmedLine} `);
+                logger.info(`Skipping duplicate graph definition at line ${i}: ${trimmedLine} `);
                 continue;
             }
 
@@ -1269,7 +1271,7 @@ export function filterMermaidDiagram(diagram: string, selectedTypes: string[], n
                 }
 
                 if (!nodeId) {
-                    console.log(`Could not extract node ID from line: ${line} `);
+                    logger.info(`Could not extract node ID from line: ${line} `);
                     continue;
                 }
 
@@ -1288,13 +1290,13 @@ export function filterMermaidDiagram(diagram: string, selectedTypes: string[], n
                 const nodeLabel = labelMatch ? labelMatch[1] : nodeId;
                 nodeLabels.set(nodeId, nodeLabel);
 
-                console.log(`Node: ID = ${nodeId}, BaseID = ${baseNodeId}, Label = ${nodeLabel}, Cluster = ${currentCluster} `);
+                logger.info(`Node: ID = ${nodeId}, BaseID = ${baseNodeId}, Label = ${nodeLabel}, Cluster = ${currentCluster} `);
 
                 // Check if node should be hidden based on type
                 const nodeType = getNodeType(nodeId);
                 if (nodeType && !selectedTypes.includes(nodeType)) {
                     hiddenNodes.add(nodeId);
-                    console.log(`Hiding node by type: ${nodeId} (${nodeType})`);
+                    logger.info(`Hiding node by type: ${nodeId} (${nodeType})`);
                 }
             }
 
@@ -1334,7 +1336,7 @@ export function filterMermaidDiagram(diagram: string, selectedTypes: string[], n
                     }
                     edgeConnections.get(to)?.add(from);
 
-                    console.log(`Edge: ${from} <--> ${to} `);
+                    logger.info(`Edge: ${from} <--> ${to} `);
                 }
             }
         }
@@ -1344,7 +1346,7 @@ export function filterMermaidDiagram(diagram: string, selectedTypes: string[], n
         const directMatches = new Set<string>();
 
         // First check for matches by label
-        console.log("Searching for matches by label...");
+        logger.info("Searching for matches by label...");
         for (const [nodeId, nodeLabel] of nodeLabels.entries()) {
             // Skip nodes already hidden by type filter
             if (hiddenNodes.has(nodeId)) continue;
@@ -1353,47 +1355,47 @@ export function filterMermaidDiagram(diagram: string, selectedTypes: string[], n
             if (nodeLabel.toLowerCase().includes(lowerFilter)) {
                 directMatches.add(nodeId);
                 visibleNodes.add(nodeId);
-                console.log(`Node label matched filter: ${nodeLabel} (ID: ${nodeId})`);
+                logger.info(`Node label matched filter: ${nodeLabel} (ID: ${nodeId})`);
             }
         }
 
         // If no label matches, try matching by node ID as fallback
         if (directMatches.size === 0) {
-            console.log("No label matches found, trying node ID fallback");
+            logger.info("No label matches found, trying node ID fallback");
             for (const [baseNodeId, fullNodeId] of allNodeIds.entries()) {
                 if (hiddenNodes.has(fullNodeId)) continue;
 
                 if (baseNodeId.toLowerCase().includes(lowerFilter)) {
                     directMatches.add(fullNodeId);
                     visibleNodes.add(fullNodeId);
-                    console.log(`Node ID matched filter: ${fullNodeId} (Base: ${baseNodeId})`);
+                    logger.info(`Node ID matched filter: ${fullNodeId} (Base: ${baseNodeId})`);
                 }
             }
         }
 
-        console.log(`Found ${directMatches.size} directly matching nodes: ${Array.from(directMatches).join(', ')} `);
+        logger.info(`Found ${directMatches.size} directly matching nodes: ${Array.from(directMatches).join(', ')} `);
 
         //=== Add directly connected nodes ===//
-        console.log("Adding direct neighbors...");
+        logger.info("Adding direct neighbors...");
         for (const matchingNodeId of directMatches) {
-            console.log(`Finding neighbors for: ${matchingNodeId} `);
+            logger.info(`Finding neighbors for: ${matchingNodeId} `);
 
             // Get all connected nodes for this match
             const connectedIds = edgeConnections.get(matchingNodeId) || new Set<string>();
-            console.log(`Found ${connectedIds.size} connections for ${matchingNodeId}`);
+            logger.info(`Found ${connectedIds.size} connections for ${matchingNodeId}`);
 
             // Add each connected node if not hidden by type
             for (const connectedId of connectedIds) {
                 if (!hiddenNodes.has(connectedId)) {
-                    console.log(`Adding connected node: ${connectedId} -> ${nodeLabels.get(connectedId) || connectedId} `);
+                    logger.info(`Adding connected node: ${connectedId} -> ${nodeLabels.get(connectedId) || connectedId} `);
                     visibleNodes.add(connectedId);
                 } else {
-                    console.log(`Skip connected node(hidden by type): ${connectedId} `);
+                    logger.info(`Skip connected node(hidden by type): ${connectedId} `);
                 }
             }
         }
 
-        console.log(`After adding connections, total visible: ${visibleNodes.size} `);
+        logger.info(`After adding connections, total visible: ${visibleNodes.size} `);
 
         //=== Rebuild the diagram ===//
         // Start fresh with only the graph definition
@@ -1458,7 +1460,7 @@ export function filterMermaidDiagram(diagram: string, selectedTypes: string[], n
                         if (nodeLine) {
                             newDiagram.push(nodeLine);
                         } else {
-                            console.log(`Warning: Could not find definition for node: ${nodeId} `);
+                            logger.info(`Warning: Could not find definition for node: ${nodeId} `);
                         }
                     }
 
@@ -1541,12 +1543,12 @@ export function filterMermaidDiagram(diagram: string, selectedTypes: string[], n
         // Join and validate the final diagram
         const result = newDiagram.join('\\n');
         // Removing this console.log:
-        // console.log(`Reconstructed diagram with ${ newDiagram.length } lines`);
+        // logger.info(`Reconstructed diagram with ${ newDiagram.length } lines`);
 
         return validateAndFixDiagram(result);
     }
     catch (error) {
-        console.error("Error in filterMermaidDiagram:", error);
+        logger.error("Error in filterMermaidDiagram:", error);
         return diagram; // Return original on error
     }
 }
@@ -1568,7 +1570,7 @@ function validateAndFixDiagram(diagramCode: string): string {
                     cleanedLines.push(lines[i]); // Keep original whitespace
                     graphDirectiveFound = true;
                 } else {
-                    console.log(`Removing duplicate graph directive at line ${i + 1}: ${line} `);
+                    logger.info(`Removing duplicate graph directive at line ${i + 1}: ${line} `);
                 }
                 continue;
             }
@@ -1586,7 +1588,7 @@ function validateAndFixDiagram(diagramCode: string): string {
                 const fixedLine = lines[i].replace(/graph\s+(TB|LR|RL|BT|TD);?/g, '').trim();
                 if (fixedLine) {
                     cleanedLines.push(fixedLine);
-                    console.log(`Fixed problematic line ${i + 1}: Removed graph directive from "${line}" -> "${fixedLine}"`);
+                    logger.info(`Fixed problematic line ${i + 1}: Removed graph directive from "${line}" -> "${fixedLine}"`);
                 }
             } else {
                 cleanedLines.push(lines[i]); // Keep original line with whitespace
@@ -1596,12 +1598,12 @@ function validateAndFixDiagram(diagramCode: string): string {
         // Ensure we have a graph directive
         if (!graphDirectiveFound) {
             cleanedLines.unshift('graph TB;');
-            console.log('Added missing graph directive');
+            logger.info('Added missing graph directive');
         }
 
         return cleanedLines.join('\\n');
     } catch (error) {
-        console.error("Error in validateAndFixDiagram:", error);
+        logger.error("Error in validateAndFixDiagram:", error);
         return diagramCode; // Return original on validation error
     }
 }

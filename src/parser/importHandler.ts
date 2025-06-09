@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
+import { logger } from '../logger';
 
 /**
  * Processes import statements in FunC code (#include)
@@ -39,10 +40,10 @@ export async function processFuncImports(
                 importedCode.push(nestedImports.importedCode);
                 importedFilePaths.push(...nestedImports.importedFilePaths);
             } else {
-                console.warn(`Included file not found: ${fullPath}`);
+                logger.error(`Included file not found: ${fullPath}`);
             }
         } catch (error) {
-            console.error(`Error processing import ${fullPath}:`, error);
+            logger.error(`Error processing import ${fullPath}: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 
@@ -85,7 +86,7 @@ export async function processTactImports(
                 fullPath = packagePath;
                 // Could further resolve subpaths here
             } else {
-                console.warn(`Package not found: ${packageName}`);
+                logger.error(`Package not found: ${packageName}`);
                 continue;
             }
         } else {
@@ -113,10 +114,10 @@ export async function processTactImports(
                 importedCode.push(nestedImports.importedCode);
                 importedFilePaths.push(...nestedImports.importedFilePaths);
             } else {
-                console.warn(`Imported file not found: ${fullPath}`);
+                logger.error(`Imported file not found: ${fullPath}`);
             }
         } catch (error) {
-            console.error(`Error processing import ${fullPath}:`, error);
+            logger.error(`Error processing import ${fullPath}: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 
@@ -159,7 +160,7 @@ export async function processTolkImports(
                 fullPath = packagePath;
                 // Could further resolve subpaths here
             } else {
-                console.warn(`Package not found: ${packageName}`);
+                logger.error(`Package not found: ${packageName}`);
                 continue;
             }
         } else {
@@ -187,10 +188,10 @@ export async function processTolkImports(
                 importedCode.push(nestedImports.importedCode);
                 importedFilePaths.push(...nestedImports.importedFilePaths);
             } else {
-                console.warn(`Imported file not found: ${fullPath}`);
+                logger.error(`Imported file not found: ${fullPath}`);
             }
         } catch (error) {
-            console.error(`Error processing import ${fullPath}:`, error);
+            logger.error(`Error processing import ${fullPath}: ${error instanceof Error ? error.message : String(error)}`);
         }
     }
 

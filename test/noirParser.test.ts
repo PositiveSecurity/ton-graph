@@ -28,6 +28,18 @@ describe('parseNoirContract', () => {
     expect(addNode?.parameters).to.deep.equal(['x', 'y']);
   });
 
+  it('detects public and regular functions', () => {
+    const code = [
+      'pub fn visible() {}',
+      'fn hidden() {}',
+    ].join('\n');
+    const graph = parseNoirContract(code);
+    const pubNode = graph.nodes.find(n => n.id === 'visible');
+    const regNode = graph.nodes.find(n => n.id === 'hidden');
+    expect(pubNode?.functionType).to.equal('public');
+    expect(regNode?.functionType).to.equal('regular');
+  });
+
   it('parses generic functions with nested control flow', () => {
     const code = [
       'fn inner<T>(x: T) {}',

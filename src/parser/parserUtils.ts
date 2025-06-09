@@ -520,6 +520,12 @@ export function getFunctionTypeFilters(language: ContractLanguage): { value: str
         case 'sophia':
         case 'marlowe':
         case 'yul':
+            if (language === 'noir') {
+                return [
+                    { value: 'regular', label: 'Regular' },
+                    { value: 'public', label: 'Public' }
+                ];
+            }
             return [
                 { value: 'regular', label: 'Regular' }
             ];

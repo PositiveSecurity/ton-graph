@@ -124,6 +124,8 @@ describe('Parser', () => {
         const moveFilters = getFunctionTypeFilters('move').map(f => f.value);
         expect(moveFilters).to.include('entry');
         expect(moveFilters).to.include('script');
+        const noirFilters = getFunctionTypeFilters('noir').map(f => f.value);
+        expect(noirFilters).to.include('public');
     });
 
     it('parses contract with imports', async () => {

@@ -5,6 +5,7 @@ import { ContractGraph } from '../types/graph';
 import { detectLanguage, parseContractByLanguage, getFunctionTypeFilters } from '../parser/parserUtils';
 import logger from '../logging/logger';
 import { applyFilters } from './filterUtils';
+import { reportDiagnostic, clearDiagnostics } from '../logging/diagnostics';
 
 let panel: vscode.WebviewPanel | undefined;
 
@@ -20,15 +21,18 @@ export async function visualize(context: vscode.ExtensionContext, fileUri?: vsco
             code = Buffer.from(fileData).toString('utf8');
             document = await vscode.workspace.openTextDocument(fileUri);
         } catch (error: any) {
-            vscode.window.showErrorMessage(`Could not read file: ${error.message || String(error)}`);
+            const msg = `Could not read file: ${error.message || String(error)}`;
+            vscode.window.showErrorMessage(msg);
             logger.error('Failed to read file', error);
+            reportDiagnostic(fileUri, msg);
             return;
         }
     } else {
         const editor = vscode.window.activeTextEditor;
         if (!editor) {
-            vscode.window.showErrorMessage('No active editor found');
-            logger.error('No active editor found');
+            const msg = 'No active editor found';
+            vscode.window.showErrorMessage(msg);
+            logger.error(msg);
             return;
         }
         document = editor.document;
@@ -42,6 +46,7 @@ export async function visualize(context: vscode.ExtensionContext, fileUri?: vsco
         logger.debug(`Detected language ${language}`);
         originalGraph = await parseContractByLanguage(code, language, document.uri);
         logger.debug('Parsed contract to graph');
+        clearDiagnostics(document.uri);
 
         if (panel) {
             panel.dispose();
@@ -81,7 +86,9 @@ export async function visualize(context: vscode.ExtensionContext, fileUri?: vsco
         logger.info('visualize command completed successfully');
     } catch (error: any) {
         logger.error('Error visualizing contract', error);
-        vscode.window.showErrorMessage(`Error visualizing contract: ${error.message || String(error)}`);
+        const msg = error.message || String(error);
+        vscode.window.showErrorMessage(`Error visualizing contract: ${msg}`);
+        reportDiagnostic(document.uri, msg);
         originalGraph = null;
     }
 }

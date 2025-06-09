@@ -265,3 +265,4 @@ We welcome your feedback and contributions to improve this extension!
 ## License
 
 [MIT](LICENSE)
+

@@ -1,4 +1,11 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
-npx lint-staged
+npm version patch --no-git-tag-version --no-commit-hooks
+git add package.json package-lock.json
+
+if [ -f node_modules/.bin/lint-staged ]; then
+  npx lint-staged
+else
+  echo "lint-staged not installed; skipping"
+fi

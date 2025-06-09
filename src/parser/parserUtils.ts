@@ -43,6 +43,18 @@ const noirFileCache = new Map<string, string>();
 if (vscode.workspace && typeof vscode.workspace.onDidChangeTextDocument === 'function') {
     vscode.workspace.onDidChangeTextDocument(e => {
         parseCache.delete(`${e.document.uri.toString()}-${detectLanguage(e.document.fileName)}`);
+        const abs = path.resolve(e.document.uri.fsPath);
+        noirFileCache.delete(abs);
+    });
+}
+
+if (vscode.workspace && typeof vscode.workspace.onDidDeleteFiles === 'function') {
+    vscode.workspace.onDidDeleteFiles(e => {
+        for (const file of e.files) {
+            parseCache.delete(`${file.toString()}-${detectLanguage(file.fsPath)}`);
+            const abs = path.resolve(file.fsPath);
+            noirFileCache.delete(abs);
+        }
     });
 }
 

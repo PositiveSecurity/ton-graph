@@ -2,10 +2,17 @@ import * as vscode from 'vscode';
 
 export const diagnosticCollection = vscode.languages.createDiagnosticCollection('ton-graph');
 
-export function reportDiagnostic(uri: vscode.Uri, message: string, line = 0, column = 0): void {
+export function reportDiagnostic(
+  uri: vscode.Uri,
+  message: string,
+  line = 0,
+  column = 0,
+  severity: vscode.DiagnosticSeverity = vscode.DiagnosticSeverity.Error
+): void {
   const range = new vscode.Range(line, column, line, column + 1);
-  const diagnostic = new vscode.Diagnostic(range, message, vscode.DiagnosticSeverity.Error);
-  diagnosticCollection.set(uri, [diagnostic]);
+  const diagnostic = new vscode.Diagnostic(range, message, severity);
+  const existing = diagnosticCollection.get(uri) || [];
+  diagnosticCollection.set(uri, [...existing, diagnostic]);
 }
 
 export function clearDiagnostics(uri: vscode.Uri): void {

@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import { filterMermaidDiagram, generateVisualizationHtml } from '../visualization/templates';
-import { logger } from '../logger';
 
 // Reference to cached Mermaid URI
 let cachedMermaidUri: vscode.Uri | undefined;
@@ -49,7 +48,7 @@ export async function handleExport(
                 break;
         }
     } catch (error: any) {
-        logger.error(`Error handling export: ${error.message || String(error)}`);
+        console.error('Error handling export:', error);
         vscode.window.showErrorMessage(`Error handling export: ${error.message || String(error)}`);
         panel.webview.postMessage({
             command: 'saveResult',
@@ -83,7 +82,7 @@ async function handleApplyFilters(
         const originalGraph = response.content;
 
         if (!originalGraph) {
-            logger.error('No original graph data received');
+            console.error('No original graph data received');
             throw new Error('No original graph data received');
         }
 
@@ -114,11 +113,11 @@ async function handleApplyFilters(
                 nameFilter
             });
         } catch (updateError) {
-            logger.error(`Error updating webview content: ${updateError instanceof Error ? updateError.message : String(updateError)}`);
+            console.error('Error updating webview content:', updateError);
             throw updateError;
         }
     } catch (error: any) {
-        logger.error(`Error applying filters: ${error.message || String(error)}`);
+        console.error('Error applying filters:', error);
         panel.webview.postMessage({
             command: 'filtersApplied',
             success: false,
@@ -148,16 +147,16 @@ async function getMermaidScriptUri(context: vscode.ExtensionContext, webview: vs
         try {
             // Check if file exists locally
             await vscode.workspace.fs.stat(localMermaidPath);
-            logger.info('Using cached Mermaid library in exportHandler');
+            console.log('Using cached Mermaid library in exportHandler');
             cachedMermaidUri = localMermaidPath;
             return webview.asWebviewUri(localMermaidPath).toString();
         } catch {
             // File doesn't exist, use CDN
-            logger.info('No cached Mermaid found, using CDN in exportHandler');
+            console.log('No cached Mermaid found, using CDN in exportHandler');
             return cdnUrl;
         }
     } catch (error) {
-        logger.error(`Error checking cached Mermaid: ${error instanceof Error ? error.message : String(error)}`);
+        console.error('Error checking cached Mermaid:', error);
         return cdnUrl;
     }
 }
@@ -265,7 +264,7 @@ async function handlePngExport(
         try {
             // Get SVG content
             const svgContent = message.content;
-            logger.info(`PNG export: Got SVG content, length: ${svgContent.length}`);
+            console.log('PNG export: Got SVG content, length:', svgContent.length);
 
             // Convert SVG to PNG using the webview
             panel.webview.postMessage({
@@ -287,7 +286,7 @@ async function handlePngExport(
                 )
             ]);
 
-            logger.info('PNG export: Received response');
+            console.log('PNG export: Received response');
 
             if (!pngResponse || !pngResponse.content) {
                 throw new Error('No PNG data received from webview');
@@ -297,7 +296,7 @@ async function handlePngExport(
 
             // Validate the data URL format
             if (!pngDataUrl.startsWith('data:image/png;base64,')) {
-                logger.error('Invalid PNG data URL format: ' + pngDataUrl.substring(0, 50) + '...');
+                console.error('Invalid PNG data URL format:', pngDataUrl.substring(0, 50) + '...');
                 throw new Error('Invalid PNG data URL format');
             }
 
@@ -313,7 +312,7 @@ async function handlePngExport(
                 path: pngUri.fsPath
             });
         } catch (error: any) {
-            logger.error(`Error in PNG export: ${error.message || String(error)}`);
+            console.error('Error in PNG export:', error);
             vscode.window.showErrorMessage(`Failed to export PNG: ${error.message}`);
             throw error;
         }
@@ -339,7 +338,7 @@ async function handleJpgExport(
         try {
             // Get SVG content
             const svgContent = message.content;
-            logger.info(`JPG export: Got SVG content, length: ${svgContent.length}`);
+            console.log('JPG export: Got SVG content, length:', svgContent.length);
 
             // Convert SVG to JPG using the webview
             panel.webview.postMessage({
@@ -361,7 +360,7 @@ async function handleJpgExport(
                 )
             ]);
 
-            logger.info('JPG export: Received response');
+            console.log('JPG export: Received response');
 
             if (!jpgResponse || !jpgResponse.content) {
                 throw new Error('No JPG data received from webview');
@@ -371,7 +370,7 @@ async function handleJpgExport(
 
             // Validate the data URL format
             if (!jpgDataUrl.startsWith('data:image/jpeg;base64,')) {
-                logger.error('Invalid JPG data URL format: ' + jpgDataUrl.substring(0, 50) + '...');
+                console.error('Invalid JPG data URL format:', jpgDataUrl.substring(0, 50) + '...');
                 throw new Error('Invalid JPG data URL format');
             }
 
@@ -387,7 +386,7 @@ async function handleJpgExport(
                 path: jpgUri.fsPath
             });
         } catch (error: any) {
-            logger.error(`Error in JPG export: ${error.message || String(error)}`);
+            console.error('Error in JPG export:', error);
             vscode.window.showErrorMessage(`Failed to export JPG: ${error.message}`);
             throw error;
         }

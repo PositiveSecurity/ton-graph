@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import { ContractGraph } from '../types/graph';
 import { generateVisualizationHtml, filterMermaidDiagram } from './templates';
-import { logger } from '../logger';
 
 // Store the original graph
 let originalGraph: ContractGraph;
@@ -34,11 +33,11 @@ export function createVisualizationPanel(
 
     // Get path to the visualization lib directory
     const extensionPath = context.extensionPath;
-    logger.info(`Extension path: ${extensionPath}`);
+    console.log(`Extension path: ${extensionPath}`);
 
     // Get the Mermaid script URI (either cached or from CDN)
     getMermaidScriptUri(context, panel.webview).then(mermaidScriptUri => {
-        logger.info(`Using Mermaid from: ${mermaidScriptUri}`);
+        console.log(`Using Mermaid from: ${mermaidScriptUri}`);
 
         // Generate Mermaid diagram from graph
         const mermaidDiagram = generateMermaidDiagram(graph);
@@ -49,7 +48,7 @@ export function createVisualizationPanel(
         // Set the HTML content for the panel
         panel.webview.html = html;
     }).catch(error => {
-        logger.error(`Error loading Mermaid library: ${error.message}`);
+        console.error('Error loading Mermaid library:', error);
         vscode.window.showErrorMessage(`Error loading Mermaid library: ${error.message}`);
     });
 
@@ -67,7 +66,7 @@ export function createVisualizationPanel(
                     // Handle other messages (export commands, etc.)
                 }
             } catch (error) {
-                logger.error(`Error handling message from webview: ${error instanceof Error ? error.message : String(error)}`);
+                console.error('Error handling message from webview:', error);
                 panel.webview.postMessage({
                     command: 'filterError',
                     error: error instanceof Error ? error.message : String(error)
@@ -117,12 +116,12 @@ async function getMermaidScriptUri(context: vscode.ExtensionContext, webview: vs
         try {
             // Check if file already exists locally
             await vscode.workspace.fs.stat(localMermaidPath);
-            logger.info('Using cached Mermaid library');
+            console.log('Using cached Mermaid library');
             cachedMermaidUri = localMermaidPath;
             return webview.asWebviewUri(localMermaidPath).toString();
         } catch {
             // File doesn't exist yet, fetch it
-            logger.info('Downloading Mermaid library from CDN');
+            console.log('Downloading Mermaid library from CDN');
 
             // Fetch the library from CDN
             const response = await fetch(cdnUrl);
@@ -142,7 +141,7 @@ async function getMermaidScriptUri(context: vscode.ExtensionContext, webview: vs
             return webview.asWebviewUri(localMermaidPath).toString();
         }
     } catch (error) {
-        logger.error(`Error caching Mermaid library: ${error instanceof Error ? error.message : String(error)}`);
+        console.error('Error caching Mermaid library:', error);
         // Fallback to CDN if caching fails
         return cdnUrl;
     }
@@ -173,7 +172,7 @@ function handleFilterRequest(panel: vscode.WebviewPanel, selectedTypes: string[]
         });
 
     } catch (error) {
-        logger.error(`Error handling filter request: ${error instanceof Error ? error.message : String(error)}`);
+        console.error('Error handling filter request:', error);
         panel.webview.postMessage({
             command: 'filterError',
             error: error instanceof Error ? error.message : String(error)

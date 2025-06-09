@@ -24,6 +24,10 @@ jobs:
         run: npm run verify-lockfile
       - name: Run npm audit
         run: npm audit --production
+      - name: Run lint
+        run: npm run lint
+      - name: Run compile
+        run: npm run compile
       - name: Run tests
         run: |
           npm run test -- --coverage

@@ -64,24 +64,16 @@ function collectNoirImports(code: string): string[] {
     const result: Set<string> = new Set();
 
     // Traverse the syntax tree for `mod foo;` declarations
-    const stack = [tree.rootNode];
-    while (stack.length) {
-        const node = stack.pop();
-        if (!node) continue;
-        if (node.type === 'module') {
-            const body = node.namedChildren.find((c: Parser.SyntaxNode) => c.type === 'body');
-            if (!body) {
-                const id = node.namedChildren.find((c: Parser.SyntaxNode) => c.type === 'identifier');
-                if (id) result.add(id.text);
+    for (const node of walk(tree.rootNode, 'module')) {
+        const body = node.namedChildren.find((c: Parser.SyntaxNode) => c.type === 'body');
+        if (!body) {
+            const parts: string[] = [];
+            for (const c of node.namedChildren) {
+                if (c.type === 'identifier') parts.push(c.text);
+                else if (c.type === 'import_identifier') parts.push(c.text.replace(/::$/, ''));
             }
+            if (parts.length) result.add(parts.join('::'));
         }
-        stack.push(...node.namedChildren);
-    }
-
-    // Also detect nested module declarations like `mod a::b;`
-    const modMatches = code.matchAll(/(?:^|\s)(?:pub\s+)?mod\s+([A-Za-z_][\w:]*)\s*;/gm);
-    for (const m of modMatches) {
-        result.add(m[1]);
     }
 
     // Collect paths from `use` statements

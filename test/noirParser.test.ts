@@ -256,6 +256,15 @@ describe('parseNoirContract', () => {
     expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::sub', label: '' });
   });
 
+  it('parses nested grouped imports', () => {
+    const fs = require('fs');
+    const code = fs.readFileSync('examples/noir/nested_group_import.nr', 'utf8');
+    const graph = parseNoirContract(code);
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'foo::bar::a', label: '' });
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'foo::bar::b', label: '' });
+    expect(graph.edges).to.deep.include({ from: 'main', to: 'foo::c', label: '' });
+  });
+
   it('parses wildcard imports', () => {
     const fs = require('fs');
     const code = fs.readFileSync('examples/noir/wildcard_import.nr', 'utf8');

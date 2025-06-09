@@ -116,41 +116,58 @@ export function parseNoir(code: string): { ast: NoirAST; tree: Parser.Tree } {
     }
   }
 
-  const useNodes = [
-    ...walk(tree.rootNode, "use_declaration"),
-    ...walk(tree.rootNode, "import"),
-  ];
-  for (const u of useNodes) {
-    const text = u.text.replace(/\s+/g, " ");
-    const match = text.match(/^use\s+([^;]+);/);
-    if (!match) continue;
-    const body = match[1].trim();
-    if (/\{.*\}/.test(body)) {
-      const g = body.match(/^(.*)::\{([^}]*)\}$/);
-      if (g) {
-        const base = g[1].trim();
-        const items = g[2]
-          .split(',')
-          .map((s: string) => s.trim())
-          .filter(Boolean);
-        for (const it of items) {
-          if (it === '*') {
-            uses.push({ alias: '*', path: `${base}::*` });
-          } else {
-            const [name, al] = it.split(/\s+as\s+/);
-            const alias = al ? al.trim() : name.trim();
-            uses.push({ alias, path: `${base}::${name.trim()}` });
+  function extractImports(node: Parser.SyntaxNode, prefix: string[] = []): void {
+    if (node.type === 'import') {
+      const segs: string[] = [];
+      let idx = 0;
+      while (idx < node.namedChildCount && node.namedChildren[idx].type === 'import_identifier') {
+        segs.push(node.namedChildren[idx].text.replace(/::$/, ''));
+        idx++;
+      }
+      if (idx < node.namedChildCount) {
+        extractImports(node.namedChildren[idx], [...prefix, ...segs]);
+        if (idx + 1 < node.namedChildCount && node.namedChildren[idx + 1].type === 'as_identifier') {
+          const last = uses.pop();
+          if (last) {
+            const id = node.namedChildren[idx + 1].namedChildren.find(c => c.type === 'identifier');
+            if (id) last.alias = id.text;
+            uses.push(last);
           }
         }
       }
-    } else if (body.endsWith('::*')) {
-      uses.push({ alias: '*', path: body });
-    } else {
-      const parts = body.split(/\s+as\s+/);
-      const path = parts[0].trim();
-      const alias = parts[1] ? parts[1].trim() : path.split("::").pop()!;
-      uses.push({ alias, path });
+    } else if (node.type === 'import_body') {
+      for (let i = 0; i < node.namedChildCount; i++) {
+        const child = node.namedChildren[i];
+        if (child.type === 'import_identifier') {
+          const seg = child.text.replace(/::$/, '');
+          if (i + 1 < node.namedChildCount) {
+            extractImports(node.namedChildren[i + 1], [...prefix, seg]);
+            i++; // skip next
+          }
+        } else if (child.type === 'identifier') {
+          const path = [...prefix, child.text].join('::');
+          uses.push({ alias: child.text, path });
+          if (i + 1 < node.namedChildCount && node.namedChildren[i + 1].type === 'as_identifier') {
+            const id = node.namedChildren[i + 1].namedChildren.find(c => c.type === 'identifier');
+            if (id) uses[uses.length - 1].alias = id.text;
+            i++;
+          }
+        } else if (child.type === 'import_body') {
+          extractImports(child, prefix);
+        } else if (child.type === '*') {
+          uses.push({ alias: '*', path: [...prefix].join('::') + '::*' });
+        }
+      }
+    } else if (node.type === 'identifier') {
+      const path = [...prefix, node.text].join('::');
+      uses.push({ alias: node.text, path });
+    } else if (node.type === '*') {
+      uses.push({ alias: '*', path: [...prefix].join('::') + '::*' });
     }
+  }
+
+  for (const n of walk(tree.rootNode, 'import')) {
+    extractImports(n);
   }
 
   return { ast: { functions, modules, uses }, tree };

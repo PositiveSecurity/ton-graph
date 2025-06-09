@@ -2,7 +2,7 @@
   "name": "ton-graph",
   "displayName": "TON Graph",
   "description": "Visualize function call graphs for FunC, Tact, Tolk and Move contracts. Move support requires the move-analyzer utility",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "publisher": "positiveweb3",
   "icon": "pic/logo.png",
   "repository": {
@@ -59,8 +59,8 @@
     "onLanguage:simplicity",
     "onLanguage:liquidity",
     "onLanguage:rell",
-    "onLanguage:rholang"
-    ,"onLanguage:yul"
+    "onLanguage:rholang",
+    "onLanguage:yul"
   ],
   "contributes": {
     "languages": [
@@ -212,8 +212,7 @@
         "aliases": [
           "LIGO"
         ]
-      }
-      ,
+      },
       {
         "id": "aiken",
         "extensions": [
@@ -338,9 +337,9 @@
         "extensions": [
           ".liq"
         ],
-      "aliases": [
-        "Liquidity"
-      ]
+        "aliases": [
+          "Liquidity"
+        ]
       },
       {
         "id": "rholang",

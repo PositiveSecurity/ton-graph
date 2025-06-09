@@ -6,6 +6,7 @@ import logger from './logging/logger';
 import adapters from './languages';
 import { GraphProvider } from './core/graphProvider';
 import { startMoveClient } from './lsp-clients/moveClient';
+import { diagnosticCollection } from './logging/diagnostics';
 
 export function activate(context: vscode.ExtensionContext) {
     logger.info('Activating TON Graph extension');
@@ -17,6 +18,8 @@ export function activate(context: vscode.ExtensionContext) {
         // Directory might already exist, that's fine
         logger.debug('Cached directory already exists');
     }
+
+    context.subscriptions.push(diagnosticCollection);
 
     adapters.forEach(adapter => {
         adapter.fileExtensions.forEach(ext => {

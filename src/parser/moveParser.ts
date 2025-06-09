@@ -209,12 +209,13 @@ export async function parseMoveContract(code: string): Promise<ContractGraph> {
         if (!edgeSet.has(key)) {
           edgeSet.add(key);
           if (!funcMap.has(to)) {
+            const parts = to.split("::");
+            const funcName = parts.pop() || to;
             graph.nodes.push({
               id: to,
-              label: path,
+              label: `${funcName}()`,
               type: GraphNodeKind.Function,
-              contractName:
-                path.split("::")[path.split("::").length - 2] || path,
+              contractName: parts.join("::") || to,
             });
             funcMap.set(to, graph.nodes[graph.nodes.length - 1]);
           }

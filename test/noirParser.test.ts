@@ -2,6 +2,7 @@ import { expect } from 'chai';
 import mock = require('mock-require');
 mock('vscode', { window: { createOutputChannel: () => ({ appendLine: () => {} }) } });
 import { parseNoirContract } from '../src/languages/noir';
+import { clusterNodes } from '../src/visualization/visualizer';
 
 describe('parseNoirContract', () => {
   it('parses functions and edges', () => {
@@ -322,5 +323,25 @@ describe('parseNoirContract', () => {
     const code = fs.readFileSync('examples/noir/nested_mod.nr', 'utf8');
     const graph = await parserUtils.parseContractWithImports(code, 'examples/noir/nested_mod.nr', 'noir');
     expect(graph.edges).to.deep.include({ from: 'main', to: 'utils::math::double', label: '' });
+  });
+
+  it('clusters external modules using full paths', () => {
+    const code = [
+      'mod utils {',
+      '  pub mod math {',
+      '    pub fn double(x: Field) -> Field { x }',
+      '  }',
+      '}',
+      'fn main() {',
+      '  utils::math::double(5);',
+      '}',
+    ].join('\n');
+    const graph = parseNoirContract(code);
+    const clusters = clusterNodes(graph);
+    const nodeId = 'utils::math::double';
+    const node = graph.nodes.find(n => n.id === nodeId);
+    expect(node?.contractName).to.equal('utils::math');
+    expect(node?.label).to.equal('double()');
+    expect(clusters.get(nodeId)).to.equal('utils::math');
   });
 });

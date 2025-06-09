@@ -3,6 +3,7 @@ import mock = require('mock-require');
 mock('vscode', { window: { createOutputChannel: () => ({ appendLine: () => {} }) } });
 import { parseMoveContract } from '../src/parser/moveParser';
 import { parseMove } from '../src/parser/moveParser';
+import { clusterNodes } from '../src/visualization/visualizer';
 
 const sample = `module M {
     fun init() {
@@ -106,5 +107,22 @@ describe('parseMoveContract', () => {
         const graph = await parseMoveContract('module {');
         expect(graph.nodes).to.be.empty;
         expect(graph.edges).to.be.empty;
+    });
+
+    it('clusters external calls under their module path', async () => {
+        const code = [
+            'module M {',
+            '  fun main() {',
+            '    aptos_framework::account::create_signer_with_capability();',
+            '  }',
+            '}',
+        ].join('\n');
+        const graph = await parseMoveContract(code);
+        const clusters = clusterNodes(graph);
+        const nodeId = 'aptos_framework::account::create_signer_with_capability';
+        const node = graph.nodes.find(n => n.id === nodeId);
+        expect(node?.contractName).to.equal('aptos_framework::account');
+        expect(node?.label).to.equal('create_signer_with_capability()');
+        expect(clusters.get(nodeId)).to.equal('aptos_framework::account');
     });
 });

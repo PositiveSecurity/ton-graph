@@ -26,6 +26,7 @@ import { parseSophiaContract } from '../languages/sophia';
 import { parseFlintContract } from '../languages/flint';
 import { parseFeContract } from '../languages/fe';
 import { parseNoirContract, parseNoir } from './noirParser';
+import { walk } from './sharedWalk';
 import { parseSimplicityContract } from '../languages/simplicity';
 import { parseLiquidityContract } from '../languages/liquidity';
 import { parseReachContract } from '../languages/reach';

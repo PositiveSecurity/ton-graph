@@ -100,6 +100,7 @@ fn main(x: Field) -> Field {
    - Press F1 or Ctrl+Shift+P to open the command palette and type "TON Graph: Visualize Contract"
    - Right-click on contract code in the editor → TON Graph: Visualize Contract
    - Right-click on a contract file in the Explorer panel → TON Graph: Visualize Contract
+   - Right-click on contract code or file → **Positive Graph**
 3. The extension will analyze your contract and display a function call graph
 
 ### Visualizing Projects with Imports

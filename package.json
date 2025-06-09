@@ -25,6 +25,7 @@
   "activationEvents": [
     "onCommand:ton-graph.visualize",
     "onCommand:ton-graph.visualizeProject",
+    "onCommand:ton-graph.positiveGraph",
     "onCommand:ton-graph.saveMermaid",
     "onCommand:ton-graph.saveSvg",
     "onCommand:ton-graph.savePng",
@@ -366,6 +367,10 @@
         "title": "TON Graph: Visualize Contract"
       },
       {
+        "command": "ton-graph.positiveGraph",
+        "title": "Positive Graph"
+      },
+      {
         "command": "ton-graph.visualizeProject",
         "title": "TON Graph: Visualize Contract with Imports"
       },
@@ -402,6 +407,11 @@
           "group": "navigation"
         },
         {
+          "command": "ton-graph.positiveGraph",
+          "when": "resourceLangId == func || resourceLangId == tact || resourceLangId == tolk || resourceLangId == move || resourceLangId == cairo || resourceLangId == plutus || resourceLangId == cadence || resourceLangId == michelson || resourceLangId == clar || resourceLangId == ink || resourceLangId == scilla || resourceLangId == pact || resourceLangId == scrypto || resourceLangId == soroban || resourceLangId == marlowe ||  resourceLangId == teal || resourceLangId == ligo || resourceLangId == aiken || resourceLangId == leo || resourceLangId == glow || resourceLangId == huff || resourceLangId == bamboo || resourceLangId == sophia || resourceLangId == flint || resourceLangId == fe || resourceLangId == noir ||resourceLangId == simplicity || resourceLangId == reach || resourceLangId == rell || resourceLangId == liquidity || resourceLangId == rholang || resourceLangId== yul",
+          "group": "navigation"
+        },
+        {
           "command": "ton-graph.visualizeProject",
           "when": "resourceLangId == func || resourceLangId == tact || resourceLangId == tolk || resourceLangId == move || resourceLangId == cairo || resourceLangId == plutus || resourceLangId == cadence || resourceLangId == michelson || resourceLangId == clar || resourceLangId == ink || resourceLangId == scilla || resourceLangId == pact || resourceLangId == scrypto || resourceLangId == soroban || resourceLangId == marlowe ||  resourceLangId == teal || resourceLangId == ligo || resourceLangId == aiken || resourceLangId == leo || resourceLangId == glow || resourceLangId == huff || resourceLangId == bamboo || resourceLangId == sophia || resourceLangId == flint || resourceLangId == fe || resourceLangId == noir || resourceLangId == simplicity || resourceLangId == reach || resourceLangId == rell || resourceLangId == liquidity || resourceLangId == rholang || resourceLangId == yul",
           "group": "navigation"
@@ -410,6 +420,11 @@
       "explorer/context": [
         {
           "command": "ton-graph.visualize",
+          "when": "resourceExtname == .fc || resourceExtname == .func || resourceExtname == .tact || resourceExtname == .tolk || resourceExtname == .move || resourceExtname == .cairo || resourceExtname == .plutus || resourceExtname == .cdc || resourceExtname == .tz || resourceExtname == .clar || resourceExtname == .ink || resourceExtname == .scilla || resourceExtname == .pact || resourceExtname == .rs || resourceExtname == .scrypto || resourceExtname == .soroban || resourceExtname == .marlowe ||  resourceExtname == .teal || resourceExtname == .ligo || resourceExtname == .mligo || resourceExtname == .religo || resourceExtname == .jsligo || resourceExtname == .ak || resourceExtname == .aiken || resourceExtname == .leo || resourceExtname == .glow || resourceExtname == .huff || resourceExtname == .bamboo || resourceExtname == .aes || resourceExtname == .flint || resourceExtname == .fe || resourceExtname == .nr || resourceExtname == .noir || resourceExtname == .simp || resourceExtname == .reach || resourceExtname == .rell || resourceExtname == .liq || resourceExtname == .rho || resourceExtname == .yul",
+          "group": "navigation"
+        },
+        {
+          "command": "ton-graph.positiveGraph",
           "when": "resourceExtname == .fc || resourceExtname == .func || resourceExtname == .tact || resourceExtname == .tolk || resourceExtname == .move || resourceExtname == .cairo || resourceExtname == .plutus || resourceExtname == .cdc || resourceExtname == .tz || resourceExtname == .clar || resourceExtname == .ink || resourceExtname == .scilla || resourceExtname == .pact || resourceExtname == .rs || resourceExtname == .scrypto || resourceExtname == .soroban || resourceExtname == .marlowe ||  resourceExtname == .teal || resourceExtname == .ligo || resourceExtname == .mligo || resourceExtname == .religo || resourceExtname == .jsligo || resourceExtname == .ak || resourceExtname == .aiken || resourceExtname == .leo || resourceExtname == .glow || resourceExtname == .huff || resourceExtname == .bamboo || resourceExtname == .aes || resourceExtname == .flint || resourceExtname == .fe || resourceExtname == .nr || resourceExtname == .noir || resourceExtname == .simp || resourceExtname == .reach || resourceExtname == .rell || resourceExtname == .liq || resourceExtname == .rho || resourceExtname == .yul",
           "group": "navigation"
         },

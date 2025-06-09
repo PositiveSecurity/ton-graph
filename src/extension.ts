@@ -35,6 +35,13 @@ export function activate(context: vscode.ExtensionContext) {
     );
 
     context.subscriptions.push(
+        vscode.commands.registerCommand('ton-graph.positiveGraph', async (fileUri?: vscode.Uri) => {
+            logger.info(`Command positiveGraph triggered with ${fileUri?.fsPath ?? 'no file'}`);
+            await visualize(context, fileUri);
+        })
+    );
+
+    context.subscriptions.push(
         vscode.commands.registerCommand('ton-graph.visualizeProject', async (fileUri?: vscode.Uri) => {
             logger.info(`Command visualizeProject triggered with ${fileUri?.fsPath ?? 'no file'}`);
             await visualizeProject(context, fileUri);
